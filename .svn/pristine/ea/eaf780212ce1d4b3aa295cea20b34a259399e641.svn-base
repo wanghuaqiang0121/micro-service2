@@ -1,0 +1,116 @@
+package org.web.module.height.obesity.controller;
+
+import java.util.List;
+import java.util.Map;
+
+import javax.annotation.Resource;
+
+import org.service.core.api.ApiCodeEnum;
+import org.service.core.api.JsonApi;
+import org.service.core.api.MultiLine;
+import org.service.core.auth.control.RequiresAuthentication;
+import org.service.core.auth.level.Level;
+import org.service.core.entity.BaseEntity;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RestController;
+import org.web.module.height.obesity.entity.ChildrenMeasure;
+import org.web.module.height.obesity.entity.ChoiceQuestion;
+import org.web.module.height.obesity.global.BaseGlobal;
+import org.web.module.height.obesity.global.GlobalEnum.ChildrenMeasureStatus;
+import org.web.module.height.obesity.message.Prompt;
+import org.web.module.height.obesity.service.ChildrenMeasureService;
+import org.web.module.height.obesity.service.ChoiceQuestionService;
+
+import com.github.pagehelper.Page;
+import com.github.pagehelper.PageHelper;
+
+/**
+ * Copyright © 2018 四川易迅通健康医疗技术发展有限公司. All rights reserved.
+ *
+ * @author: WangHuaQiang
+ * @date: 2018年12月24日
+ * @description: 问题表
+ */
+@RestController
+public class ChoiceQuestionController {
+	
+	@Resource
+	private ChoiceQuestionService choiceQuestionService;
+	@Resource 
+	private ChildrenMeasureService childrenMeasureService;
+	/** 
+	 * @author: WangHuaQiang
+	 * @date: 2018年12月24日
+	 * @param userId
+	 * @param choiceQuestion
+	 * @param resul
+	 * @return
+	 * @description: 病史(问题和选项)列表
+	 */
+	@RequiresAuthentication(value = { "web-module-height-obesity:choice-question:get-list" },level = Level.OPERATION)
+	@GetMapping(value = { "/choice/questions" })
+	public JsonApi getList(@Validated({ BaseEntity.SelectAll.class }) ChoiceQuestion choiceQuestion,
+			BindingResult resul, @RequestHeader(required = true, value = BaseGlobal.TOKEN_FLAG) String token) {
+		/* 如果儿童测量信息id（childrenMeasureId）为空 根据用户id查询状态为 2服务中的 儿童测量信息   */
+		if (choiceQuestion.getChildrenMeasureId() == null && choiceQuestion.getUserId() == null) {
+			return new JsonApi(ApiCodeEnum.NOT_FOUND);
+		}else if (choiceQuestion.getChildrenMeasureId() != null) {
+			ChildrenMeasure childrenMeasure = new ChildrenMeasure();
+			childrenMeasure.setId(choiceQuestion.getChildrenMeasureId());
+			/* 查询儿童测量信息详情 */
+			Map<String, Object> childrenMeasureMap = childrenMeasureService.getOne(childrenMeasure);
+			if (childrenMeasureMap == null) {
+				return new JsonApi(ApiCodeEnum.NOT_FOUND);
+			}
+			choiceQuestion.setMonthAge(Integer.parseInt(childrenMeasureMap.get("monthAge").toString()));
+		}else if (choiceQuestion.getUserId() != null) {
+			/* 查询用户最新一条儿童测量信息详情 状态为2服务中 */
+			ChildrenMeasure childrenMeasure = new ChildrenMeasure();
+			childrenMeasure.setUserId(choiceQuestion.getUserId());
+			childrenMeasure.setStatus(ChildrenMeasureStatus.INSERVICE.getValue());
+			Map<String, Object> childrenMeasureMap = childrenMeasureService.getNewOne(childrenMeasure);
+			if (childrenMeasureMap == null) {
+				return new JsonApi(ApiCodeEnum.NOT_FOUND,Prompt.bundle("children.measure.is.null"));
+			}
+			choiceQuestion.setMonthAge(Integer.parseInt(childrenMeasureMap.get("monthAge").toString()));
+		} 
+		/* 查询用户月龄对应的问题 */
+		Page<?> page = PageHelper.startPage(choiceQuestion.getPage(), choiceQuestion.getPageSize());
+		List<Map<String, Object>> childrenMeasureList = choiceQuestionService.getList(choiceQuestion);
+		if (childrenMeasureList != null){
+			return new JsonApi(ApiCodeEnum.OK,new MultiLine(page.getTotal(), childrenMeasureList));
+		}
+		return new JsonApi(ApiCodeEnum.NOT_FOUND);
+	}
+	
+	/** 
+	 * @author: WangHuaQiang
+	 * @date: 2018年12月25日
+	 * @param choiceQuestion
+	 * @param resul
+	 * @return
+	 * @description: 获取用户病史(选择的问题和选项)
+	 */
+	@RequiresAuthentication(value = { "web-module-height-obesity:choice-question:selected" },level = Level.OPERATION)
+	@GetMapping(value = { "/choice/questions/selected" })
+	public JsonApi getSelected(@Validated({ ChoiceQuestion.Selected.class }) ChoiceQuestion choiceQuestion,
+			BindingResult resul, @RequestHeader(required = true, value = BaseGlobal.TOKEN_FLAG) String token) {
+		ChildrenMeasure childrenMeasure = new ChildrenMeasure();
+		childrenMeasure.setId(choiceQuestion.getChildrenMeasureId());
+		/* 查询儿童测量信息详情 */
+		Map<String, Object> childrenMeasureMap = childrenMeasureService.getOne(childrenMeasure);
+		if (childrenMeasureMap == null) {
+			return new JsonApi(ApiCodeEnum.NOT_FOUND);
+		}
+		choiceQuestion.setMonthAge(Integer.parseInt(childrenMeasureMap.get("monthAge").toString()));
+		Page<?> page = PageHelper.startPage(choiceQuestion.getPage(), choiceQuestion.getPageSize());
+		List<Map<String, Object>> childrenMeasureList = choiceQuestionService.getSelectedList(choiceQuestion);
+		if (childrenMeasureList != null){
+			return new JsonApi(ApiCodeEnum.OK,new MultiLine(page.getTotal(), childrenMeasureList));
+		}
+		return new JsonApi(ApiCodeEnum.NOT_FOUND);
+	}
+}

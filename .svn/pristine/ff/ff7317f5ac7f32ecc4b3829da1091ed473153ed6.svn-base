@@ -1,0 +1,165 @@
+package org.web.module.bone.age.controller;
+
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.annotation.Resource;
+
+import org.service.core.api.ApiCodeEnum;
+import org.service.core.api.JsonApi;
+import org.service.core.auth.control.RequiresAuthentication;
+import org.service.core.auth.level.Level;
+import org.service.core.entity.BaseEntity;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RestController;
+import org.web.module.bone.age.domain.MedicalImagingData;
+import org.web.module.bone.age.domain.User;
+import org.web.module.bone.age.domain.UserCertificate;
+import org.web.module.bone.age.domain.UserUserType;
+import org.web.module.bone.age.global.BaseGlobal;
+import org.web.module.bone.age.message.Prompt;
+import org.web.module.bone.age.service.MedicalImagingDataService;
+import org.web.module.bone.age.service.UserCertificateService;
+import org.web.module.bone.age.service.UserService;
+import org.web.module.bone.age.service.UserUserTypeService;
+
+@RestController
+public class UserController {
+	@Resource
+	private UserService userService;
+	
+	@Resource
+	private UserCertificateService userCertificateService;
+	
+	@Resource
+	private MedicalImagingDataService medicalImagingDataService;
+	
+	@Resource
+	private 	UserUserTypeService  userUserTypeService;
+	
+	/**
+	 * @author: ChenYan
+	 * @date: 2019年4月22日
+	 * @param id
+	 * @param user
+	 * @param result
+	 * @param token
+	 * @return
+	 * @description: 修改用户信息
+	 */
+	@RequiresAuthentication(value = { "web-module-bone-age:user:update" },level = Level.OPERATION,ignore=true)
+	@PutMapping(value = { "/user/{id}" })
+	@Transactional
+	public JsonApi update(@PathVariable("id") Integer id,@Validated({ BaseEntity.Update.class }) @RequestBody User user, BindingResult result,@RequestHeader(required = true, value = BaseGlobal.TOKEN_FLAG) String token) {
+		MedicalImagingData medicalImagingData=new MedicalImagingData();
+		medicalImagingData.setUserId(id);
+		/*查询该用户的影像资料状态*/
+		List<Map<String, Object>> medicalImagingDataList=medicalImagingDataService.getUser(medicalImagingData);
+		if (medicalImagingDataList!=null  && medicalImagingDataList.size()>0) {
+			for (int i = 0; i < medicalImagingDataList.size(); i++) {
+				if ( Integer.parseInt(medicalImagingDataList.get(i).get("medicalImagingStatus").toString())==2 || // 医学影像资料已上传
+						 Integer.parseInt(medicalImagingDataList.get(i).get("medicalImagingStatus").toString())==4) {// 医学影像资料已完成
+					 return new JsonApi(ApiCodeEnum.CONFLICT).setMsg(Prompt.bundle("medica.imaging.status.is.up.or.com"));
+				}
+			}
+		}
+		
+		/*判断是否是用户组电话*/
+		if (user.getPhone()!=null) {
+			User userGroup=new User();
+			userGroup.setPhone(user.getPhone());
+			List<Map<String, Object>> userGroupPhone=userService.getUserGroupPhone(userGroup);
+			if (userGroupPhone!=null && userGroupPhone.size()>0) {
+				user.setPhone(null);
+			}
+		}
+		/* 判断手机号是重复 */
+		user.setId(id);
+		user.setIdCard(null);
+		if (user.getPhone()!=null) {
+			User userNew = new User();
+			userNew.setPhone(user.getPhone());
+			Map<String, Object> userRepeatMap = userService.getRepeat(userNew);
+			if (userRepeatMap!=null && (Integer) userRepeatMap.get("id") != id.intValue()) {
+				return new JsonApi(ApiCodeEnum.CONFLICT).setMsg(Prompt.bundle("user.phone.repeat"));
+			}
+		}
+		
+		/* 是否修改证件 */
+		if (user.getUserCertificate() != null && user.getUserCertificate().getCertificateNumber() != null
+				&& !"".equals(user.getUserCertificate().getCertificateNumber())) {
+			if (user.getUserCertificate().getCertificateType() == null || "".equals(user.getUserCertificate().getCertificateType())) {
+				return new JsonApi(ApiCodeEnum.FAIL,Prompt.bundle("user.certificate.is.not.null"));
+			}
+			UserCertificate userCertificate = user.getUserCertificate();
+			if (BaseGlobal.USER_ID_CARD_TYPE.equals(userCertificate.getCertificateType())) {
+				user.setIdCard(userCertificate.getCertificateNumber());
+			}
+			userCertificate.setUserId(user.getId());
+			/* 判断证件是否被使用 */
+			Map<String, Object> userCertificateRepeatMap = userCertificateService.getRepeat(userCertificate);
+			/* 未被使用 */
+			if (userCertificateRepeatMap==null) {
+				// 拼接证件字符串
+				List<String> imagesList = userCertificate.getImagesList();
+				if (imagesList!=null && imagesList.size()>0) {
+					String images = "";
+					for (String string : imagesList) {
+						images = images + string + ",";
+					}
+					userCertificate.setImages(images.substring(0, images.length() - 1));
+				}
+				/* 删除用户证件并添加新证件 */
+				if (userCertificateService.deleteByUserId(userCertificate) < 0) {
+					throw new RuntimeException();
+				}
+				/* 新增证件信息 */
+				userCertificate.setCreateDate(new Date());
+				if (userCertificateService.insert(userCertificate) <= 0) {
+					throw new RuntimeException();
+				}
+			} else if ((Integer) userCertificateRepeatMap.get("userId") != user.getId().intValue()) {
+				return new JsonApi(ApiCodeEnum.CONFLICT).setMsg(Prompt.bundle("user.certificate.is.used"));
+			}
+		}
+		
+		/*新增人群类型*/
+		UserUserType userUserType=new UserUserType();
+		userUserType.setUserId(id);
+		if (user.getType()!=null) {
+			/*查询数据列表*/
+			List<Map<String, Object>> list=userUserTypeService.getList(userUserType);
+			if (list!=null && list.size()>0) {
+				/*删除人群类型*/
+				if (userUserTypeService.delete(userUserType)<=0) {
+					throw new RuntimeException();
+				}
+			}
+		 	int[] type=	user.getType();
+			for (int i = 0; i < type.length; i++) {
+				userUserType.setUserTypeId((type[i]));
+				userUserTypeService.insert(userUserType);
+			}
+		}
+		
+		
+		user.setUpdateDate(new Date());
+		/* 修改基本信息 */
+		if (userService.update(user) <= 0) {
+			throw new RuntimeException();
+		}
+		Map<String, Object> map=new HashMap<>();
+		map.put("userId", id);
+		return new JsonApi(ApiCodeEnum.OK,map);
+	}
+
+
+}

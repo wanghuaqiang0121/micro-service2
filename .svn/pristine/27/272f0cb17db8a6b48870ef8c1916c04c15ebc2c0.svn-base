@@ -1,0 +1,191 @@
+package org.web.module.bone.age.domain;
+
+import java.util.Date;
+
+import javax.validation.constraints.NotNull;
+
+import org.service.core.entity.BaseEntity;
+import org.springframework.format.annotation.DateTimeFormat;
+
+/**
+ * Copyright © 2019 四川易迅通健康医疗技术发展有限公司. All rights reserved.
+ *
+ * @author: ChenYan
+ * @date: 2019年3月4日
+ * @description: 远程阅片骨龄工单
+ */
+public class RemoteBoneAgeOrder extends BaseEntity {
+ 
+	private static final long serialVersionUID = 1L;
+	
+	/**
+	 * Copyright © 2019 四川易迅通健康医疗技术发展有限公司. All rights reserved.
+	 *
+	 * @author: ChenYan
+	 * @date: 2019年3月18日
+	 * @description: 阅片历史
+	 */
+	public interface History{};
+
+	private Integer id;
+	@NotNull(message = "{remote.bone.age.order.bone.age.order.id.notnull.valid}", groups = { Insert.class })
+    private Integer baseBoneAgeOrderId;
+
+    private Integer status;
+
+    private Boolean reminder;
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
+    private Date createTime;
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
+    private Date endTime;
+
+    private Integer launchOrganizationTeamId;
+
+    private Integer launchOrganizationId;
+
+    private Integer launchOrganizationUserId;
+
+    private Integer receiveOrganizationTeamId;
+	@NotNull(message = "{remote.bone.age.order.receive.organization.id.notnull.valid}", groups = { Insert.class })
+    private Integer receiveOrganizationId;
+	@NotNull(message = "{remote.bone.age.order.receive.organization.user.id.notnull.valid}", groups = { Insert.class ,History.class})
+    private Integer receiveOrganizationUserId;
+    
+    private String searchbox;
+    
+    private Integer sex;
+
+    private String name;
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public Integer getBaseBoneAgeOrderId() {
+        return baseBoneAgeOrderId;
+    }
+
+    public void setBaseBoneAgeOrderId(Integer baseBoneAgeOrderId) {
+        this.baseBoneAgeOrderId = baseBoneAgeOrderId;
+    }
+
+    public Integer getStatus() {
+        return status;
+    }
+
+    public void setStatus(Integer status) {
+        this.status = status;
+    }
+
+    public Boolean getReminder() {
+        return reminder;
+    }
+
+    public void setReminder(Boolean reminder) {
+        this.reminder = reminder;
+    }
+
+    public Date getCreateTime() {
+        return createTime;
+    }
+
+    public void setCreateTime(Date createTime) {
+        this.createTime = createTime;
+    }
+
+    public Date getEndTime() {
+        return endTime;
+    }
+
+    public void setEndTime(Date endTime) {
+        this.endTime = endTime;
+    }
+
+    public Integer getLaunchOrganizationTeamId() {
+        return launchOrganizationTeamId;
+    }
+
+    public void setLaunchOrganizationTeamId(Integer launchOrganizationTeamId) {
+        this.launchOrganizationTeamId = launchOrganizationTeamId;
+    }
+
+    public Integer getLaunchOrganizationId() {
+        return launchOrganizationId;
+    }
+
+    public void setLaunchOrganizationId(Integer launchOrganizationId) {
+        this.launchOrganizationId = launchOrganizationId;
+    }
+
+    public Integer getLaunchOrganizationUserId() {
+        return launchOrganizationUserId;
+    }
+
+    public void setLaunchOrganizationUserId(Integer launchOrganizationUserId) {
+        this.launchOrganizationUserId = launchOrganizationUserId;
+    }
+
+    public Integer getReceiveOrganizationTeamId() {
+        return receiveOrganizationTeamId;
+    }
+
+    public void setReceiveOrganizationTeamId(Integer receiveOrganizationTeamId) {
+        this.receiveOrganizationTeamId = receiveOrganizationTeamId;
+    }
+
+    public Integer getReceiveOrganizationId() {
+        return receiveOrganizationId;
+    }
+
+    public void setReceiveOrganizationId(Integer receiveOrganizationId) {
+        this.receiveOrganizationId = receiveOrganizationId;
+    }
+
+    public Integer getReceiveOrganizationUserId() {
+        return receiveOrganizationUserId;
+    }
+
+    public void setReceiveOrganizationUserId(Integer receiveOrganizationUserId) {
+        this.receiveOrganizationUserId = receiveOrganizationUserId;
+    }
+
+	public String getSearchbox() {
+		return searchbox;
+	}
+
+	public void setSearchbox(String searchbox) {
+		this.searchbox = searchbox;
+	}
+	
+	public Integer getSex() {
+		return sex;
+	}
+
+	public void setSex(Integer sex) {
+		this.sex = sex;
+	}
+	
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	@Override
+	@NotNull(message = "{page.empty}", groups = { SelectAll.class,History.class })
+	public Integer getPage() {
+		return super.getPage();
+	}
+
+	@Override
+	@NotNull(message = "{pageSize.empty}", groups = { SelectAll.class,History.class })
+	public Integer getPageSize() {
+		return super.getPageSize();
+	}
+    
+}

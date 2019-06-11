@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.web.module.height.obesity.dao.FoodRecipesMapper">
+
+  <delete id="delete" parameterType="org.web.module.height.obesity.entity.FoodRecipes">
+	DELETE
+	FROM
+		base_food_recipes
+	WHERE
+		id = #{id}  
+  </delete>
+  
+  <insert id="insert" parameterType="org.web.module.height.obesity.entity.FoodRecipes" keyProperty="id"  useGeneratedKeys="true">
+	 INSERT INTO base_food_recipes (`code`,`name`)
+	VALUES
+		(
+			#{code},#{name})
+  </insert>
+  
+  <update id="update" parameterType="org.web.module.height.obesity.entity.FoodRecipes">
+   UPDATE base_food_recipes SET id=#{id}
+	    <if test="name!=null and name!=''">
+	     ,`name` =#{name}
+	    </if>
+    WHERE
+		id = #{id}
+  </update>
+  
+  <select id="getOne" parameterType="org.web.module.height.obesity.entity.FoodRecipes" resultType="map">
+	SELECT
+		id,
+		`name`,
+		`code`
+	FROM
+		base_food_recipes
+	WHERE
+		id = #{id}
+  </select>
+  
+  <!--查询菜谱列表  -->
+  <select id="getList" parameterType="org.web.module.height.obesity.entity.FoodRecipes" resultType="map">
+  SELECT
+		id,
+		`name`,
+		`code`
+	FROM
+		base_food_recipes
+		<where>
+		    <if test="name!=null and name!=''">
+		       `name`  LIKE CONCAT(CONCAT('%',#{name},'%'))
+		    </if>
+		</where>
+  </select>
+  
+  <!--查询菜名下的食物列表  -->
+  <select id="getFoodRecipefoods"  parameterType="org.web.module.height.obesity.entity.FoodRecipes" resultType="map">
+	SELECT
+		bf.id,
+		bf.`name`,
+		bf.`code`
+	FROM
+		base_food_recipes bfr
+	INNER JOIN base_food_recipes_has_base_food bfrhbf ON bfr.`code` = bfrhbf.food_recipes_code
+	INNER JOIN base_food bf ON bf.`code` = bfrhbf.food_code
+   <where>
+		    <if test="code!=null and code!=''">
+		      bfr.`code` = #{code}
+		    </if>
+		</where>
+		GROUP BY bf.id
+  </select>
+</mapper>

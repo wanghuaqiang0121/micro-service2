@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.service.task.delay.dao.UserRelationMapper">
+	<insert id="insert" parameterType="org.service.task.delay.entity.user.UserRelation" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO base_user_organization_team ( user_id, organization_team_id, is_sign, is_increment_service, is_single_service )
+		VALUES
+		( #{userId},#{organizationTeamId},#{isSign},#{isIncrementService},#{isSingleService})
+	</insert>
+	<select id="getOne" parameterType="org.service.task.delay.entity.user.UserRelation" resultType="map">
+		SELECT
+			id
+		FROM
+			base_user_organization_team
+		WHERE
+			user_id = #{userId}
+		AND organization_team_id=#{organizationTeamId}
+	</select>
+	<update id="update" parameterType="org.service.task.delay.entity.user.UserRelation">
+		UPDATE base_user_organization_team
+		SET id = id
+		<if test="isSign != null">
+			,is_sign=#{isSign}
+		</if>
+		<if test="isIncrementService != null">
+			,is_increment_service=#{isIncrementService}
+		</if>
+		<if test="isSingleService != null">
+			,is_single_service=#{isSingleService}
+		</if>
+		WHERE user_id = #{userId} AND organization_team_id=#{organizationTeamId}
+	</update>
+</mapper>

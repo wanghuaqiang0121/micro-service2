@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.web.module.height.obesity.dao.BehavioralDevelopmentConfigMapper">
+
+	<delete id="delete" parameterType="org.web.module.height.obesity.entity.BehavioralDevelopmentConfig">
+	 DELETE
+	FROM
+		base_behavioral_development_config
+	WHERE
+		id = #{id}
+	</delete>
+
+	<insert id="insert" parameterType="org.web.module.height.obesity.entity.BehavioralDevelopmentConfig" keyProperty="id" useGeneratedKeys="true">
+   INSERT INTO base_behavioral_development_config 
+   		( `name`, month_age_start, month_age_end, picture, remark,  create_date_time)
+    VALUES 
+    	(#{name},  #{monthAgeStart}, #{monthAgeEnd},  #{picture}, #{remark}, #{createDateTime})
+	</insert>
+
+	<update id="update" parameterType="org.web.module.height.obesity.entity.BehavioralDevelopmentConfig">
+    UPDATE base_behavioral_development_config SET id=#{id}
+		<if test="name!=null and name!=''">
+	     , name = #{name}
+		</if>
+		<if test="monthAgeStart!=null">
+	    ,month_age_start = #{monthAgeStart}
+		</if>
+		<if test="monthAgeEnd!=null">
+	     , month_age_end = #{monthAgeEnd}
+		</if>
+		<if test="picture!=null and picture!=''">
+	       ,  picture = #{picture}
+		</if>
+		<if test="remark!=null">
+	     ,  remark = #{remark}
+		</if>
+    WHERE
+    	 id = #{id}
+	</update>
+
+	<select id="getOne" parameterType="org.web.module.height.obesity.entity.BehavioralDevelopmentConfig" resultType="map">
+	  SELECT
+		id,
+		`name`,
+		month_age_start monthAgeStart,
+		month_age_end monthAgeEnd,
+		picture,
+		remark,
+		create_date_time createDateTime
+	FROM
+		base_behavioral_development_config
+	WHERE
+		id = #{id}
+	</select>
+
+	<select id="getList" parameterType="org.web.module.height.obesity.entity.BehavioralDevelopmentConfig" resultType="map">
+   SELECT
+		id,
+		`name`,
+		month_age_start monthAgeStart,
+		month_age_end monthAgeEnd,
+		picture,
+		remark,
+		create_date_time  createDateTime
+	FROM
+		base_behavioral_development_config
+		<where>
+			<if test="name!=null and name!=''">
+	      	 `name`  like CONCAT(CONCAT('%', #{name}), '%')
+			</if>
+			<if test="monthAge != null">
+	  			and (month_age_start&lt;=#{monthAge} and month_age_end&gt;=#{monthAge})
+			</if>
+		</where>
+	</select>
+
+
+	<select id="getMotionList" parameterType="org.web.module.height.obesity.entity.BehavioralDevelopmentConfig" resultType="map">
+		SELECT
+				id,
+				`name`,
+				month_age_start monthAgeStart,
+				month_age_end monthAgeEnd,
+				picture,
+				remark,
+				create_date_time  createDateTime
+		FROM
+				base_behavioral_development_config
+		<where>
+			<if test="monthAgeStart!=null"> #{monthAgeStart}&gt;=month_age_start</if>
+			<if test="monthAgeEnd!=null">AND #{monthAgeEnd}&lt;=month_age_end</if>
+		</where>
+	</select>
+</mapper>

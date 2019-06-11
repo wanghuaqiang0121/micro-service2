@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.wechat.module.user.dao.UserUserGroupMapper">
+  <!-- 移除成员 -->
+  <delete id="delete" parameterType="org.wechat.module.user.domain.UserUserGroup">
+    delete from base_user_user_group
+    where id = #{id}
+  </delete>
+  
+  <!-- 新增用户组成员 -->
+  <insert id="insert" parameterType="org.wechat.module.user.domain.UserUserGroup" useGeneratedKeys="true" keyProperty="id">
+    insert into base_user_user_group ( user_id, user_group_id, 
+      relation, trust, create_datetime
+      )
+    values (#{userId}, #{userGroupId}, 
+      #{relation}, #{trust}, #{createDatetime}
+      )
+  </insert>
+  
+  <!--修改用户用户组  -->
+  <update id="update" parameterType="org.wechat.module.user.domain.UserUserGroup">
+    update base_user_user_group set id = #{id},
+      <if test="relation !=null and relation !=''">
+      ,relation = #{relation}
+      </if>
+      <if test="trust !=null and trust !=''">
+      ,trust = #{trust}
+      </if>
+    where id = #{id}
+  </update>
+  
+  
+  <!-- 查询用户组成员是否重复-->
+  <select id="getRepeat" parameterType="org.wechat.module.user.domain.UserUserGroup" resultType="map">
+	SELECT
+		buug.id,
+		buug.user_id userId,
+		buug.user_group_id userGroupId,
+		buug.relation,
+		fn_print_system_code_result (buug.relation, ';', 'gx') relationName,
+		buug.trust
+	FROM
+		base_user_user_group buug
+	WHERE
+		buug.user_id = #{userId} and buug.user_group_id=#{userGroupId} 
+  </select>
+  <!--查询详情  -->
+  <select id="getOne" parameterType="org.wechat.module.user.domain.UserUserGroup" resultType="map">
+    select id, 
+    user_id userId, 
+    user_group_id userGroupId, 
+    relation, 
+    trust, 
+    create_datetime createDatetime
+    from base_user_user_group
+    where id = #{id}
+  </select>
+  <!-- 定义查询用户的用户组列表结果集-->
+  <resultMap type="map" id="userMap">
+		<result column="userId" property="userId"/>
+		<collection property="userType" column="userId" javaType="list" select="getUserTypeList"/>
+  </resultMap>		
+  
+  <!-- 用户组管理者的成员列表 -->
+  <select id="getList" parameterType="org.wechat.module.user.domain.UserUserGroup" resultMap="userMap">
+	SELECT
+		buug.id,
+		bu.id userId,
+		bu.`name` userName,
+		bu.phone userPhone,
+		bu.sex userSex,
+		bu.photo userPhoto,
+		(
+			SELECT
+				COUNT(
+					buspo.organization_service_package_id
+				)
+			FROM
+				base_user_service_package_order buspo
+			WHERE
+				buspo.user_id = bu.id
+		) userOrderNum,
+		buug.user_group_id groupId,
+		bug.user_id managerUserId,
+		bum.`name` managerUserName,
+		bum.sex managerUserSex,
+		bum.phone managerPhone,
+		bus.id signId,
+		bus.`status` signStatus,
+		bus.close_reason closeReason,
+		bus.close_reason_code closeReasonCode,
+		buug.relation,
+		fn_print_system_code_result (buug.relation, ';', 'gx') relationName,
+		buug.trust,
+		bu.birthday,
+		(DATE_FORMAT(FROM_DAYS(TO_DAYS(NOW())-TO_DAYS(bu.birthday)), '%Y')+0) age,
+		bug.phone groupPhone
+	FROM
+		base_user_user_group buug
+	LEFT JOIN base_user bu ON bu.id = buug.user_id
+	LEFT JOIN base_user_service_package_order buspo ON buspo.user_id = bu.id
+	LEFT JOIN base_user_group bug ON bug.id = buug.user_group_id
+	LEFT JOIN base_user bum ON bum.id = bug.user_id
+	LEFT JOIN base_user_sign bus ON bus.user_id=bu.id
+	<where>
+		<if test="userId != null">
+			buug.user_id=#{userId}
+		</if>
+		<if test="userGroupId != null">
+			and buug.user_group_id=#{userGroupId}
+		</if>
+		<if test="trust != null">
+			and buug.trust=#{trust}
+		</if>
+		<if test="trusts !=null">
+			<foreach collection="trusts" item="item" open="and buug.trust IN (" close=")" separator=",">
+				${item}
+			</foreach>
+		</if>
+	</where>
+  </select>
+  
+  <!-- 查询用户对应的人群类型 -->
+  <select id="getUserTypeList" parameterType="int" resultType="map">
+		SELECT
+			but.id userTypeId,
+			but.`name` userTypeName
+		FROM
+			base_user_user_type buut
+		LEFT JOIN base_user_type but ON but.id = buut.user_type_id
+		WHERE
+			buut.user_id =#{userId}
+  </select>
+</mapper>

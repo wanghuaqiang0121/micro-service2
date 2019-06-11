@@ -1,0 +1,231 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.web.module.height.obesity.dao.BoneAgeOrderMapper">
+	<delete id="delete" parameterType="org.web.module.height.obesity.entity.BoneAgeOrder">
+		delete from base_bone_age_order
+		where id = #{id}
+	</delete>
+	<insert id="insert" parameterType="org.web.module.height.obesity.entity.BoneAgeOrder">
+		insert into base_bone_age_order (id, user_id,
+		organization_team_id,
+		organization_user_id, order_no, status,
+		sex,
+		height, weight, check_point,
+		x_ray, x_ray_no, algorithm,
+		summary_algorithm, radius_level, ulna_level,
+		metacarpal_1_level,
+		metacarpal_3_level, metacarpal_5_level,
+		near_phalanges_1_level,
+		near_phalanges_3_level,
+		near_phalanges_5_level, in_phalanges_3_level,
+		in_phalanges_5_level, far_phalanges_1_level,
+		far_phalanges_3_level,
+		far_phalanges_5_level,
+		head_bone_level, hamate_level,
+		pyramidal_bone_level,
+		moon_bone_level, scaphoid_level,
+		most_of_the_horns_level,
+		small_polyhorns_level, menarche_type,
+		menarche_age,
+		bone_age, bone_score, forecast_height,
+		doctor_forecast_height, min_forecast_height,
+		doctor_min_forecast_height,
+		max_forecast_height,
+		doctor_max_forecast_height, is_display_forecast_height,
+		explain,
+		advise, generating_report_date,
+		create_date)
+		values (#{id}, #{userId},
+		#{organizationTeamId},
+		#{organizationUserId}, #{orderNo}, #{status},
+		#{sex}, #{height}, #{weight}, #{checkPoint},
+		#{xRay}, #{xRayNo},
+		#{algorithm},
+		#{summaryAlgorithm}, #{radiusLevel}, #{ulnaLevel},
+		#{metacarpal1Level}, #{metacarpal3Level}, #{metacarpal5Level},
+		#{nearPhalanges1Level}, #{nearPhalanges3Level},
+		#{nearPhalanges5Level}, #{inPhalanges3Level},
+		#{inPhalanges5Level},
+		#{farPhalanges1Level},
+		#{farPhalanges3Level}, #{farPhalanges5Level},
+		#{headBoneLevel}, #{hamateLevel}, #{pyramidalBoneLevel},
+		#{moonBoneLevel}, #{scaphoidLevel}, #{mostOfTheHornsLevel},
+		#{smallPolyhornsLevel}, #{menarcheType}, #{menarcheAge},
+		#{boneAge},
+		#{boneScore}, #{forecastHeight},
+		#{doctorForecastHeight},
+		#{minForecastHeight}, #{doctorMinForecastHeight},
+		#{maxForecastHeight}, #{doctorMaxForecastHeight},
+		#{isDisplayForecastHeight},
+		#{explain}, #{advise},
+		#{generatingReportDate},
+		#{createDate})
+	</insert>
+	<update id="updateByPrimaryKey" parameterType="org.web.module.height.obesity.entity.BoneAgeOrder">
+		update base_bone_age_order
+		set user_id = #{userId},
+		organization_team_id = #{organizationTeamId},
+		organization_user_id =
+		#{organizationUserId},
+		order_no = #{orderNo},
+		status = #{status},
+		sex =
+		#{sex},
+		height = #{height},
+		weight = #{weight},
+		check_point =
+		#{checkPoint},
+		x_ray = #{xRay},
+		x_ray_no = #{xRayNo},
+		algorithm =
+		#{algorithm},
+		summary_algorithm = #{summaryAlgorithm},
+		radius_level =
+		#{radiusLevel},
+		ulna_level = #{ulnaLevel},
+		metacarpal_1_level =
+		#{metacarpal1Level},
+		metacarpal_3_level = #{metacarpal3Level},
+		metacarpal_5_level = #{metacarpal5Level},
+		near_phalanges_1_level =
+		#{nearPhalanges1Level},
+		near_phalanges_3_level =
+		#{nearPhalanges3Level},
+		near_phalanges_5_level =
+		#{nearPhalanges5Level},
+		in_phalanges_3_level = #{inPhalanges3Level},
+		in_phalanges_5_level = #{inPhalanges5Level},
+		far_phalanges_1_level =
+		#{farPhalanges1Level},
+		far_phalanges_3_level = #{farPhalanges3Level},
+		far_phalanges_5_level = #{farPhalanges5Level},
+		head_bone_level =
+		#{headBoneLevel},
+		hamate_level = #{hamateLevel},
+		pyramidal_bone_level =
+		#{pyramidalBoneLevel},
+		moon_bone_level = #{moonBoneLevel},
+		scaphoid_level = #{scaphoidLevel},
+		most_of_the_horns_level =
+		#{mostOfTheHornsLevel},
+		small_polyhorns_level = #{smallPolyhornsLevel},
+		menarche_type = #{menarcheType},
+		menarche_age = #{menarcheAge},
+		bone_age = #{boneAge},
+		bone_score = #{boneScore},
+		forecast_height =
+		#{forecastHeight},
+		doctor_forecast_height = #{doctorForecastHeight},
+		min_forecast_height = #{minForecastHeight}, doctor_min_forecast_height = #{doctorMinForecastHeight},
+		max_forecast_height =
+		#{maxForecastHeight},
+		doctor_max_forecast_height =
+		#{doctorMaxForecastHeight},
+		is_display_forecast_height =
+		#{isDisplayForecastHeight},
+		explain = #{explain},
+		advise =
+		#{advise},
+		generating_report_date = #{generatingReportDate},
+		create_date =
+		#{createDate}
+		where id = #{id}
+	</update>
+	<select id="getOne" parameterType="org.web.module.height.obesity.entity.BoneAgeOrder" resultType="map">
+		select id,
+		user_id userId,
+		organization_team_id organizationTeamId,
+		organization_user_id organizationUserId,
+		order_no
+		orderNo,
+		status,
+		sex,
+		height,
+		weight,
+		check_point checkPoint,
+		x_ray xRay,
+		x_ray_no xRayNo,
+		algorithm,
+		summary_algorithm summaryAlgorithm,
+		radius_level
+		radiusLevel,
+		ulna_level ulnaLevel,
+		metacarpal_1_level metacarpal1Level,
+		metacarpal_3_level metacarpal3Level,
+		metacarpal_5_level
+		metacarpal5Level,
+		near_phalanges_1_level nearPhalanges1Level,
+		near_phalanges_3_level nearPhalanges3Level,
+		near_phalanges_5_level
+		nearPhalanges5Level, in_phalanges_3_level inPhalanges3Level,
+		in_phalanges_5_level inPhalanges5Level,
+		far_phalanges_1_level
+		farPhalanges1Level, far_phalanges_3_level farPhalanges3Level,
+		far_phalanges_5_level farPhalanges5Level,
+		head_bone_level
+		headBoneLevel, hamate_level hamateLevel, pyramidal_bone_level
+		pyramidalBoneLevel, moon_bone_level moonBoneLevel,
+		scaphoid_level
+		scaphoidLevel,
+		most_of_the_horns_level mostOfTheHornsLevel,
+		small_polyhorns_level smallPolyhornsLevel,
+		menarche_type menarcheType,
+		menarche_age menarcheAge, bone_age boneAge,
+		bone_score boneScore,
+		forecast_height forecastHeight,
+		doctor_forecast_height
+		doctorForecastHeight, min_forecast_height minForecastHeight,
+		doctor_min_forecast_height doctorMinForecastHeight,
+		max_forecast_height maxForecastHeight,
+		doctor_max_forecast_height
+		doctorMaxForecastHeight, is_display_forecast_height
+		isDisplayForecastHeight, `EXPLAIN`,
+		advise, generating_report_date
+		generatingReportDate, create_date createDate
+		from base_bone_age_order
+		<where>
+			<if test="id!=null">id=#{id}</if>
+			<if test="startDate!=null">AND create_date &gt;=#{startDate}</if>
+			<if test="endDate!=null">AND create_date &lt;=#{endDate}</if>
+			<if test="userId!=null">AND user_id =#{userId}</if>
+		</where>
+	</select>
+
+
+	<select id="getList" parameterType="org.web.module.height.obesity.entity.BoneAgeOrder" resultType="map">
+		select id, user_id,
+		organization_team_id,
+		organization_user_id, order_no,
+		status,
+		sex,
+		height, weight, check_point,
+		x_ray, x_ray_no, algorithm,
+		summary_algorithm,
+		radius_level, ulna_level,
+		metacarpal_1_level,
+		metacarpal_3_level,
+		metacarpal_5_level,
+		near_phalanges_1_level,
+		near_phalanges_3_level, near_phalanges_5_level,
+		in_phalanges_3_level,
+		in_phalanges_5_level, far_phalanges_1_level,
+		far_phalanges_3_level,
+		far_phalanges_5_level,
+		head_bone_level,
+		hamate_level,
+		pyramidal_bone_level, moon_bone_level, scaphoid_level,
+		most_of_the_horns_level, small_polyhorns_level, menarche_type,
+		menarche_age, bone_age,
+		bone_score, forecast_height,
+		doctor_forecast_height, min_forecast_height,
+		doctor_min_forecast_height,
+		max_forecast_height,
+		doctor_max_forecast_height, is_display_forecast_height, explain,
+		advise, generating_report_date, create_date
+		from base_bone_age_order
+	</select>
+	
+	
+	
+	
+</mapper>

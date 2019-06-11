@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.wechat.module.height.obesity.dao.OrganizationConsultingRoomMapper">
+  <delete id="delete" parameterType="org.wechat.module.height.obesity.entity.OrganizationConsultingRoom">
+	DELETE
+	FROM
+		base_organization_consulting_room
+	WHERE
+		id = #{id}
+  </delete>
+  
+  <insert id="insert" parameterType="org.wechat.module.height.obesity.entity.OrganizationConsultingRoom" keyProperty="id"  useGeneratedKeys="true">
+  	 INSERT INTO base_organization_consulting_room
+     		(organization_id, organization_team_id, name, create_date_time)
+    VALUES
+    	 ( #{organizationId}, #{organizationTeamId},  #{name}, #{createDateTime})
+  </insert>
+  
+  <update id="update" parameterType="org.wechat.module.height.obesity.entity.OrganizationConsultingRoom">
+    UPDATE base_organization_consulting_room  SET id=#{id}
+	    <if test="organizationId!=null">
+	    , organization_id = #{organizationId}
+	    </if>
+	    <if test="organizationTeamId!=null">
+	    ,  organization_team_id = #{organizationTeamId}
+	    </if>
+	    <if test="name!=null and name!=''">
+	    , name = #{name}
+	    </if>
+    WHERE
+    	 id = #{id}
+  </update>
+  
+  <select id="getOne" parameterType="org.wechat.module.height.obesity.entity.OrganizationConsultingRoom" resultType="map">
+	 SELECT
+		id,
+		organization_id organizationId,
+		organization_team_id organizationTeamId,
+		`name`,
+		create_date_time createDateTime
+	FROM
+		base_organization_consulting_room
+	WHERE
+		id = #{id}
+  </select>
+  
+  <select id="getList" parameterType="org.wechat.module.height.obesity.entity.OrganizationConsultingRoom" resultType="map">
+	SELECT
+		id,
+		organization_id organizationId,
+		organization_team_id organizationTeamId,
+		`name`,
+		create_date_time createDateTime
+	FROM
+		base_organization_consulting_room
+  </select>
+</mapper>

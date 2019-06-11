@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.web.module.height.obesity.dao.SecondarySexCharactersConfigMapper">
+  <delete id="delete"  parameterType="org.web.module.height.obesity.entity.SecondarySexCharactersConfig">
+	DELETE
+	FROM
+		base_secondary_sex_characters_config
+	WHERE
+		id = #{id}   
+  </delete>
+  
+  <insert id="insert"  parameterType="org.web.module.height.obesity.entity.SecondarySexCharactersConfig" keyProperty="id"  useGeneratedKeys="true">
+     INSERT INTO base_secondary_sex_characters_config
+   		  ( sex, phase,  phase_name, picture, testicular_diameter, testicular_volume, penile_length, pubic_hair,  breast, create_date_time)
+    VALUES
+    	 (#{sex}, #{phase},#{phaseName}, #{picture}, #{testicularDiameter},  #{testicularVolume}, #{penileLength}, #{pubicHair}, #{breast}, #{createDateTime})
+  </insert>
+  
+  <update id="update" parameterType="org.web.module.height.obesity.entity.SecondarySexCharactersConfig">
+    UPDATE base_secondary_sex_characters_config SET id=#{id}
+	    <if test="sex!=null">
+	      , sex = #{sex}
+	    </if>
+	     <if test="phase!=null">
+	   ,  phase = #{phase}
+	    </if>
+	     <if test="phaseName!=null and phaseName!=''">
+	      , phase_name = #{phaseName}
+	    </if>
+	     <if test="picture!=null and picture!=''">
+	    ,  picture = #{picture}
+	    </if>
+	     <if test="testicularDiameter!=null and testicularDiameter!=''">
+	       ,testicular_diameter = #{testicularDiameter}
+	    </if>
+	     <if test="testicularVolume!=null and testicularVolume!=''">
+	     , testicular_volume = #{testicularVolume}
+	    </if>
+	     <if test="penileLength!=null">
+	     ,penile_length = #{penileLength}
+	    </if>
+	     <if test="pubicHair!=null and pubicHair!=''">
+	       ,pubic_hair = #{pubicHair}
+	    </if>
+	     <if test="breast!=null and breast!=''">
+	        , breast = #{breast}
+	    </if>
+    WHERE
+    	 id = #{id}
+  </update>
+	
+  <select id="getOne"  parameterType="org.web.module.height.obesity.entity.SecondarySexCharactersConfig" resultType="map">
+  SELECT
+		id,
+		sex,
+		phase,
+		phase_name phaseName,
+		picture,
+		testicular_diameter testicularDiameter,
+		testicular_volume testicularVolume,
+		penile_length penileLength,
+		pubic_hair pubicHair,
+		breast,
+		create_date_time createDateTime
+	FROM
+		base_secondary_sex_characters_config
+	WHERE
+		id = #{id}  
+  </select>
+  
+  <!-- 第二性征配置列表 -->
+  <select id="getList" parameterType="org.web.module.height.obesity.entity.SecondarySexCharactersConfig" resultType="map">
+	SELECT
+		bcscc.id,
+		bcscc.sex,
+		bcscc.phase,
+		bcscc.phase_name phaseName,
+		bcscc.picture,
+		bcscc.testicular_diameter testicularDiameter,
+		bcscc.testicular_volume testicularVolume,
+		bcscc.penile_length penileLength,
+		bcscc.pubic_hair pubicHair,
+		bcscc.breast,
+		bcscc.create_date_time createDateTime
+	FROM
+		base_secondary_sex_characters_config bcscc
+	<where>
+		<if test="sex != null">
+			bcscc.sex = #{sex}
+		</if>
+	</where>	
+  </select>
+</mapper>

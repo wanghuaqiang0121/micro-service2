@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.wechat.module.height.obesity.dao.UserMapper">
+
+  <delete id="delete" parameterType="org.wechat.module.height.obesity.entity.User">
+    delete from base_user
+    where id = #{id}
+  </delete>
+  
+  <insert id="insert" parameterType="org.wechat.module.height.obesity.entity.User"  keyProperty="id"  useGeneratedKeys="true">
+    insert into base_user (id, name, sex, 
+      id_card, birthday, phone, 
+      phone_status, photo, province, 
+      city, area, street, 
+      lng, lat, address, status, 
+      is_bind_wechat, source, terminal_source, 
+      create_date, update_date, remark
+      )
+    values (#{id}, #{name}, #{sex}, 
+      #{idCard}, #{birthday}, #{phone}, 
+      #{phoneStatus}, #{photo}, #{province}, 
+      #{city}, #{area}, #{street}, 
+      #{lng}, #{lat}, #{address}, #{status}, 
+      #{isBindWechat,jdbcType=BIT}, #{source}, #{terminalSource}, 
+      #{createDate}, #{updateDate}, #{remark}
+      )
+  </insert>
+  <update id="update" parameterType="org.wechat.module.height.obesity.entity.User">
+    update base_user
+    set name = #{name},
+      sex = #{sex},
+      id_card = #{idCard},
+      birthday = #{birthday},
+      phone = #{phone},
+      phone_status = #{phoneStatus},
+      photo = #{photo},
+      province = #{province},
+      city = #{city},
+      area = #{area},
+      street = #{street},
+      lng = #{lng},
+      lat = #{lat},
+      address = #{address},
+      status = #{status},
+      is_bind_wechat = #{isBindWechat},
+      source = #{source},
+      terminal_source = #{terminalSource},
+      create_date = #{createDate},
+      update_date = #{updateDate},
+      remark = #{remark}
+    where id = #{id}
+  </update>
+  <select id="getOne" parameterType="org.wechat.module.height.obesity.entity.User"  resultType="map">
+    SELECT id, name, sex, id_card, birthday, phone, phone_status, photo, province, city,
+    area, street, lng, lat, address, status, is_bind_wechat, source, terminal_source,
+    create_date, update_date, remark,TIMESTAMPDIFF(MONTH,birthday,NOW()) monthAge
+    FROM base_user
+    WHERE id = #{id}
+  </select>
+  <select id="getNewOne" parameterType="org.wechat.module.height.obesity.entity.User"  resultType="map">
+    SELECT bu.id,buug.user_group_id groupId, name, sex, id_card, birthday, bu.phone, phone_status, photo, province, city,
+    area, street, lng, lat, address, status, is_bind_wechat, source, terminal_source,
+    bu.create_date, update_date, bu.remark,TIMESTAMPDIFF(MONTH,birthday,NOW()) monthAge
+    FROM base_user bu
+    INNER JOIN base_user_user_group buug ON bu.id = buug.user_id
+    WHERE bu.id = #{id}
+  </select>
+  <select id="getList" parameterType="org.wechat.module.height.obesity.entity.User"  resultType="map">
+    select id, name, sex, id_card, birthday, phone, phone_status, photo, province, city,
+    area, street, lng, lat, address, status, is_bind_wechat, source, terminal_source,
+    create_date, update_date, remark
+    from base_user
+  </select>
+</mapper>

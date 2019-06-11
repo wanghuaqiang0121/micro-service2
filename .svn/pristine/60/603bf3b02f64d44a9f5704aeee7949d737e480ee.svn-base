@@ -1,0 +1,163 @@
+package org.web.module.height.obesity.controller;
+
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+
+import javax.annotation.Resource;
+
+import org.service.core.api.ApiCodeEnum;
+import org.service.core.api.JsonApi;
+import org.service.core.api.MultiLine;
+import org.service.core.auth.control.RequiresAuthentication;
+import org.service.core.auth.level.Level;
+import org.service.core.entity.BaseEntity;
+import org.service.core.entity.BaseEntity.SelectAll;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RestController;
+import org.web.module.height.obesity.entity.OrganizationConsultingRoom;
+import org.web.module.height.obesity.global.BaseGlobal;
+import org.web.module.height.obesity.service.OrganizationConsultingRoomService;
+
+import com.github.pagehelper.Page;
+import com.github.pagehelper.PageHelper;
+
+/**
+ * Copyright © 2018 四川易迅通健康医疗技术发展有限公司. All rights reserved.
+ *
+ * @author: WangHuaQiang
+ * @date: 2018年12月18日
+ * @description: 机构诊室
+ */
+@RestController
+public class OrganizationConsultingRoomController {
+
+	@Resource
+	private OrganizationConsultingRoomService organizationConsultingRoomService;
+	
+	/** 
+	 * @author: WangHuaQiang
+	 * @date: 2018年12月18日
+	 * @param organizationConsultingRoom
+	 * @param resul
+	 * @param organizationId
+	 * @param organizationTeamId
+	 * @return
+	 * @description: 添加机构诊室
+	 */
+	@RequiresAuthentication(ignore = false,value = { "web-module-height-obesity:organization-consulting-room:insert" },level = Level.OPERATION)
+	@PostMapping(value = { "/organization/consulting/room" })
+	public JsonApi insert(@RequestBody @Validated({ BaseEntity.Insert.class }) OrganizationConsultingRoom organizationConsultingRoom,
+			BindingResult resul,@RequestHeader(required = true,value = BaseGlobal.ORGANIZATION_ID) Integer organizationId ,
+			@RequestHeader(required = true,value = BaseGlobal.ORGANIZATION_TEAM_ID) Integer organizationTeamId ) {
+		organizationConsultingRoom.setOrganizationId(organizationId);
+		organizationConsultingRoom.setOrganizationTeamId(organizationTeamId);
+		/* 判断机构诊室是否存在 */
+		Map<String, Object> organizationConsultingRoomMap = organizationConsultingRoomService.getOne(organizationConsultingRoom);
+		if (organizationConsultingRoomMap != null) {
+			return new JsonApi(ApiCodeEnum.CONFLICT);
+		}
+		organizationConsultingRoom.setCreateDateTime(new Date());
+		if (organizationConsultingRoomService.insert(organizationConsultingRoom) > 0) {
+			return new JsonApi(ApiCodeEnum.OK);
+		}
+		return new JsonApi(ApiCodeEnum.FAIL);
+	}
+	
+	/** 
+	 * @author: WangHuaQiang
+	 * @date: 2018年12月18日
+	 * @param id
+	 * @param organizationConsultingRoom
+	 * @param resul
+	 * @return
+	 * @description: 机构诊室详情
+	 */
+	@RequiresAuthentication(value = { "web-module-height-obesity:organization-consulting-room:detail" },level = Level.OPERATION)
+	@GetMapping(value = { "/organization/consulting/room/{id}" })
+	public JsonApi detail(@PathVariable("id") Integer id,@Validated({ BaseEntity.SelectOne.class }) OrganizationConsultingRoom organizationConsultingRoom,
+			BindingResult resul) {
+		/* 设置id */
+		organizationConsultingRoom.setId(id);
+		Map<String, Object> organizationConsultingRoomMap = organizationConsultingRoomService.getOne(organizationConsultingRoom);
+		if (organizationConsultingRoomMap != null){
+			return new JsonApi(ApiCodeEnum.OK,organizationConsultingRoomMap);
+		}
+		return new JsonApi(ApiCodeEnum.NOT_FOUND);
+	}
+	
+	/** 
+	 * @author: WangHuaQiang
+	 * @date: 2018年12月18日
+	 * @param id
+	 * @param organizationConsultingRoom
+	 * @param resul
+	 * @return
+	 * @description: 修改机构诊室
+	 */
+	@RequiresAuthentication(ignore = false,value = { "web-module-height-obesity:organization-consulting-room:update" },level = Level.OPERATION)
+	@PutMapping(value = { "/organization/consulting/room/{id}" })
+	public JsonApi update(@PathVariable("id") Integer id,@RequestBody @Validated({ BaseEntity.Update.class }) OrganizationConsultingRoom organizationConsultingRoom,
+			BindingResult resul,@RequestHeader(required = true,value = BaseGlobal.ORGANIZATION_ID) Integer organizationId ,
+			@RequestHeader(required = true,value = BaseGlobal.ORGANIZATION_TEAM_ID) Integer organizationTeamId) {
+		/* 设置id */
+		organizationConsultingRoom.setId(id);
+		OrganizationConsultingRoom oldOrganizationConsultingRoom = new OrganizationConsultingRoom();
+		oldOrganizationConsultingRoom.setId(id);
+		/* 判断要修改的机构诊室是否存在 */
+		Map<String, Object> organizationConsultingRoomMap = organizationConsultingRoomService.getOne(oldOrganizationConsultingRoom);
+		if (organizationConsultingRoomMap == null) {
+			return new JsonApi(ApiCodeEnum.NOT_FOUND);
+		}
+		/* 判断数据重复 */
+		if(organizationConsultingRoom.getName() != null && !"".equals(organizationConsultingRoom.getName())) {
+			organizationConsultingRoom.setOrganizationId(organizationId);
+			organizationConsultingRoom.setOrganizationTeamId(organizationTeamId);
+			Map<String, Object> newOrganizationConsultingRoomMap = organizationConsultingRoomService.getOne(organizationConsultingRoom);
+			if(newOrganizationConsultingRoomMap != null) {
+				int updateId = (int) newOrganizationConsultingRoomMap.get("id");
+				if(updateId != id ) {
+					return new JsonApi(ApiCodeEnum.CONFLICT);
+				}
+			}
+		}
+		/* 修改修改机构诊室 */
+		if (organizationConsultingRoomService.update(organizationConsultingRoom) > 0) {
+			return new JsonApi(ApiCodeEnum.OK);
+		}
+		return new JsonApi(ApiCodeEnum.FAIL);
+	}
+	
+	
+	/** 
+	 * @author: WangHuaQiang
+	 * @date: 2018年12月18日
+	 * @param organizationConsultingRoom
+	 * @param result
+	 * @param organizationTeamId
+	 * @param organizationId
+	 * @return
+	 * @description: 某机构某团队的机构诊室列表
+	 */
+	@RequiresAuthentication(ignore = false, value = { "web-module-height-obesity:organization-consulting-room:get-list" },level=Level.OPERATION)
+	@GetMapping("/organization/consulting/rooms")
+	public JsonApi getList(@Validated({ SelectAll.class }) OrganizationConsultingRoom organizationConsultingRoom, BindingResult result,
+			@RequestHeader(required = true, value = BaseGlobal.ORGANIZATION_TEAM_ID) Integer organizationTeamId,
+			@RequestHeader(required = true,value = BaseGlobal.ORGANIZATION_ID) Integer organizationId ) {
+		organizationConsultingRoom.setOrganizationTeamId(organizationTeamId);
+		organizationConsultingRoom.setOrganizationId(organizationId);
+		Page<?> page = PageHelper.startPage(organizationConsultingRoom.getPage(), organizationConsultingRoom.getPageSize());
+		List<Map<String, Object>> organizationConsultingRoomList = organizationConsultingRoomService.getList(organizationConsultingRoom);
+		if (organizationConsultingRoomList != null && !organizationConsultingRoomList.isEmpty()) {
+			return new JsonApi(ApiCodeEnum.OK, new MultiLine(page.getTotal(), organizationConsultingRoomList));
+		}
+		return new JsonApi(ApiCodeEnum.NOT_FOUND);
+	}	
+}

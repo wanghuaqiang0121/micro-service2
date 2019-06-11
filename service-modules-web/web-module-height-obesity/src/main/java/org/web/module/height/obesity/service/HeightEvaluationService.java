@@ -1,0 +1,873 @@
+package org.web.module.height.obesity.service;
+
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.annotation.Resource;
+
+import org.springframework.stereotype.Service;
+import org.web.module.height.obesity.dao.BoneAgeOrderMapper;
+import org.web.module.height.obesity.dao.ChildrenHighRiskFactorMapper;
+import org.web.module.height.obesity.dao.ChildrenMeasureMapper;
+import org.web.module.height.obesity.dao.StandardHeightPercentileMapper;
+import org.web.module.height.obesity.dao.UserExaminationRecordMapper;
+import org.web.module.height.obesity.dao.UserSecondarySexCharactersRecordMapper;
+import org.web.module.height.obesity.dao.WhoStandardBmiSdMapper;
+import org.web.module.height.obesity.dao.WhoStandardHeightWeightSdMapper;
+import org.web.module.height.obesity.entity.BoneAgeOrder;
+import org.web.module.height.obesity.entity.ChildrenHighRiskFactor;
+import org.web.module.height.obesity.entity.ChildrenMeasure;
+import org.web.module.height.obesity.entity.Diagnosis;
+import org.web.module.height.obesity.entity.StandardHeightPercentile;
+import org.web.module.height.obesity.entity.UserExaminationRecord;
+import org.web.module.height.obesity.entity.UserSecondarySexCharactersRecord;
+import org.web.module.height.obesity.entity.WhoStandardBmiSd;
+import org.web.module.height.obesity.entity.WhoStandardHeightWeightSd;
+import org.web.module.height.obesity.global.BaseGlobal;
+import org.web.module.height.obesity.global.GlobalEnum;
+import org.web.module.height.obesity.tools.HeightObesityCalculation;
+
+/**
+ * Copyright © 2018 四川易迅通健康医疗技术发展有限公司. All rights reserved.
+ *
+ * @author: ZhangGuangZhi
+ * @date: 2018年12月21日
+ * @description: HeightEvaluationService 身高评价
+ */
+@Service
+public class HeightEvaluationService {
+
+	@Resource
+	private StandardHeightPercentileMapper standardHeightPercentileMapper;
+	@Resource
+	private DiagnosisService diagnosisService;
+	@Resource
+	private ChildrenHighRiskFactorMapper childrenHighRiskFactorMapper;
+	@Resource
+	private UserSecondarySexCharactersRecordMapper userSecondarySexCharactersRecordMapper;
+	@Resource
+	private UserExaminationRecordMapper userExaminationRecordMapper;
+	@Resource
+	private ChildrenMeasureMapper childrenMeasureMapper;
+	@Resource
+	private WhoStandardHeightWeightSdMapper whoStandardHeightWeightSdMapper;
+	@Resource
+	private WhoStandardBmiSdMapper whoStandardBmiSdMapper;
+	@Resource
+	private BoneAgeOrderMapper boneAgeOrderMapper;
+
+	/**
+	 * @author: ZhangGuangZhi
+	 * @date: 2018年12月24日
+	 * @param
+	 * @return
+	 * @description: 身高评价
+	 */
+	public Map<String, Object> getHeightEvaluation(Diagnosis diagnosis) {
+
+		Map<String, Object> map = new HashMap<String, Object>();
+
+		/* 1.当前身高水平 */
+		String evaluation = null;
+		String heightWarning = null;
+		Boolean dwarfism = false;
+		/* 查询用户当前身高百分位数 */
+		StandardHeightPercentile standardHeightPercentile = new StandardHeightPercentile();
+		standardHeightPercentile.setSex(diagnosis.getSex());
+		/* 如果用户有骨龄,用骨龄代替年龄（单位：月龄）*/
+		BoneAgeOrder boneAgeOrder = new BoneAgeOrder();
+		boneAgeOrder.setUserId(diagnosis.getUserId());
+		boneAgeOrder.setStartDate(HeightObesityCalculation.getDayAfter(-31));
+		boneAgeOrder.setEndDate(new Date());
+		Map<String, Object> boneAgeOrderMap = boneAgeOrderMapper.getNewOne(boneAgeOrder);
+		// 定义骨龄
+		Double boneAge = null;
+		/* 查询是否有骨龄测量信息 */
+		UserExaminationRecord userExaminationRecord = new UserExaminationRecord();
+		userExaminationRecord.setUserId(diagnosis.getUserId());
+		userExaminationRecord.setChildrenMeasureId(diagnosis.getChildrenMeasureId());
+		userExaminationRecord.setExaminationCode(BaseGlobal.EXAMINATION_BONEAGE);// 骨龄检测
+		Map<String, Object> examinationlistMap = userExaminationRecordMapper.getUserExaminationByCode(userExaminationRecord);
+		/* 查询一个月内骨龄检测工单记录
+		 * 如果有骨龄骨龄工单骨龄就用骨龄工单里的骨龄代替年龄（这个优先,所以if放下面）
+		 * 如果有骨龄测量信息骨龄就用骨龄测量信息里的骨龄代替年龄
+		 *  */
+		// 如果有骨龄测量信息骨龄就用骨龄测量信息里的骨龄代替年龄
+		if (examinationlistMap != null && examinationlistMap.get("examinationResult") != null) {
+			boneAge = (Double.parseDouble(examinationlistMap.get("examinationResult").toString()) );
+		}
+		// 如果有骨龄骨龄工单骨龄就用骨龄工单里的骨龄代替年龄（这个优先,所以if放下面）
+		if (boneAgeOrderMap != null && boneAgeOrderMap.get("boneAge") != null) {
+			boneAge = (Double.parseDouble(boneAgeOrderMap.get("boneAge").toString()) );
+		}
+		if(boneAge != null){// 有月龄用月龄代替年龄
+			standardHeightPercentile.setMonthAge(HeightObesityCalculation.getMonthAgeByAge(boneAge));
+		}else{// 否则用当前月龄
+			standardHeightPercentile.setMonthAge(diagnosis.getMonthAge());
+		}
+		standardHeightPercentile.setStandardValue(new BigDecimal(diagnosis.getHeight()));
+		Map<String, Object> resultMap = standardHeightPercentileMapper.getPercentile(standardHeightPercentile);
+
+		if (resultMap != null && resultMap.get("percentile") != null) {
+			Integer percentile = Integer.parseInt(resultMap.get("percentile").toString());
+			if (percentile == GlobalEnum.Percentile.THREE.getValue()) {
+				/* 判断值是否小于3标准 */
+				if (diagnosis.getWeight() < ((BigDecimal) resultMap.get("standardValue")).doubleValue()) {
+					// 小于第三百分位
+					percentile = GlobalEnum.Percentile.Two.getValue();
+				}
+			}
+
+			double age = HeightObesityCalculation.getAge(diagnosis.getMonthAge());
+			String name = diagnosis.name + HeightObesityCalculation.getName(age);
+			String sex = diagnosis.getSex() == 1 ? "男" : "女";
+
+			evaluation =String.format(BaseGlobal.HEIGHT_EVALUATION, name, age, sex, diagnosis.getHeight());
+
+			String more = evaluation;
+			if (percentile < 3) {
+				more += String.format(BaseGlobal.HEIGHT_EVALUATION_MORE, age, sex, "<3", resultMap.get("standardValue"),
+						name);
+			} else {
+				more += String.format(BaseGlobal.HEIGHT_EVALUATION_MORE, age, sex, percentile,
+						resultMap.get("standardValue"), name);
+			}
+
+			/** 干预效果评价 */
+			ChildrenMeasure childrenMeasure = new ChildrenMeasure();
+			childrenMeasure.setId(diagnosis.getChildrenMeasureId());
+			childrenMeasure.setUserId(diagnosis.getUserId());
+			Map<String, Object> childrenMeasureMap = childrenMeasureMapper.getLastOne(childrenMeasure);
+
+			/* 查询是否有上次干预记录
+			 * 针对本次测量时间,往前推三天,这三天内的测量历史只算一条
+			 * 针对本次测量时间,往前推3天,判断三天前有没有数据
+			 * 比如：本次时间为2019-03-20 那么就查询 2019-03-17 及以前的,就是时间小于2019-03-17的记录
+			 * 如果没有：干预效果为空*/
+			Map<String, Object> childrenMeasureOneMap = childrenMeasureMapper.getOne(childrenMeasure);
+			Date date = new Date();
+			if (childrenMeasureOneMap != null) {
+				date = (Date) childrenMeasureOneMap.get("createDateTime");
+			}
+			// 得到本次测量时间往前推3天的时间
+			Date createDateTime =HeightObesityCalculation.getDayAfter(date,-3);
+			childrenMeasure.setCreateDateTime(createDateTime);
+			List<Map<String, Object>> childrenMeasureList = childrenMeasureMapper.getListThreeDaysAgo(childrenMeasure);
+			
+			if (childrenMeasureList ==null || (childrenMeasureList !=null && childrenMeasureList.size() <= 0) ) {
+				map.put("evaluationOfInterventionEffect", null);
+			} else if(childrenMeasureMap != null){
+				/* 查上次身高所处百分位 */
+				standardHeightPercentile.setMonthAge(Integer.parseInt(childrenMeasureMap.get("monthAge").toString()));
+				standardHeightPercentile
+						.setStandardValue(new BigDecimal(childrenMeasureMap.get("currentHeight").toString()));
+				Map<String, Object> perResultMap = standardHeightPercentileMapper
+						.getPercentile(standardHeightPercentile);
+				if (perResultMap != null && perResultMap.get("percentile") != null) {
+
+					Integer perPercentile = Integer.parseInt(perResultMap.get("percentile").toString());
+					if (perPercentile == GlobalEnum.Percentile.THREE.getValue()) {
+						/* 判断值是否小于3标准 */
+						if (((Float) childrenMeasureMap.get("currentHeight"))
+								.doubleValue() < ((BigDecimal) perResultMap.get("standardValue")).doubleValue()) {
+							// 小于第三百分位
+							perPercentile = GlobalEnum.Percentile.Two.getValue();
+						}
+					}
+
+					/* 本次身高百分位数≤上次身高百分位数 */
+					if (percentile <= perPercentile) {
+						map.put("evaluationOfInterventionEffect", BaseGlobal.HEIGHT_EVALUATION_EFFECT_BAD);
+					} else if (percentile > perPercentile && percentile >= GlobalEnum.Percentile.THREE.getValue()
+							&& percentile <= GlobalEnum.Percentile.Fifty.getValue()) {
+						/* 本次身高百分位数>上次身高百分位数,且3百分位数≤当前身高白百分位数<50百分位数 */
+						map.put("evaluationOfInterventionEffect", BaseGlobal.HEIGHT_EVALUATION_EFFECT_GOOD);
+					} else if (percentile > perPercentile && percentile > GlobalEnum.Percentile.Fifty.getValue()
+							&& percentile <= GlobalEnum.Percentile.NinetySeven.getValue()) {
+						/* 本次身高百分位数>上次身高百分位数,且50百分位数<当前身高白百分位数≤97百分位数 */
+						map.put("evaluationOfInterventionEffect", BaseGlobal.HEIGHT_EVALUATION_EFFECT_BETTER);
+					} else if (percentile > perPercentile
+							&& percentile > GlobalEnum.Percentile.NinetySeven.getValue()) {
+						/* 本次身高百分位数>上次身高百分位数,且当前身高白百分位数>97百分位数 */
+						map.put("evaluationOfInterventionEffect", BaseGlobal.HEIGHT_EVALUATION_EFFECT_VERY_GOOD);
+					}
+				}
+
+			}
+
+			/*
+			 * 1.当前身高百分位数<3百分位数 
+			 *   1）先查询父母身高和遗传身高,判断家族性矮身材的可能,有以下4种情况中任一 一种即为家族性矮身材
+			 * ①父亲身高小于3百分位数
+			 * ②母亲身高小于3百分位数 
+			 * ③父亲、母亲身高都小于3百分位数
+			 *  ④遗传身高小于3百分位数
+			 */
+			if (percentile < GlobalEnum.Percentile.THREE.getValue()) {
+
+				more += BaseGlobal.HEIGHT_EVALUATION_MORE_DWARF;
+				map.put("more", more);
+				heightWarning = "孩子属于矮身材,请进一步明确病因。";
+				/* 查询父母身高所在百分位 */
+				/* 父亲身高是否小于第三百分位数 */
+				if (diagnosis.getFatherHeight() != null) {
+					standardHeightPercentile.setSex(1);
+					standardHeightPercentile.setMonthAge(BaseGlobal.MAX_MONTH_AGE);
+					standardHeightPercentile.setStandardValue(new BigDecimal(diagnosis.getFatherHeight()));
+					Map<String, Object> fatherResultMap = standardHeightPercentileMapper
+							.getPercentile(standardHeightPercentile);
+					if (fatherResultMap.get("percentile") != null && Integer.parseInt(
+							fatherResultMap.get("percentile").toString()) == GlobalEnum.Percentile.THREE.getValue()) {
+						// 判断是否小于第三百分位
+						if (diagnosis.getFatherHeight() < ((BigDecimal) fatherResultMap.get("standardValue"))
+								.doubleValue()) {
+							evaluation += BaseGlobal.HEIGHT_EVALUATION_FAMILY;
+							heightWarning = "孩子属于矮身材,请进一步明确病因。";
+							map.put("evaluation", evaluation);
+							map.put("heightWarning", heightWarning);
+							dwarfism = true;
+							map.put("dwarfism", dwarfism);
+							return map;
+						}
+					}
+				}
+
+				/* 母亲身高是否小于3百分位数 */
+				if (diagnosis.getMotherHeight() != null) {
+					standardHeightPercentile.setSex(2);
+					standardHeightPercentile.setMonthAge(BaseGlobal.MAX_MONTH_AGE);
+					standardHeightPercentile.setStandardValue(new BigDecimal(diagnosis.getMotherHeight()));
+					Map<String, Object> motherResultMap = standardHeightPercentileMapper
+							.getPercentile(standardHeightPercentile);
+					if (motherResultMap.get("percentile") != null && Integer.parseInt(
+							motherResultMap.get("percentile").toString()) == GlobalEnum.Percentile.THREE.getValue()) {
+						// 判断是否小于第三百分位
+						if (diagnosis.getMotherHeight() < ((BigDecimal) motherResultMap.get("standardValue"))
+								.doubleValue()) {
+							evaluation += BaseGlobal.HEIGHT_EVALUATION_FAMILY;
+							heightWarning = "孩子属于矮身材,请进一步明确病因。";
+							dwarfism = true;
+							map.put("dwarfism", dwarfism);
+							map.put("heightWarning", heightWarning);
+							map.put("evaluation", evaluation);
+							return map;
+						}
+					}
+				}
+
+				/* 查询遗传身高百分位 */
+				if (diagnosis.getFatherHeight() != null && diagnosis.getMotherHeight() != null) {
+					double geneticHeight = diagnosisService.getGeneticHeight(diagnosis);
+					standardHeightPercentile.setSex(diagnosis.getSex());
+					standardHeightPercentile.setMonthAge(BaseGlobal.MAX_MONTH_AGE);
+					standardHeightPercentile.setStandardValue(new BigDecimal(geneticHeight));
+
+					Map<String, Object> geneticResultMap = standardHeightPercentileMapper
+							.getPercentile(standardHeightPercentile);
+
+					if (geneticResultMap.get("percentile") != null && Integer.parseInt(
+							geneticResultMap.get("percentile").toString()) == GlobalEnum.Percentile.THREE.getValue()) {
+						// 判断遗传身高是否小于第三百分位
+						if (geneticHeight < ((BigDecimal) geneticResultMap.get("standardValue")).doubleValue()) {
+							evaluation += BaseGlobal.HEIGHT_EVALUATION_FAMILY;
+							heightWarning = "孩子属于矮身材,请进一步明确病因。";
+							dwarfism = true;
+							map.put("dwarfism", dwarfism);
+							map.put("heightWarning", heightWarning);
+							map.put("evaluation", evaluation);
+							return map;
+						}
+					}
+
+				}
+
+				/*
+				 * 1.当前身高百分位数<3百分位数 
+				 *   2）排除家族性矮身材后（即没有家族性矮身材的4种情况）,在判断是否是出生时情况影响身高： 
+				 * ①判断年龄是否是≤3岁
+				 * ②早产（孕周<37周） 
+				 * ③低出生体重又叫宫内发育迟缓,即出生体重低于2.5kg
+				 */
+				/* 查询早产标准 */
+				ChildrenHighRiskFactor childrenHighRiskFactor = new ChildrenHighRiskFactor();
+				childrenHighRiskFactor.setCode(BaseGlobal.PREMATURE_DELIVERY_LT);
+				Map<String, Object> prematureDeliveryMap = childrenHighRiskFactorMapper.getOne(childrenHighRiskFactor);
+
+				childrenHighRiskFactor.setCode(BaseGlobal.BIRTH_WEIGHT_LT);
+				Map<String, Object> birthWeightLtMap = childrenHighRiskFactorMapper.getOne(childrenHighRiskFactor);
+				
+				if (diagnosis.getChildrenMaternity() == null ) {
+					evaluation +=",建议测骨龄,完善出生信息和家族信息。";
+					dwarfism = true;
+					map.put("dwarfism", dwarfism);
+					map.put("heightWarning", heightWarning);
+					map.put("evaluation", evaluation);
+					return map;
+				}
+				if (((age <= 3)&& (((Float) diagnosis.getChildrenMaternity().get("birthGestational")).doubleValue() < ((Float) prematureDeliveryMap.get("conditionValue")).doubleValue()))
+						|| ((age <= 3)&& (((Float) diagnosis.getChildrenMaternity().get("birthWeight")).doubleValue() < ((Float) birthWeightLtMap.get("conditionValue")).doubleValue()))
+						|| ((age <= 3)&& 
+								(((Float) diagnosis.getChildrenMaternity().get("birthGestational")).doubleValue() < ((Float) prematureDeliveryMap.get("conditionValue")).doubleValue()) 
+								&&(((Float) diagnosis.getChildrenMaternity().get("birthGestational")).doubleValue() < ((Float) prematureDeliveryMap.get("conditionValue")).doubleValue()))
+						) {
+					evaluation += BaseGlobal.HEIGHT_EVALUATION_TNQK;
+					heightWarning = "孩子属于矮身材,请进一步明确病因。";
+					dwarfism = true;
+					map.put("dwarfism", dwarfism);
+					map.put("heightWarning", heightWarning);
+					map.put("evaluation", evaluation);
+					return map;
+				}
+
+				/*
+				 * 1.当前身高百分位数<3百分位数 
+				 *   3）排除家族性矮身材,且年龄大于2岁,查询是否有本次骨龄记录、青春期记录、家族青春期情况
+				 * ①骨龄<年龄2岁以上
+				 * ②青春期性征出现延迟数年 
+				 * ③家族存在青春期延迟情况
+				 */
+				if (age > 2) {
+
+					/* 查询是否有骨龄测量信息 
+					UserExaminationRecord userExaminationRecord = new UserExaminationRecord();
+					userExaminationRecord.setUserId(diagnosis.getUserId());
+					userExaminationRecord.setChildrenMeasureId(diagnosis.getChildrenMeasureId());
+					userExaminationRecord.setExaminationCode(BaseGlobal.EXAMINATION_BONEAGE);// 骨龄检测
+					Map<String, Object> examinationlistMap = userExaminationRecordMapper
+							.getUserExaminationByCode(userExaminationRecord);*/
+					// 没测试骨龄  评价：+  属于矮小,建议测骨龄,完善出生信息和家族信息。
+					if (examinationlistMap == null) {
+						evaluation += "属于矮小,建议测骨龄,完善出生信息和家族信息。";
+						map.put("evaluation", evaluation);
+						dwarfism = false;
+						map.put("dwarfism", dwarfism);
+						map.put("heightWarning", heightWarning);
+						return map;
+					}
+					/* 检测结果 ①骨龄<年龄2岁以上 */
+					if (examinationlistMap != null && examinationlistMap.get("examinationResult") != null && Math
+							.abs((Double.parseDouble(examinationlistMap.get("examinationResult").toString())) - age) > 2) {
+						evaluation += BaseGlobal.HEIGHT_EVALUATION_HYPOEVOLUTISM;
+						map.put("evaluation", evaluation);
+						dwarfism = false;
+						map.put("dwarfism", dwarfism);
+						map.put("heightWarning", heightWarning);
+						return map;
+					}
+
+					/* 青春期延迟几年：女孩12周岁、男孩14周岁,仍无青春发育征象者、家族存在青春期延迟情况 */
+					/* 查询有无青春期发育记录 */
+					UserSecondarySexCharactersRecord userSecondarySexCharactersRecord = new UserSecondarySexCharactersRecord();
+					userSecondarySexCharactersRecord.setUserId(diagnosis.getUserId());
+					List<Map<String, Object>> userSecondarySexCharactersRecordMap = userSecondarySexCharactersRecordMapper
+							.getList(userSecondarySexCharactersRecord);
+
+					/* 查询有无家族延迟 */
+					if ((diagnosis.getSex() == 1 && age >= 14 && userSecondarySexCharactersRecordMap.isEmpty())
+							|| (diagnosis.getSex() == 2 && age >= 12 && userSecondarySexCharactersRecordMap.isEmpty())
+							|| (diagnosis.getChildrenFamily().get("delayedAdolescence") != null && Integer.parseInt(
+									diagnosis.getChildrenFamily().get("delayedAdolescence").toString()) == 1)) {
+						evaluation += BaseGlobal.HEIGHT_EVALUATION_HYPOEVOLUTISM;
+						if (examinationlistMap.isEmpty()) {
+							evaluation += BaseGlobal.HEIGHT_EVALUATION_BONAGE;
+						}
+						map.put("evaluation", evaluation);
+						dwarfism = false;
+						map.put("heightWarning", heightWarning);
+						map.put("dwarfism", dwarfism);
+						return map;
+					}
+				}
+
+				/*
+				 * 1.当前身高百分位数<3百分位数, 
+				 *   4）以上检测都未检查出异常 
+				 *   1 对应成年身高小于遗传身高10cm
+				 */
+				/* 计算遗传身高 */
+				double geneticHeight = diagnosisService.getGeneticHeight(diagnosis);
+				/* 计算成年身高 */
+				double adultHeight = diagnosisService.getAdultHeight(diagnosis);
+
+				if (Math.abs(adultHeight - geneticHeight) > 10) {
+					evaluation += BaseGlobal.HEIGHT_EVALUATION_NANOSOMA_ESSENTIALIS;
+					heightWarning = "孩子属于矮身材,请进一步明确病因。";
+					map.put("evaluation", evaluation);
+					dwarfism = true;
+					map.put("heightWarning", heightWarning);
+					map.put("dwarfism", dwarfism);
+					return map;
+				}
+				
+				evaluation += ",属于矮小";
+				heightWarning = "孩子属于矮身材,请进一步明确病因。";
+				map.put("evaluation", evaluation);
+				dwarfism = true;
+				map.put("heightWarning", heightWarning);
+				map.put("dwarfism", dwarfism);
+				return map;
+			} else if (percentile >= GlobalEnum.Percentile.THREE.getValue()
+					&& percentile < GlobalEnum.Percentile.TwentyFive.getValue()) {
+				/* 2.3百分位数≤当前身高百分位数<25百分位数 */
+				evaluation += BaseGlobal.HEIGHT_EVALUATION_ON_THE_DWARF_SIDE;
+				more += BaseGlobal.HEIGHT_EVALUATION_MORE_DWARF_SIDE;
+				dwarfism = false;
+				map.put("dwarfism", dwarfism);
+				map.put("evaluation", evaluation);
+				map.put("heightWarning", heightWarning);
+				map.put("more", more);
+				return map;
+			} else if (percentile >= GlobalEnum.Percentile.TwentyFive.getValue()
+					&& percentile < GlobalEnum.Percentile.SeventyFive.getValue()) {
+				/* 3.25百分位数≤当前身 */
+				evaluation += BaseGlobal.HEIGHT_EVALUATION_MEDIUM_HEIGHT;
+				more += BaseGlobal.HEIGHT_EVALUATION_MORE_MEDIUM_HEIGHT;
+
+				map.put("evaluation", evaluation);
+				map.put("more", more);
+				dwarfism = false;
+				map.put("heightWarning", heightWarning);
+				map.put("dwarfism", dwarfism);
+				return map;
+
+			} else if (percentile >= GlobalEnum.Percentile.SeventyFive.getValue()
+					&& percentile < GlobalEnum.Percentile.NinetySeven.getValue()) {
+				/* 4.75百分位数≤当前身高百分位数≤97百分位数 */
+				evaluation += BaseGlobal.HEIGHT_EVALUATION_HEIGHT_SIDE;
+				more += BaseGlobal.HEIGHT_EVALUATION_MORE_HEIGHT_SIDE;
+				dwarfism = false;
+				map.put("dwarfism", dwarfism);
+				map.put("evaluation", evaluation);
+				map.put("more", more);
+				map.put("heightWarning", heightWarning);
+				return map;
+
+			} else if (percentile >= GlobalEnum.Percentile.NinetySeven.getValue()) {
+				/* 5.当前身高百分位数≥97百分位数 */
+				evaluation += BaseGlobal.HEIGHT_EVALUATION_OVER_HEIGHT;
+				more += BaseGlobal.HEIGHT_EVALUATION_MORE_OVER_HEIGHT;
+				heightWarning = "孩子属于超高,请监测骨龄,预防性早熟。";
+				dwarfism = false;
+				map.put("dwarfism", dwarfism);
+				map.put("evaluation", evaluation);
+				map.put("more", more);
+				map.put("heightWarning", heightWarning);
+				return map;
+			}
+			// 建议测骨龄 必须是>=3岁
+			if (age < 3){//,建议测骨龄 替换为 空
+				evaluation = evaluation.replaceAll(",建议测骨龄", "");
+			}
+		}
+		
+		dwarfism = false;
+		map.put("dwarfism", dwarfism);
+		map.put("heightWarning", heightWarning);
+		map.put("evaluation", evaluation);
+		return map;
+	}
+
+	/**
+	 * @author: ZhangGuangZhi
+	 * @date: 2018年12月24日
+	 * @param
+	 * @return
+	 * @description: 身高匀称度评价
+	 */
+	public Map<String, Object> getHeightProportionBody(Diagnosis diagnosis) {
+		Map<String, Object> map = new HashMap<>();
+
+		/* 计算当前身高/体重比 */
+		int sd = getWeightSd(diagnosis.getMonthAge(), diagnosis.getHeight(), diagnosis.getWeight(), diagnosis.getSex());
+
+		double age = HeightObesityCalculation.getAge(diagnosis.getMonthAge());
+		String name = diagnosis.name + HeightObesityCalculation.getName(age);
+		String sex = diagnosis.getSex() == 1 ? "男" : "女";
+		String evaluation = String.format(BaseGlobal.WEIGHT_EVALUATION, name, age, sex, diagnosis.getWeight());
+
+		/* 当前体重匀称度评价 */
+		Map<String, Object> shapMap = getWeightShap(sd);
+		map.put("evaluation", evaluation + shapMap.get("evaluation").toString());
+
+		/* 干预效果评价 */
+		/* 查询上次记录体型 */
+		ChildrenMeasure childrenMeasure = new ChildrenMeasure();
+		childrenMeasure.setId(diagnosis.getChildrenMeasureId());
+		childrenMeasure.setUserId(diagnosis.getUserId());
+		Map<String, Object> childrenMeasureMap = childrenMeasureMapper.getNewOne(childrenMeasure);
+		if (childrenMeasureMap == null) {
+			map.put("evaluationOfInterventionEffect", null);
+		} else {
+
+			int monthAge = Integer.parseInt(childrenMeasureMap.get("monthAge").toString());
+			sd = getWeightSd(monthAge, ((Float) childrenMeasureMap.get("currentHeight")).doubleValue(),
+					((Float) childrenMeasureMap.get("currentWeight")).doubleValue(), diagnosis.getSex());
+
+			/* 评价上次记录体型 */
+			Map<String, Object> perShapMap = getWeightShap(sd);
+			map.put("evaluationOfInterventionEffect", getWeightPerEvaluation(
+					(GlobalEnum.Shape) (perShapMap.get("shape")), (GlobalEnum.Shape) shapMap.get("shape")));
+		}
+
+		return map;
+	}
+
+	/**
+	 * @author: ZhangGuangZhi
+	 * @date: 2018年12月24日
+	 * @param
+	 * @return
+	 * @description: 计算成年身高骨龄对比
+	 */
+	public Map<String, Object> getHeightBoneAgeContrast(Diagnosis diagnosis) {
+		Map<String, Object> map = new HashMap<>();
+
+		double height;
+
+		String jgck = "";
+		String evaluation = "";
+		String warning = "";
+
+		/* 骨龄预测 */
+		BoneAgeOrder boneAgeOrder = new BoneAgeOrder();
+		boneAgeOrder.setUserId(diagnosis.getUserId());
+		boneAgeOrder.setStartDate(HeightObesityCalculation.getDayAfter(-31));
+		boneAgeOrder.setEndDate(new Date());
+		/* 查询一月这内骨龄检测工单记录 */
+		Map<String, Object> boneAgeOrderMap = boneAgeOrderMapper.getNewOne(boneAgeOrder);
+		if (boneAgeOrderMap != null && boneAgeOrderMap.get("forecastHeight") != null) {
+			height = (Double.parseDouble(boneAgeOrderMap.get("forecastHeight").toString()) );
+		} else {
+			/* 查询有无填写信息 */
+			/* 查询是否有骨龄测量信息 */
+			UserExaminationRecord userExaminationRecord = new UserExaminationRecord();
+			userExaminationRecord.setChildrenMeasureId(diagnosis.getChildrenMeasureId());
+			userExaminationRecord.setExaminationCode(BaseGlobal.EXAMINATION_BONEAGE);
+			userExaminationRecord.setUserId(diagnosis.getUserId());
+			Map<String, Object> examinationlistMap = userExaminationRecordMapper
+					.getUserExaminationByCode(userExaminationRecord);
+
+			/* 根据输入的骨龄 */
+			if (examinationlistMap != null && examinationlistMap.get("examinationResult") != null) {
+				/* 根据输入的骨龄评测身高 */
+				Diagnosis diagnosisBoneAge = new Diagnosis();
+				diagnosisBoneAge.setSex(diagnosis.getSex());
+				float examinationResult = Float.parseFloat(examinationlistMap.get("examinationResult").toString());
+				float monthAge = examinationResult * 12;
+				int amonthAge = (int) HeightObesityCalculation.round(monthAge, 0);
+				diagnosisBoneAge.setMonthAge(amonthAge);
+				diagnosisBoneAge.setHeight(diagnosis.getHeight());
+
+				// 骨龄预测成年身高
+				height = diagnosisService.getAdultHeight(diagnosisBoneAge);
+				// TODO 根据骨龄预测成年身高 （用骨龄系统的算法 ）
+			} else {
+				/* 年龄预测 */
+				height = diagnosisService.getAdultHeight(diagnosis);
+			}
+			jgck += BaseGlobal.HEIGHT_JGCK;
+		}
+
+		/* 当前成年身高与遗传身高对比 */
+		double age = HeightObesityCalculation.getAge(diagnosis.getMonthAge());
+		String name = diagnosis.name + HeightObesityCalculation.getName(age);
+
+		/* 计算遗传身高 */
+		if (diagnosis.getChildrenFamily() != null && diagnosis.getChildrenFamily().get("fatherHeight") != null
+				&& diagnosis.getChildrenFamily().get("motherHeight") != null) {
+
+			double geneticHeight = diagnosisService.getGeneticHeight(diagnosis);
+			double subHeight = Math.abs(height - geneticHeight);
+
+			if (subHeight > 10) {
+				/* 预警 */
+				evaluation = "对应成年身高与遗传身高相差10cm以上";
+				warning = String.format(BaseGlobal.HEIGHT_GENETIC_WARNING, name);
+			} else {
+
+				String sex = diagnosis.getSex() == 1 ? "男" : "女";
+				evaluation += String.format(BaseGlobal.HEIGHT_GENETICHEIGHT, name, age, sex,
+						/*diagnosis.getChildrenMaternity().get("geneticHeight")*/ geneticHeight, height) + jgck;
+			}
+		}
+
+		map.put("warning", warning);
+		map.put("evaluation", evaluation);
+		return map;
+	}
+
+	/**
+	 * @author: ZhangGuangZhi
+	 * @date: 2018年12月26日
+	 * @param
+	 * @return
+	 * @description: 计算身高生长速度
+	 */
+	public Map<String, Object> getHeightGrowthRateEvaluation(Diagnosis diagnosis) {
+		Map<String, Object> map = new HashMap<>();
+		ChildrenMeasure childrenMeasure = new ChildrenMeasure();
+		childrenMeasure.setId(diagnosis.getChildrenMeasureId());
+		childrenMeasure.setUserId(diagnosis.getUserId());
+
+		List<String> warning = new ArrayList<>();
+		Double differenceHeight = null;
+		String differenceDateTime = null;
+
+		/* 查询上次就诊信息 */
+		Map<String, Object> perChildrenMeasureMap = childrenMeasureMapper.getNewOne(childrenMeasure);
+		if (perChildrenMeasureMap != null) {
+			/* 查询本次就诊信息 */
+			Map<String, Object> childrenMeasureMap = childrenMeasureMapper.getOne(childrenMeasure);
+			/* 计算本次就诊与上次就诊时间差 */
+			/*
+			 * map.put("differenceDateTime",
+			 * HeightObesityCalculation.remainDateToString(perChildrenMeasureMap.get(
+			 * "createDateTime").toString(),
+			 * childrenMeasureMap.get("createDateTime").toString()));
+			 */
+
+			differenceDateTime = HeightObesityCalculation.remainDateToString(
+					perChildrenMeasureMap.get("createDateTime").toString(),
+					childrenMeasureMap.get("createDateTime").toString());
+
+			/* 计算本次就诊与上次就诊身高差 */
+			double height = ((Float) childrenMeasureMap.get("currentHeight")).doubleValue()
+					- ((Float) perChildrenMeasureMap.get("currentHeight")).doubleValue();
+			// map.put("differenceHeight ", height);
+			differenceHeight = height;
+
+			/* 判断是否预警 */
+			/* 1.3月身高增长为0,预警：季度身高增长为0,存在生长迟缓的风险。 */
+			childrenMeasure.setId((Integer) perChildrenMeasureMap.get("id"));
+			Map<String, Object> pPerChildrenMeasureMap = childrenMeasureMapper.getNewOne(childrenMeasure);
+			if (pPerChildrenMeasureMap != null) {
+				double pHeightPlush = ((Float) perChildrenMeasureMap.get("currentHeight")).doubleValue()
+						- ((Float) pPerChildrenMeasureMap.get("currentHeight")).doubleValue();
+				if (height <= 0 && pHeightPlush <= 0) {
+					warning.add(BaseGlobal.HEIGHT_ZERO_WARNING);
+				}
+			}
+
+			double beforHeight = 0;
+			int beforMonthAge = 0;
+			double addHeight = 0;
+
+			// 当前月龄-12最接近的月份身高
+			childrenMeasure.setMonthAge(diagnosis.getMonthAge() - 12);
+			Map<String, Object> beforMeasureMap = childrenMeasureMapper.getRecordByMonthAge(childrenMeasure);
+			if (beforMeasureMap != null) {
+				beforHeight = ((Float) beforMeasureMap.get("currentHeight")).doubleValue();
+				beforMonthAge = Integer.parseInt(beforMeasureMap.get("monthAge").toString());
+				addHeight = ((Float) childrenMeasureMap.get("currentHeight")).doubleValue() - beforHeight;
+			}
+
+			if (diagnosis.getMonthAge() >= 11 || diagnosis.getMonthAge() <= 13) {
+				/* 婴儿期年生长速度<<23cm */
+				/* 当前身高减出生身高 */
+				if (diagnosis.getChildrenMaternity() != null
+						&& diagnosis.getChildrenMaternity().get("birthHeight") != null) {
+					double birthHeight = ((Float) diagnosis.getChildrenMaternity().get("birthHeight")).doubleValue();
+					addHeight = ((Float) childrenMeasureMap.get("currentHeight")).doubleValue() - birthHeight;
+					if (addHeight < 23) {
+						warning.add(BaseGlobal.HEIGHT_BIRTH_WARNING);
+					}
+				}
+			} else if ((diagnosis.getMonthAge() >= 23 || diagnosis.getMonthAge() <= 25)
+					&& (beforMonthAge >= 11 && beforHeight <= 13)) {
+				/* 1-2岁年生长速度<<9cm */
+				if (addHeight < 9) {
+					warning.add(String.format(BaseGlobal.HEIGHT_WARNING_COMM, "1-2", 9));
+				}
+			} else if ((diagnosis.getMonthAge() >= 35 && diagnosis.getMonthAge() <= 37)
+					&& (beforMonthAge >= 23 && beforMonthAge <= 25)) {
+				/* 2-3岁年生长速度<7cm */
+				if (addHeight < 7) {
+					warning.add(String.format(BaseGlobal.HEIGHT_WARNING_COMM, "2-3", 7));
+				}
+			} else if ((diagnosis.getMonthAge() >= 47 && diagnosis.getMonthAge() < 49)
+					&& (beforMonthAge >= 35 && beforMonthAge <= 37)) {
+				/* 3-4岁<6cm */
+				if (addHeight < 6) {
+					warning.add(String.format(BaseGlobal.HEIGHT_WARNING_COMM, "3-4", 6));
+				}
+			} else if (diagnosis.getMonthAge() >= 48) {
+				/* 4-青春期<5cm */
+				/* 4岁以上,年生长速度>8cm以上 */
+				if (diagnosis.getMonthAge() - 11 == beforMonthAge || diagnosis.getMonthAge() - 12 == beforMonthAge
+						|| diagnosis.getMonthAge() - 13 == beforMonthAge) {
+					if (addHeight > 8) {
+						warning.add(BaseGlobal.HEIGHT_OVER_WARNING);
+					}
+				}
+			}
+
+		}
+
+		String evaluation = "";
+		if (differenceDateTime != null && differenceHeight != null) {
+			evaluation = differenceDateTime + ",身高增长了" + differenceHeight + "cm";
+		}
+		map.put("evaluation", evaluation);
+		map.put("warning", warning);
+		return map;
+	}
+
+	/**
+	 * @author: ZhangGuangZhi
+	 * @date: 2018年12月26日
+	 * @param
+	 * @return
+	 * @description: 计算骨龄评价
+	 */
+	public Map<String, Object> getBoneAgeEvaluation(Diagnosis diagnosis) {
+		Map<String, Object> map = new HashMap<>();
+
+		return map;
+	}
+
+	/**
+	 * @author: ZhangGuangZhi
+	 * @date: 2018年12月26日
+	 * @param
+	 * @return
+	 * @description: 计算身高/体重（体重）
+	 */
+	private int getWeightSd(int monthAge, double height, double weight, int sex) {
+		int sd = 0;
+		/* 计算用户身高别体重 */
+		double bmi = diagnosisService.getBMI(height, weight);
+
+		if (monthAge <= 60) {
+			/* 与身高别体重标准比较 */
+			WhoStandardHeightWeightSd whoStandardHeightWeightSd = new WhoStandardHeightWeightSd();
+			whoStandardHeightWeightSd.setSex(sex);
+			whoStandardHeightWeightSd.setStandardValue(new BigDecimal(bmi));
+			if (monthAge >= 0 && monthAge <= 24) {
+				whoStandardHeightWeightSd.setMonthAgeStart(0);
+				whoStandardHeightWeightSd.setMonthAgeEnd(24);
+			} else if (monthAge > 24 && monthAge <= 60) {
+				whoStandardHeightWeightSd.setMonthAgeStart(25);
+				whoStandardHeightWeightSd.setMonthAgeEnd(60);
+			}
+			whoStandardHeightWeightSd.setHeight(new BigDecimal(height));
+			Map<String, Object> whoStandardHeightWeightSdMap = whoStandardHeightWeightSdMapper
+					.getHeightWeightSd(whoStandardHeightWeightSd);
+			if (whoStandardHeightWeightSdMap != null) {
+				sd = Integer.parseInt(whoStandardHeightWeightSdMap.get("sd").toString());
+				if (sd == GlobalEnum.Sd.SUB_THREE.getValue()
+						&& bmi < ((BigDecimal) whoStandardHeightWeightSdMap.get("standardValue")).doubleValue()) {
+					sd = -4;
+				}
+			}
+
+		} else {
+			/* 与bmi比较 */
+			WhoStandardBmiSd whoStandardBmiSd = new WhoStandardBmiSd();
+			whoStandardBmiSd.setSex(sex);
+			whoStandardBmiSd.setMonthAge(monthAge);
+			whoStandardBmiSd.setStandardValue(new BigDecimal(bmi));
+
+			Map<String, Object> whoStandardBmiSdMap = whoStandardBmiSdMapper.getBmiSd(whoStandardBmiSd);
+			if (whoStandardBmiSdMap != null) {
+				sd = Integer.parseInt(whoStandardBmiSdMap.get("sd").toString());
+				if (sd == GlobalEnum.Sd.SUB_THREE.getValue()
+						&& bmi < ((BigDecimal) whoStandardBmiSdMap.get("standardValue")).doubleValue()) {
+					sd = -4;
+				}
+			}
+		}
+		return sd;
+	}
+
+	/**
+	 * @author: ZhangGuangZhi
+	 * @date: 2018年12月24日
+	 * @param
+	 * @return
+	 * @description: 干预效果评价
+	 */
+	private String getWeightPerEvaluation(GlobalEnum.Shape perShape, GlobalEnum.Shape shape) {
+
+		String evaluation = "";
+
+		/* 上次肥胖体型,本次依旧肥胖体型或消瘦 */
+		if (perShape == GlobalEnum.Shape.OVER_WEIGHT && (shape == GlobalEnum.Shape.OVER_WEIGHT
+				|| shape == GlobalEnum.Shape.OBESITY || shape == GlobalEnum.Shape.MODERATE_EMACIATION
+				|| shape == GlobalEnum.Shape.SEVERE_EMACIATION)) {
+			evaluation = BaseGlobal.WEIGHT_EVALUATION_EFFECT_BAD;
+		} else if (perShape == GlobalEnum.Shape.OVER_WEIGHT && shape == GlobalEnum.Shape.NORMAL) {
+			evaluation = BaseGlobal.WEIGHT_EVALUATION_EFFECT_GOOD;
+		} else if (perShape == GlobalEnum.Shape.OBESITY
+				&& (shape == GlobalEnum.Shape.OVER_WEIGHT || shape == GlobalEnum.Shape.NORMAL)) {
+			/* 上次肥胖体型,本次变为超重体型/标准体型 */
+			evaluation = BaseGlobal.WEIGHT_EVALUATION_EFFECT_GOOD;
+		} else if (perShape == GlobalEnum.Shape.OBESITY && (shape == GlobalEnum.Shape.OBESITY
+				|| shape == GlobalEnum.Shape.MODERATE_EMACIATION || shape == GlobalEnum.Shape.SEVERE_EMACIATION)) {
+			/* 上次超重体型,本次超重或肥胖体型 */
+			evaluation = BaseGlobal.WEIGHT_EVALUATION_EFFECT_BAD;
+		} else if (perShape == GlobalEnum.Shape.NORMAL && shape == GlobalEnum.Shape.NORMAL) {
+			evaluation = BaseGlobal.WEIGHT_EVALUATION_EFFECT_GOOD;
+		} else if (perShape == GlobalEnum.Shape.MODERATE_EMACIATION && (shape == GlobalEnum.Shape.OVER_WEIGHT
+				|| shape == GlobalEnum.Shape.OBESITY || shape == GlobalEnum.Shape.MODERATE_EMACIATION
+				|| shape == GlobalEnum.Shape.SEVERE_EMACIATION)) {
+			evaluation = BaseGlobal.WEIGHT_EVALUATION_EFFECT_BAD;
+		} else if (perShape == GlobalEnum.Shape.SEVERE_EMACIATION
+				&& (shape == GlobalEnum.Shape.NORMAL || shape == GlobalEnum.Shape.MODERATE_EMACIATION)) {
+			evaluation = BaseGlobal.WEIGHT_EVALUATION_EFFECT_GOOD;
+		} else if (perShape == GlobalEnum.Shape.SEVERE_EMACIATION && (shape == GlobalEnum.Shape.SEVERE_EMACIATION
+				|| shape == GlobalEnum.Shape.OVER_WEIGHT || shape == GlobalEnum.Shape.OBESITY)) {
+			evaluation = BaseGlobal.WEIGHT_EVALUATION_EFFECT_BAD;
+		} else if (perShape == GlobalEnum.Shape.MODERATE_EMACIATION && shape == GlobalEnum.Shape.MODERATE_EMACIATION) {
+			evaluation = BaseGlobal.WEIGHT_EVALUATION_EFFECT_GOOD;
+		} else if (perShape == GlobalEnum.Shape.MODERATE_EMACIATION
+				&& (shape == GlobalEnum.Shape.MODERATE_EMACIATION || shape == GlobalEnum.Shape.SEVERE_EMACIATION
+						|| shape == GlobalEnum.Shape.OVER_WEIGHT || shape == GlobalEnum.Shape.OBESITY)) {
+			evaluation = BaseGlobal.WEIGHT_EVALUATION_EFFECT_BAD;
+		}
+		return evaluation;
+	}
+
+	/**
+	 * @author: ZhangGuangZhi
+	 * @date: 2018年12月24日
+	 * @param
+	 * @return
+	 * @description: 体型评价
+	 */
+	private Map<String, Object> getWeightShap(int sd) {
+
+		GlobalEnum.Shape shape = GlobalEnum.Shape.NORMAL;/* 正常 */
+		String evaluation = "";
+		Map<String, Object> map = new HashMap<>();
+
+		if (sd >= GlobalEnum.Sd.PLUS_ONE_SD.getValue() && sd < GlobalEnum.Sd.PLUS_TWO_SD.getValue()) {
+			evaluation += BaseGlobal.WEIGHT_EVALUATION_OVERWEIGHT;
+			shape = GlobalEnum.Shape.OVER_WEIGHT;/* 超重 */
+		} else if (sd >= GlobalEnum.Sd.PLUS_TWO_SD.getValue()) {
+			/* 体重/身长（身高）≥M＋2SD */
+			evaluation += BaseGlobal.WEIGHT_EVALUATION_OBESITY;
+			shape = GlobalEnum.Shape.OBESITY;/* 肥胖 */
+		} else if (sd >= GlobalEnum.Sd.SUB_THREE.getValue() && sd < GlobalEnum.Sd.SUB_TWO.getValue()) {
+			/* -3SD≤体重/身长（身高）<-2SD */
+			evaluation += BaseGlobal.WEIGHT_EVALUATION_MODERATE_EMACIATION;
+			shape = GlobalEnum.Shape.MODERATE_EMACIATION;/* 中度消瘦 */
+		} else if (sd < GlobalEnum.Sd.SUB_THREE.getValue()) {
+			/* 体重/身长（身高）<-3SD */
+			evaluation += BaseGlobal.WEIGHT_EVALUATION_SEVERE_EMACIATION;
+			shape = GlobalEnum.Shape.SEVERE_EMACIATION;/* 重度消瘦 */
+		} else if (sd >= GlobalEnum.Sd.SUB_TWO.getValue() && sd < GlobalEnum.Sd.PLUS_ONE_SD.getValue()) {
+			/* -2SD≤体重/身长（身高）<1sd */
+			evaluation += BaseGlobal.WEIGHT_EVALUATION_GOOD;
+			shape = GlobalEnum.Shape.NORMAL;/* 正常 */
+		}
+
+		map.put("shape", shape);
+		map.put("evaluation", evaluation);
+		return map;
+	}
+
+}

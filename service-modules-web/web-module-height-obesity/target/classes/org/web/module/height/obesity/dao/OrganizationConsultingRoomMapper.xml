@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.web.module.height.obesity.dao.OrganizationConsultingRoomMapper">
+  <delete id="delete" parameterType="org.web.module.height.obesity.entity.OrganizationConsultingRoom">
+	DELETE
+	FROM
+		base_organization_consulting_room
+	WHERE
+		id = #{id}
+  </delete>
+  
+  <!-- 添加机构诊室 -->
+  <insert id="insert" parameterType="org.web.module.height.obesity.entity.OrganizationConsultingRoom" keyProperty="id"  useGeneratedKeys="true">
+  	 INSERT INTO base_organization_consulting_room
+     		(organization_id, organization_team_id, name, create_date_time)
+    VALUES
+    	 ( #{organizationId}, #{organizationTeamId},  #{name}, #{createDateTime})
+  </insert>
+  
+  <!-- 修改机构诊室 -->
+  <update id="update" parameterType="org.web.module.height.obesity.entity.OrganizationConsultingRoom">
+    UPDATE base_organization_consulting_room  SET id=#{id}
+	    <if test="organizationId!=null">
+	    , organization_id = #{organizationId}
+	    </if>
+	    <if test="organizationTeamId!=null">
+	    ,  organization_team_id = #{organizationTeamId}
+	    </if>
+	    <if test="name!=null and name!=''">
+	    , name = #{name}
+	    </if>
+    WHERE
+    	 id = #{id}
+  </update>
+  
+  <!-- 机构诊室详情 -->
+  <select id="getOne" parameterType="org.web.module.height.obesity.entity.OrganizationConsultingRoom" resultType="map">
+	 SELECT
+		id,
+		organization_id organizationId,
+		organization_team_id organizationTeamId,
+		`name`,
+		create_date_time createDateTime
+	FROM
+		base_organization_consulting_room
+	<where>
+		<if test="id != null">
+			id = #{id}
+		</if>
+		<if test="organizationId != null">
+			AND organization_id = #{organizationId}
+		</if>
+		<if test="organizationTeamId != null">
+			AND organization_team_id = #{organizationTeamId}
+		</if>
+		<if test="name != null  and name != ''">
+			AND name = #{name}
+		</if>
+	</where>
+  </select>
+  
+  <!-- 某机构下某团队的机构诊室列表 -->
+  <select id="getList" parameterType="org.web.module.height.obesity.entity.OrganizationConsultingRoom" resultType="map">
+	SELECT
+		bocr.id,
+		bocr.`name`,
+		bocr.create_date_time createDateTime
+	FROM
+		base_organization_consulting_room bocr
+	<where>
+		<if test="organizationId!= null">
+			bocr.organization_id = #{organizationId}
+		</if>
+		<if test="organizationTeamId != null">
+			AND bocr.organization_team_id = #{organizationTeamId}
+		</if>
+	</where>
+	ORDER BY bocr.create_date_time DESC
+  </select>
+</mapper>

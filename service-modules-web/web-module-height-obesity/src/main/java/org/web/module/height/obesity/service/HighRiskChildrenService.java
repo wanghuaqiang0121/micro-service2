@@ -1,0 +1,318 @@
+package org.web.module.height.obesity.service;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.annotation.Resource;
+
+import org.springframework.stereotype.Service;
+import org.web.module.height.obesity.dao.ChildrenHighRiskFactorMapper;
+import org.web.module.height.obesity.dao.ChildrenMaternityMapper;
+import org.web.module.height.obesity.entity.ChildrenHighRiskFactor;
+import org.web.module.height.obesity.entity.ChildrenMaternity;
+import org.web.module.height.obesity.entity.Diagnosis;
+import org.web.module.height.obesity.global.BaseGlobal;
+
+/**
+ * Copyright © 2018 四川易迅通健康医疗技术发展有限公司. All rights reserved.
+ *
+ * @author: ZhangGuangZhi
+ * @date: 2018年12月21日
+ * @description: HighRiskChildrenService 高危儿
+ */
+@Service
+public class HighRiskChildrenService {
+
+	@Resource
+	private ChildrenHighRiskFactorMapper childrenHighRiskFactorMapper;
+	@Resource
+	private DiagnosisService diagnosisService;
+	@Resource
+	private ChildrenMaternityMapper childrenMaternityMapper;
+
+	/**
+	 * @author: ZhangGuangZhi
+	 * @date: 2018年12月21日
+	 * @param
+	 * @return
+	 * @description: 高危因素
+	 */
+	public List<Map<String, Object>> getHighRiskChildren(Diagnosis diagnosis) {
+		List<Map<String, Object>> list = new ArrayList<>();
+
+		/* 判断用户是否高危 */
+		ChildrenHighRiskFactor childrenHighRiskFactor = new ChildrenHighRiskFactor();
+		Map<String, Object> resultMap = null;
+
+		/* 查询用户是否有儿童出生信息 */
+		ChildrenMaternity childrenMaternity = new ChildrenMaternity();
+		childrenMaternity.setUserId(diagnosis.getUserId());
+		Map<String, Object> childrenMaternityMap = childrenMaternityMapper.getOne(childrenMaternity);
+		if (childrenMaternityMap == null || childrenMaternityMap.isEmpty()) {
+			Map<String, Object> map = new HashMap<>();
+			map.put("highRiskFactor", "请完善儿童出生信息 ");
+			list.add(map);
+		}
+		/* 1.小于37周为早产儿，早产儿是高危儿，高危因素是：早产 */
+		/* 查询早产标准 */
+		childrenHighRiskFactor.setCode(BaseGlobal.PREMATURE_DELIVERY_LT);
+		Map<String, Object> prematureDeliveryMap = childrenHighRiskFactorMapper.getOne(childrenHighRiskFactor);
+		if (diagnosis.getBirthGestational() != null && diagnosis.getBirthGestational()
+				.doubleValue() < ((Float) prematureDeliveryMap.get("conditionValue")).doubleValue()) {
+			Map<String, Object> map = new HashMap<>();
+			map.put("highRiskFactor", prematureDeliveryMap.get("name"));
+			list.add(map);
+		}
+
+		/* 母亲分娩年龄>=35岁 */
+		childrenHighRiskFactor.setCode(BaseGlobal.MATERNAL_CHILDBIRTH_AGE_GTT);
+		Map<String, Object> maternalChildbirthAgeGttMap = childrenHighRiskFactorMapper.getOne(childrenHighRiskFactor);
+		if (diagnosis.getChildrenFamily() != null && diagnosis.getChildrenFamily().get("motherChildbirthAge") != null
+				&& ((Integer) diagnosis.getChildrenFamily().get("motherChildbirthAge"))
+						.intValue() >= ((Float) maternalChildbirthAgeGttMap.get("conditionValue")).intValue()) {
+			Map<String, Object> map = new HashMap<>();
+			map.put("highRiskFactor", maternalChildbirthAgeGttMap.get("name"));
+			list.add(map);
+		}
+
+		/* 母亲孕前体重bmi */
+		childrenHighRiskFactor.setCode(BaseGlobal.MOTHER_BMI_GT);
+		List<Map<String, Object>> MotherWeightLtMap = childrenHighRiskFactorMapper.getList(childrenHighRiskFactor);
+		if (diagnosis.getChildrenFamily() != null && diagnosis.getChildrenFamily().get("prePregnancyWeight") != null) {
+			/* 计算母亲bmi */
+			double motherBmi = diagnosisService.getBMI(
+					((Float) diagnosis.getChildrenFamily().get("motherHeight")).doubleValue(),
+					((Float) diagnosis.getChildrenFamily().get("prePregnancyWeight")).doubleValue());
+
+			Map<String, Object> map = new HashMap<>();
+			for (Map<String, Object> mapChild : MotherWeightLtMap) {
+				
+				if (mapChild.get("conditionValue")!=null&&motherBmi > ((Float) mapChild.get("conditionValue")).doubleValue()) {
+					map.clear();
+					map.put("highRiskFactor", mapChild.get("name"));
+				}
+			}
+			list.add(map);
+		}
+
+		/* 孕期增重 */
+		if (diagnosis.getChildrenFamily() != null && diagnosis.getChildrenFamily().get("pregnancyWeightAdd") != null) {
+
+			/* 计算母亲bmi */
+			double motherBmi = diagnosisService.getBMI(
+					((Float) diagnosis.getChildrenFamily().get("motherHeight")).doubleValue(),
+					((Float) diagnosis.getChildrenFamily().get("prePregnancyWeight")).doubleValue());
+
+			Map<String, Object> map = new HashMap<>();
+			/* bmi小于18.5 增重超过18 */
+			if (motherBmi < 18.5
+					&& ((Float) diagnosis.getChildrenFamily().get("pregnancyWeightAdd")).doubleValue() > 18) {
+				map.put("highRiskFactor", BaseGlobal.MOTHER_WEIGHT_ADD);
+			}
+			/* BMI: 18.5～24.9：11.5～16.0 kg */
+			else if (motherBmi >= 18.5 && motherBmi <= 24.9
+					&& ((Float) diagnosis.getChildrenFamily().get("pregnancyWeightAdd")).doubleValue() > 16) {
+				map.put("highRiskFactor", BaseGlobal.MOTHER_WEIGHT_ADD);
+			}
+			/* 超重BMI: 25.0～29.9：7.0～11.5 kg */
+			else if (motherBmi >= 25 && motherBmi <= 29.9
+					&& ((Float) diagnosis.getChildrenFamily().get("pregnancyWeightAdd")).doubleValue() > 11.5) {
+				map.put("highRiskFactor", BaseGlobal.MOTHER_WEIGHT_ADD);
+			}
+			/* 肥胖BMI:≥30.0 ：5.0～9.0 kg */
+			else if (motherBmi >= 30
+					&& ((Float) diagnosis.getChildrenFamily().get("pregnancyWeightAdd")).doubleValue() > 9) {
+				map.put("highRiskFactor", BaseGlobal.MOTHER_WEIGHT_ADD);
+			}
+			list.add(map);
+		}
+
+		/* 出生体重 小于2.5kg */
+		childrenHighRiskFactor.setCode(BaseGlobal.BIRTH_WEIGHT_LT);
+		Map<String, Object> birthWeightLtMap = childrenHighRiskFactorMapper.getOne(childrenHighRiskFactor);
+		if (diagnosis.getBirthWeight() != null && diagnosis.getBirthWeight()
+				.doubleValue() < ((Float) birthWeightLtMap.get("conditionValue")).doubleValue()) {
+			Map<String, Object> map = new HashMap<>();
+			map.put("highRiskFactor", birthWeightLtMap.get("name"));
+			list.add(map);
+		}
+
+		/* 出生体重 大于4kg */
+		childrenHighRiskFactor.setCode(BaseGlobal.BIRTH_WEIGHT_GT);
+		Map<String, Object> birthWeightGtMap = childrenHighRiskFactorMapper.getOne(childrenHighRiskFactor);
+		if (diagnosis.getBirthWeight() != null && diagnosis.getBirthWeight()
+				.doubleValue() > ((Float) birthWeightGtMap.get("conditionValue")).doubleValue()) {
+			Map<String, Object> map = new HashMap<>();
+			map.put("highRiskFactor", birthWeightGtMap.get("name"));
+			list.add(map);
+		}
+
+		/* 出生时宫内、产时或产后窒息 */
+		if (diagnosis.getChildrenMaternity() != null
+				&& diagnosis.getChildrenMaternity().get("postpartumAsphyxia") != null
+				&& ((Integer) diagnosis.getChildrenMaternity().get("postpartumAsphyxia")).intValue() == 1) {
+
+			childrenHighRiskFactor.setCode(BaseGlobal.POSTPARTUM_ASPHYXIA);
+			resultMap = childrenHighRiskFactorMapper.getOne(childrenHighRiskFactor);
+
+			Map<String, Object> map = new HashMap<>();
+			map.put("highRiskFactor", resultMap.get("name"));
+			list.add(map);
+		}
+
+		/* 患有缺氧缺血性脑病 */
+		if (diagnosis.getChildrenMaternity() != null && diagnosis.getChildrenMaternity().get("aie") != null
+				&& ((Integer) diagnosis.getChildrenMaternity().get("aie")).intValue() == 1) {
+
+			childrenHighRiskFactor.setCode(BaseGlobal.AIE);
+			resultMap = childrenHighRiskFactorMapper.getOne(childrenHighRiskFactor);
+
+			Map<String, Object> map = new HashMap<>();
+			map.put("highRiskFactor", resultMap.get("name"));
+			list.add(map);
+		}
+
+		/* 颅内出血 */
+		if (diagnosis.getChildrenMaternity() != null && diagnosis.getChildrenMaternity().get("encephalopathy") != null
+				&& ((Integer) diagnosis.getChildrenMaternity().get("encephalopathy")).intValue() == 1) {
+
+			childrenHighRiskFactor.setCode(BaseGlobal.ENCEPHALOPATHY);
+			resultMap = childrenHighRiskFactorMapper.getOne(childrenHighRiskFactor);
+
+			Map<String, Object> map = new HashMap<>();
+			map.put("highRiskFactor", resultMap.get("name"));
+			list.add(map);
+		}
+
+		/* 患有高胆红素血症 */
+		if (diagnosis.getChildrenMaternity() != null
+				&& diagnosis.getChildrenMaternity().get("hyperbilirubinemia") != null
+				&& ((Integer) diagnosis.getChildrenMaternity().get("hyperbilirubinemia")).intValue() == 1) {
+
+			childrenHighRiskFactor.setCode(BaseGlobal.HYPERBILIRUBINEMIA);
+			resultMap = childrenHighRiskFactorMapper.getOne(childrenHighRiskFactor);
+
+			Map<String, Object> map = new HashMap<>();
+			map.put("highRiskFactor", resultMap.get("name"));
+			list.add(map);
+		}
+
+		/* 患有新生儿肺炎 */
+		if (diagnosis.getChildrenMaternity() != null
+				&& diagnosis.getChildrenMaternity().get("pneumoniaOfNewborn") != null
+				&& ((Integer) diagnosis.getChildrenMaternity().get("pneumoniaOfNewborn")).intValue() == 1) {
+
+			childrenHighRiskFactor.setCode(BaseGlobal.PNEUMONIA_OF_NEWBORN);
+			resultMap = childrenHighRiskFactorMapper.getOne(childrenHighRiskFactor);
+
+			Map<String, Object> map = new HashMap<>();
+			map.put("highRiskFactor", resultMap.get("name"));
+			list.add(map);
+		}
+
+		/* 患有新生儿败血症 */
+		if (diagnosis.getChildrenMaternity() != null
+				&& diagnosis.getChildrenMaternity().get("neonatalSepticemia") != null
+				&& ((Integer) diagnosis.getChildrenMaternity().get("neonatalSepticemia")).intValue() == 1) {
+
+			childrenHighRiskFactor.setCode(BaseGlobal.NEONATAL_SEPTICEMIA);
+			resultMap = childrenHighRiskFactorMapper.getOne(childrenHighRiskFactor);
+
+			Map<String, Object> map = new HashMap<>();
+			map.put("highRiskFactor", resultMap.get("name"));
+			list.add(map);
+		}
+
+		/* 患有其他新生儿严重感染疾病 */
+		if (diagnosis.getChildrenMaternity() != null
+				&& diagnosis.getChildrenMaternity().get("severeInfectiousDiseases") != null
+				&& ((Integer) diagnosis.getChildrenMaternity().get("severeInfectiousDiseases")).intValue() == 1) {
+
+			childrenHighRiskFactor.setCode(BaseGlobal.SEVERE_INFECTIOUS_DISEASES);
+			resultMap = childrenHighRiskFactorMapper.getOne(childrenHighRiskFactor);
+
+			Map<String, Object> map = new HashMap<>();
+			map.put("highRiskFactor", resultMap.get("name"));
+			list.add(map);
+		}
+
+		/* 患有影响生活能力的出生缺陷疾病 */
+		if (diagnosis.getChildrenMaternity() != null && diagnosis.getChildrenMaternity().get("birthDefect") != null
+				&& ((Integer) diagnosis.getChildrenMaternity().get("birthDefect")).intValue() == 1) {
+
+			childrenHighRiskFactor.setCode(BaseGlobal.BIRTH_DEFECT);
+			resultMap = childrenHighRiskFactorMapper.getOne(childrenHighRiskFactor);
+
+			Map<String, Object> map = new HashMap<>();
+			map.put("highRiskFactor", resultMap.get("name"));
+			list.add(map);
+		}
+
+		/* 患有遗传代谢性疾病 */
+		if (diagnosis.getChildrenMaternity() != null
+				&& diagnosis.getChildrenMaternity().get("hereditaryDisease") != null
+				&& ((Integer) diagnosis.getChildrenMaternity().get("hereditaryDisease")).intValue() == 1) {
+
+			childrenHighRiskFactor.setCode(BaseGlobal.HEREDITARY_DISEASE);
+			resultMap = childrenHighRiskFactorMapper.getOne(childrenHighRiskFactor);
+
+			Map<String, Object> map = new HashMap<>();
+			map.put("highRiskFactor", resultMap.get("name"));
+			list.add(map);
+		}
+
+		/* 母亲有异常妊娠及分娩史 */
+		if (diagnosis.getChildrenMaternity() != null
+				&& diagnosis.getChildrenMaternity().get("motherAbnormalPregnancy") != null
+				&& ((Integer) diagnosis.getChildrenMaternity().get("motherAbnormalPregnancy")).intValue() == 1) {
+
+			childrenHighRiskFactor.setCode(BaseGlobal.MOTHER_ABNORMAL_PREGNANCY);
+			resultMap = childrenHighRiskFactorMapper.getOne(childrenHighRiskFactor);
+
+			Map<String, Object> map = new HashMap<>();
+			map.put("highRiskFactor", resultMap.get("name"));
+			list.add(map);
+		}
+
+		/* 母亲患有残疾（视、听、智力、肢体、精神）并影响养育能力 */
+		if (diagnosis.getChildrenMaternity() != null && diagnosis.getChildrenMaternity().get("motherDisability") != null
+				&& ((Integer) diagnosis.getChildrenMaternity().get("motherDisability")).intValue() == 1) {
+
+			childrenHighRiskFactor.setCode(BaseGlobal.MOTHER_DISABILITY);
+			resultMap = childrenHighRiskFactorMapper.getOne(childrenHighRiskFactor);
+
+			Map<String, Object> map = new HashMap<>();
+			map.put("highRiskFactor", resultMap.get("name"));
+			list.add(map);
+		}
+
+		/* 母亲妊娠糖尿病 */
+		if (diagnosis.getChildrenMaternity() != null
+				&& diagnosis.getChildrenMaternity().get("motherGestationalDabetes") != null
+				&& ((Integer) diagnosis.getChildrenMaternity().get("motherGestationalDabetes")).byteValue() == 1) {
+
+			childrenHighRiskFactor.setCode(BaseGlobal.MOTHER_GESTATIONAL_DIABETES);
+			resultMap = childrenHighRiskFactorMapper.getOne(childrenHighRiskFactor);
+
+			Map<String, Object> map = new HashMap<>();
+			map.put("highRiskFactor", resultMap.get("name"));
+			list.add(map);
+		}
+
+		/* 母亲妊娠高血压 */
+		if (diagnosis.getChildrenMaternity() != null
+				&& diagnosis.getChildrenMaternity().get("motherGestationalHypertension") != null
+				&& ((Integer) diagnosis.getChildrenMaternity().get("motherGestationalHypertension")).byteValue() == 1) {
+
+			childrenHighRiskFactor.setCode(BaseGlobal.MOTHER_GESTATIONAL_HYPERTENSION);
+			resultMap = childrenHighRiskFactorMapper.getOne(childrenHighRiskFactor);
+
+			Map<String, Object> map = new HashMap<>();
+			map.put("highRiskFactor", resultMap.get("name"));
+			list.add(map);
+		}
+		return list;
+	}
+}

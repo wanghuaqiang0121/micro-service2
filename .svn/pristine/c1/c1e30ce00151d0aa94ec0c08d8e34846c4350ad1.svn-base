@@ -1,0 +1,17 @@
+package org.web.module.bone.age.dao;
+
+import java.util.List;
+import org.service.core.dao.IBaseMapper;
+import org.web.module.bone.age.domain.BaseAgeOrder;
+
+public interface BaseAgeOrderMapper extends IBaseMapper {
+    int deleteByPrimaryKey(Integer id);
+
+    int insert(BaseAgeOrder record);
+
+    BaseAgeOrder selectByPrimaryKey(Integer id);
+
+    List<BaseAgeOrder> selectAll();
+
+    int updateByPrimaryKey(BaseAgeOrder record);
+}

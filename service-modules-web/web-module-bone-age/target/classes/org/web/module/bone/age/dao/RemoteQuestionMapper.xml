@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.web.module.bone.age.dao.RemoteQuestionMapper">
+  
+  <delete id="delete" parameterType="org.web.module.bone.age.domain.RemoteQuestion">
+    delete from base_remote_question
+    where id = #{id}
+  </delete>
+  
+  <insert id="insert" parameterType="org.web.module.bone.age.domain.RemoteQuestion" useGeneratedKeys="true" keyProperty="id">
+    insert into base_remote_question (launch_organization_user_id, launch_organization_user_name, 
+      content, type, create_time, 
+      base_remote_bone_age_order_id)
+    values ( #{launchOrganizationUserId}, #{launchOrganizationUserName}, 
+      #{content}, #{type}, #{createTime}, 
+      #{baseRemoteBoneAgeOrderId})
+  </insert>
+  
+  <update id="update" parameterType="org.web.module.bone.age.domain.RemoteQuestion">
+    update base_remote_question
+    set launch_organization_user_id = #{launchOrganizationUserId},
+      launch_organization_user_name = #{launchOrganizationUserName},
+      content = #{content},
+      type = #{type},
+      create_time = #{createTime},
+      base_remote_bone_age_order_id = #{baseRemoteBoneAgeOrderId}
+    where id = #{id}
+  </update>
+  <select id="getOne"  parameterType="org.web.module.bone.age.domain.RemoteQuestion" resultType="map">
+    select id, launch_organization_user_id, launch_organization_user_name, content, type, 
+    create_time, base_remote_bone_age_order_id
+    from base_remote_question
+    where id = #{id}
+  </select>
+  
+  <!--根据远程阅片骨龄工单id查看疑问列表，按时间降序（取前三条）  -->
+  <select id="getList"  parameterType="org.web.module.bone.age.domain.RemoteQuestion" resultType="map">
+	SELECT
+		id,
+		launch_organization_user_id launchOrganizationUserId,
+		launch_organization_user_name launchOrganizationUserName,
+		content,
+		type,
+		create_time createTime,
+		base_remote_bone_age_order_id baseRemoteBoneAgeOrderId
+	FROM
+		base_remote_question
+	WHERE
+		base_remote_bone_age_order_id = #{id}
+	ORDER BY
+		create_time DESC
+	<!-- LIMIT 3 -->
+  </select>
+  
+  
+  <select id="getIsAnswer"  parameterType="org.web.module.bone.age.domain.RemoteQuestion" resultType="map">
+  SELECT
+		id,
+		content,
+		type,
+		create_time createTime,
+		base_remote_bone_age_order_id baseRemoteBoneAgeOrderId
+	FROM
+		base_remote_question
+	WHERE
+		base_remote_bone_age_order_id = #{id} 
+	ORDER BY
+		create_time DESC
+   LIMIT 1
+  </select>
+  
+  
+  <select id="getOrganizationUserName" parameterType="org.web.module.bone.age.domain.RemoteQuestion" resultType="map">
+	SELECT
+		bou.id,
+		bou.`name`
+	FROM
+		base_organization_user bou
+	WHERE
+		bou.id =#{id}
+  </select>
+</mapper>

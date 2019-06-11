@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.wechat.module.height.obesity.dao.ChoiceQuestionMapper">
+
+	<delete id="delete" parameterType="org.wechat.module.height.obesity.entity.ChoiceQuestion">
+		DELETE
+		FROM
+		base_choice_question
+		WHERE
+		id = #{id}
+	</delete>
+
+	<insert id="insert" parameterType="org.wechat.module.height.obesity.entity.ChoiceQuestion" keyProperty="id"  useGeneratedKeys="true">
+		INSERT INTO base_choice_question
+		(month_age_start, month_age_end,title, code, name, type, sort, create_date_time )
+		VALUES
+		( #{monthAgeStart}, #{monthAgeEnd},  #{title}, #{code}, #{name}, #{type}, #{sort}, #{createDateTime} )
+	</insert>
+
+	<update id="update" parameterType="org.wechat.module.height.obesity.entity.ChoiceQuestion">
+		UPDATE base_choice_question SET id=#{id}
+		<if test="monthAgeStart!=null">
+			,month_age_start = #{monthAgeStart}
+		</if>
+		<if test="monthAgeEnd!=null">
+			,month_age_end = #{monthAgeEnd}
+		</if>
+		<if test="title!=null and title!=''">
+			,title = #{title}
+		</if>
+		<if test="code!=null and code!=''">
+			, code = #{code}
+		</if>
+		<if test="name!=null and name!=''">
+			, name = #{name}
+		</if>
+		<if test="type!=null">
+			,type = #{type}
+		</if>
+		<if test="sort!=null">
+			,sort = #{sort}
+		</if>
+		WHERE
+		id = #{id}
+	</update>
+
+	<select id="getOne" parameterType="org.wechat.module.height.obesity.entity.ChoiceQuestion"  resultType="map">
+		SELECT
+		id,
+		month_age_start monthAgeStart,
+		month_age_end monthAgeEnd,
+		title,
+		`code`,
+		`name`,
+		type,
+		sort,
+		create_date_time createDateTime
+		FROM
+		base_choice_question
+		WHERE
+		id = #{id}
+	</select>
+
+	<resultMap type="map" id="questionMap">
+		<result column="id" property="id"/>
+		<collection property="choiceItems" column="{id=id,monthAge=monthAge}" javaType="list" select="getChoiceItem"/>
+	</resultMap>
+
+	<!-- 根据月龄查询问题和选项列表 -->
+	<select id="getList" parameterType="org.wechat.module.height.obesity.entity.ChoiceQuestion"  resultMap="questionMap">
+		SELECT
+		bcq.id,
+		bcq.month_age_start monthAgeStart,
+		bcq.month_age_end monthAgeEnd,
+		bcq.title,
+		#{monthAge} monthAge,
+		bcq.`code`,
+		bcq.`name`,
+		bcq.type,
+		bcq.sort,
+		bcq.create_date_time createDateTime
+		FROM
+		base_choice_question bcq
+		WHERE bcq.month_age_start &lt;= #{monthAge} AND bcq.month_age_end &gt;= #{monthAge}
+		<if test="code != null">
+			AND bcq.`code` = #{code}
+		</if>
+		ORDER BY bcq.sort
+	</select>
+	<!-- 选项列表 -->
+	<select id="getChoiceItem" parameterType="java.util.Map" resultType="map">
+		SELECT
+		bci.id,
+		bci.item,
+		(
+		if( (start_month_age &lt;= #{monthAge} and end_month_age &gt;= #{monthAge}), true, false)
+		) isDefaultItem,
+		bci.sort
+		FROM
+		base_choice_item bci
+		INNER JOIN base_choice_question bcq ON bci.choice_question_id =bcq.id
+		WHERE bci.choice_question_id = #{id}
+	</select>
+
+	<resultMap type="map" id="selectedQuestionMap">
+		<result column="id" property="id"/>
+		<collection property="choiceItems" column="{id=id,monthAge=monthAge,childrenMeasureId=childrenMeasureId,choiceQuestionId=choiceQuestionId}" javaType="list" select="getSelectedChoiceItem"/>
+	</resultMap>
+	<!-- 根据儿童今天已选择的问题和选项列表 -->
+	<select id="getSelectedList" parameterType="org.wechat.module.height.obesity.entity.ChoiceQuestion"  resultMap="selectedQuestionMap">
+		SELECT
+		bcq.id,
+		bcq.month_age_start monthAgeStart,
+		bcq.month_age_end monthAgeEnd,
+		bcq.title,
+		bucr.children_measure_id childrenMeasureId,
+		bucr.choice_question_id  choiceQuestionId,
+		#{monthAge} monthAge,
+		bcq.`code`,
+		bcq.`name`,
+		bcq.type,
+		bcq.sort,
+		bcq.create_date_time createDateTime
+		FROM
+		base_choice_question bcq
+		INNER JOIN base_user_choice_record bucr ON bucr.choice_question_id = bcq.id
+		WHERE to_days(bucr.create_date_time)= to_days(now()) AND  bucr.user_id=#{userId}
+	</select>
+	<!-- 选项列表 -->
+	<select id="getSelectedChoiceItem" parameterType="java.util.Map" resultType="map">
+	SELECT
+		bci.id,
+		item,
+		sort
+	FROM
+		base_user_choice_record bucr
+	INNER JOIN base_choice_item bci ON bci.id =bucr.choice_item_id
+	WHERE bucr.choice_question_id = #{choiceQuestionId} AND to_days(bucr.create_date_time)= to_days(now()) AND  bucr.user_id=#{userId}
+  </select>
+	<select id="getQuestionCount" parameterType="org.wechat.module.height.obesity.entity.ChoiceQuestion" resultType="int">
+		SELECT
+		COUNT(*)
+		FROM
+		base_choice_question bcq
+		WHERE bcq.month_age_start &lt;= #{monthAge} AND bcq.month_age_end &gt;= #{monthAge} AND bcq.code=1 OR bcq.code=2 or bcq.code=3 OR bcq.code=6
+	</select>
+	<select id="getRecordCount" parameterType="org.wechat.module.height.obesity.entity.ChoiceQuestion" resultType="int">
+		SELECT
+		COUNT(*)
+		FROM
+		base_user_choice_record bucr
+		WHERE to_days(bucr.create_date_time)= to_days(now()) AND  bucr.user_id=#{userId} AND bucr.organization_user_id IS NULL AND bucr.children_measure_id IS NULL
+	</select>
+	<select id="getRecord" parameterType="org.wechat.module.height.obesity.entity.ChoiceQuestion"  resultType="map">
+		SELECT
+		distinct date(create_date_time) createDateTime
+		FROM
+		base_user_choice_record bucr
+		WHERE
+		YEARWEEK(date_format(create_date_time,'%Y-%m-%d')) = YEARWEEK(now()) AND  bucr.user_id=#{userId}
+	</select>
+	<select id="getRecordDays" parameterType="org.wechat.module.height.obesity.entity.ChoiceQuestion" resultType="int">
+		SELECT
+		COUNT(distinct  date(create_date_time))
+		FROM
+		base_user_choice_record bucr
+		WHERE bucr.create_date_time &lt;= #{createDateTime} AND bucr.user_id=#{userId}
+	</select>
+</mapper>

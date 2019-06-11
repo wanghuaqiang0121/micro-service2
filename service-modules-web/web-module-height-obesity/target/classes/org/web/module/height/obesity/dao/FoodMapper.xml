@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.web.module.height.obesity.dao.FoodMapper">
+
+  <delete id="delete" parameterType="org.web.module.height.obesity.entity.Food">
+	DELETE
+	FROM
+		base_food
+	WHERE
+		id = #{id}  
+  </delete>
+  
+  <insert id="insert" parameterType="org.web.module.height.obesity.entity.Food" keyProperty="id"  useGeneratedKeys="true">
+    INSERT INTO base_food (name)
+    VALUES (#{name})
+  </insert>
+  
+  <update id="update" parameterType="org.web.module.height.obesity.entity.Food">
+  UPDATE   base_food SET id=#{id}
+	  <if test="name!=null and name!=''">
+	    , name = #{name}
+	  </if>
+    WHERE
+    	 id = #{id}
+  </update>
+  
+  <select id="select" parameterType="org.web.module.height.obesity.entity.Food" resultType="map">
+	SELECT
+		id,
+		`name`
+	FROM
+		base_food
+	WHERE
+		id = #{id}
+  </select>
+  
+  <select id="selectAll" parameterType="org.web.module.height.obesity.entity.Food" resultType="map">
+	SELECT
+		id,
+		`name`
+	FROM
+		base_food
+  </select>
+</mapper>

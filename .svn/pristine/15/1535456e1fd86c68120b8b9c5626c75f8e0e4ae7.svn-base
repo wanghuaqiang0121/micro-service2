@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.web.module.bone.age.dao.OrganizationChoosedReadFilmDoctorMapper">
+  
+  <delete id="delete" parameterType="org.web.module.bone.age.domain.OrganizationChoosedReadFilmDoctor">
+    delete from base_organization_choosed_read_film_doctor
+    where id = #{id}
+  </delete>
+  
+  <insert id="insert" parameterType="org.web.module.bone.age.domain.OrganizationChoosedReadFilmDoctor"  useGeneratedKeys="true" keyProperty="id">
+    insert into base_organization_choosed_read_film_doctor ( organization_id, read_film_doctor_price_id,  create_time)
+    values (#{organizationId}, #{readFilmDoctorPriceId},  #{createTime})
+  </insert>
+  
+  <update id="update" parameterType="org.web.module.bone.age.domain.OrganizationChoosedReadFilmDoctor">
+    update base_organization_choosed_read_film_doctor
+    set organization_id = #{organizationId},
+      read_film_doctor_price_id = #{readFilmDoctorPriceId},
+      create_time = #{createTime}
+    where id = #{id}
+  </update>
+  
+  <select id="getOne" parameterType="org.web.module.bone.age.domain.OrganizationChoosedReadFilmDoctor" resultType="map">
+    select id, organization_id, read_film_doctor_price_id, create_time
+    from base_organization_choosed_read_film_doctor
+    where read_film_doctor_price_id = #{readFilmDoctorPriceId}
+  </select>
+  
+  <select id="getRepeat" parameterType="org.web.module.bone.age.domain.OrganizationChoosedReadFilmDoctor" resultType="map">
+    select id, organization_id, read_film_doctor_price_id, create_time
+    from base_organization_choosed_read_film_doctor
+    where read_film_doctor_price_id = #{readFilmDoctorPriceId} and organization_id=#{organizationId}
+  </select>
+  
+  <select id="getList"  parameterType="org.web.module.bone.age.domain.OrganizationChoosedReadFilmDoctor" resultType="map">
+SELECT 
+	bocrfd.organization_id organizationId,
+    bo.`name` organizationName,
+	brfdp.doctor_id doctorId,
+	bou.`name` doctorName,
+	brfdp.price,
+	bou.photo,
+	bou.remark organizationUserRemark,
+	brfdp.id 
+ FROM base_read_film_doctor_price  brfdp
+LEFT JOIN base_organization_choosed_read_film_doctor bocrfd ON bocrfd.read_film_doctor_price_id = brfdp.id AND bocrfd.organization_id = 3
+LEFT JOIN base_organization_user bou ON brfdp.doctor_id = bou.id
+LEFT JOIN base_doctor_organization_department_duty bdodd ON bdodd.organization_user_id = bou.id
+LEFT JOIN base_organization bo ON bdodd.organization_id = bo.id
+<where>
+ 	<if test="doctorName!=null and doctorName!=''">
+  		bou.`name`   like CONCAT(CONCAT('%', #{doctorName}), '%')
+  		or bou.`phone`   like CONCAT(CONCAT('%', #{doctorName}), '%')
+  		or bou.certificate_number   like CONCAT(CONCAT('%', #{doctorName}), '%')
+  </if>
+</where>
+ORDER BY bocrfd.num DESC
+  </select>
+  
+  <select id="getReadFilmDoctorPriceList" parameterType="org.web.module.bone.age.domain.OrganizationChoosedReadFilmDoctor" resultType="map">
+	SELECT
+	  	bdodd.organization_id organizationId,
+	  	bo.`name` organizationName,
+		brfdp.doctor_id doctorId,
+		brfdp.doctor_name doctorName,
+		brfdp.price,
+	  	bou.photo,
+		bou.remark organizationUserRemark,
+		brfdp.`status`,
+		brfdp.remark,
+		brfdp.id
+	FROM
+		base_read_film_doctor_price brfdp
+	INNER JOIN base_organization_user bou ON brfdp.doctor_id = bou.id
+	LEFT JOIN base_doctor_organization_department_duty bdodd ON bdodd.organization_user_id = bou.id
+	LEFT JOIN base_organization bo ON bdodd.organization_id = bo.id
+	GROUP BY brfdp.id
+</select>
+</mapper>

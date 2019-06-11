@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.wechat.module.height.obesity.dao.WhoStandardWeightSdTempMapper">
+  <delete id="delete" parameterType="org.wechat.module.height.obesity.entity.WhoStandardWeightSdTemp">
+    delete from who_standard_weight_sd_temp
+    where id = #{id}
+  </delete>
+  <insert id="insert" parameterType="org.wechat.module.height.obesity.entity.WhoStandardWeightSdTemp">
+    insert into who_standard_weight_sd_temp (id, month_age, sex, 
+      sub_three_sd, sub_two_sd, sub_one_sd, 
+      median_sd, plus_one_sd, plus_two_sd, 
+      plus_three_sd)
+    values (#{id}, #{monthAge}, #{sex}, 
+      #{subThreeSd}, #{subTwoSd}, #{subOneSd}, 
+      #{medianSd}, #{plusOneSd}, #{plusTwoSd}, 
+      #{plusThreeSd})
+  </insert>
+  <update id="update" parameterType="org.wechat.module.height.obesity.entity.WhoStandardWeightSdTemp">
+    update who_standard_weight_sd_temp
+    set month_age = #{monthAge},
+      sex = #{sex},
+      sub_three_sd = #{subThreeSd},
+      sub_two_sd = #{subTwoSd},
+      sub_one_sd = #{subOneSd},
+      median_sd = #{medianSd},
+      plus_one_sd = #{plusOneSd},
+      plus_two_sd = #{plusTwoSd},
+      plus_three_sd = #{plusThreeSd}
+    where id = #{id}
+  </update>
+  <select id="getOne" parameterType="org.wechat.module.height.obesity.entity.WhoStandardWeightSdTemp" resultType="map">
+    select id, month_age, sex, sub_three_sd, sub_two_sd, sub_one_sd, median_sd, plus_one_sd, 
+    plus_two_sd, plus_three_sd
+    from who_standard_weight_sd_temp
+    where id = #{id}
+  </select>
+  <select id="getList" parameterType="org.wechat.module.height.obesity.entity.WhoStandardWeightSdTemp" resultType="map">
+    select id, month_age, sex, sub_three_sd, sub_two_sd, sub_one_sd, median_sd, plus_one_sd, 
+    plus_two_sd, plus_three_sd
+    from who_standard_weight_sd_temp
+  </select>
+</mapper>

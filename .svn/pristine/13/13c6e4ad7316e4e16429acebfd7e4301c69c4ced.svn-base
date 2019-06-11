@@ -1,0 +1,74 @@
+package org.web.module.bone.age.service;
+
+import java.util.List;
+import java.util.Map;
+
+import javax.annotation.Resource;
+
+import org.springframework.stereotype.Service;
+import org.web.module.bone.age.dao.ReadFilmRechargeRecordMapper;
+import org.web.module.bone.age.domain.ReadFilmRechargeRecord;
+
+@Service
+public class ReadFilmRechargeRecordService {
+	@Resource
+	private ReadFilmRechargeRecordMapper mapper;
+
+	public List<Map<String, Object>> getList(ReadFilmRechargeRecord readFilmRechargeRecord) {
+		return mapper.getList(readFilmRechargeRecord);
+	}
+
+	public Map<String, Object> getOne(ReadFilmRechargeRecord readFilmRechargeRecord) {
+		return mapper.getOne(readFilmRechargeRecord);
+	}
+
+	public int update(ReadFilmRechargeRecord readFilmRechargeRecord) {
+		return mapper.update(readFilmRechargeRecord);
+	}
+
+	public int insert(ReadFilmRechargeRecord readFilmRechargeRecord) {
+		return mapper.insert(readFilmRechargeRecord);
+	}
+
+	public Map<String, Object> getRepeat(ReadFilmRechargeRecord readFilmRechargeRecord) {
+		return mapper.getRepeat(readFilmRechargeRecord);
+	}
+	
+	public List<Map<String, Object>> getOrganizationList(ReadFilmRechargeRecord readFilmRechargeRecord){
+		return mapper.getOrganizationList(readFilmRechargeRecord);
+	}
+
+	/** 
+	 * @author: WangHuaQiang
+	 * @date: 2019年3月11日
+	 * @param readFilmRechargeRecord
+	 * @return
+	 * @description: 获取机构最新一条充值记录
+	 */
+	public Map<String, Object> getNewOne(ReadFilmRechargeRecord readFilmRechargeRecord) {
+		return mapper.getNewOne(readFilmRechargeRecord);
+	}
+
+	/** 
+	 * @author: WangHuaQiang
+	 * @date: 2019年3月11日
+	 * @param readFilmRechargeRecord
+	 * @return
+	 * @description: 锁定次数
+	 */
+	public int lockMoney(ReadFilmRechargeRecord readFilmRechargeRecord) {
+		return mapper.lockMoney(readFilmRechargeRecord);
+	}
+
+	/** 
+	 * @author: WangHuaQiang
+	 * @date: 2019年3月11日
+	 * @param readFilmRechargeRecord
+	 * @return
+	 * @description: 扣费
+	 */
+	public int deductionFee(ReadFilmRechargeRecord readFilmRechargeRecord) {
+		return mapper.deductionFee(readFilmRechargeRecord);
+	}
+
+}

@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.web.module.base.dao.data.base.ServiceMapper">
+	<!-- 新增服务 -->
+	<insert id="insert" parameterType="org.web.module.base.domain.data.base.Service" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO base_service ( service_type_id, `name`, `code`, `index`, create_date,remark )
+		VALUES (#{serviceTypeId}, #{name}, #{code}, #{index}, #{createDate}, #{remark} )
+	</insert>
+
+	<!-- 修改服务 -->
+	<update id="update" parameterType="org.web.module.base.domain.data.base.Service">
+		UPDATE base_service SET id = #{id}
+		<if test="serviceTypeId !=null">
+			,service_type_id = #{serviceTypeId}
+		</if>
+		<if test="name !=null and name !=''">
+			,`name` = #{name}
+		</if>
+		<if test="code !=null and code !=''">
+			,`code` = #{code}
+		</if>
+		<if test="index !=null">
+			,`index` = #{index}
+		</if>
+		<if test="remark!=null ">
+			,remark = #{remark}
+		</if>
+		WHERE id = #{id}
+	</update>
+
+	<select id="getRepeat" parameterType="org.web.module.base.domain.data.base.Service" resultType="map">
+		SELECT
+			id,
+			service_type_id serviceTypeId,
+			`name`,
+			`code`
+		FROM
+			base_service
+		WHERE
+			code = #{code}
+	</select>
+	<select id="getOne" parameterType="org.web.module.base.domain.data.base.Service" resultType="map">
+		SELECT
+			id,
+			service_type_id serviceTypeId,
+			`name`,
+			`code`,
+			`index`,
+			create_date createDate,
+			remark
+		FROM
+			base_service
+		WHERE
+			id = #{id}
+	</select>
+
+	<!-- 服务列表 -->
+	<select id="getList" parameterType="org.web.module.base.domain.data.base.Service" resultType="map">
+		SELECT
+			s.id,
+			s.service_type_id serviceTypeId,
+			s.`name`,
+			s.`code`,
+			s.`index`,
+			s.create_date createDate,
+			s.remark,
+			st.`name` serviceTypeName,
+			st.`code` serviceTypeCode,
+			st.`explain` serviceTypeExplain
+		FROM
+			base_service s
+		LEFT JOIN base_service_type st ON st.id = s.service_type_id
+		<where>
+			<if test="serviceTypeId !=null">
+				s.service_type_id = #{serviceTypeId}
+			</if>
+			<if test="name != null and name != ''">
+				and s.`name` like CONCAT(CONCAT('%', #{name}), '%')
+			</if>
+			<if test="code != null and code != ''">
+				and s.`code` like CONCAT(CONCAT('%', #{code}), '%')
+			</if>
+		</where>
+	</select>
+</mapper>

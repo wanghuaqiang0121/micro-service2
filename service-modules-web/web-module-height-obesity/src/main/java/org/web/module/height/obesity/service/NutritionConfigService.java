@@ -1,0 +1,36 @@
+package org.web.module.height.obesity.service;
+
+import java.util.List;
+import java.util.Map;
+
+import javax.annotation.Resource;
+
+import org.springframework.stereotype.Service;
+import org.web.module.height.obesity.dao.NutritionConfigMapper;
+import org.web.module.height.obesity.entity.NutritionConfig;
+
+@Service
+public class NutritionConfigService {
+	@Resource
+	private NutritionConfigMapper  nutritionConfigMapper;
+	
+	    public int insert(NutritionConfig nutritionConfig){
+	        return nutritionConfigMapper.insert(nutritionConfig);
+	    }
+	    public int update(NutritionConfig nutritionConfig){
+	        return nutritionConfigMapper.update(nutritionConfig);
+	    }
+	    public int delete(NutritionConfig nutritionConfig){
+	        return nutritionConfigMapper.delete(nutritionConfig);
+	    }
+	    public Map<String, Object> getOne(NutritionConfig nutritionConfig) {
+	        return nutritionConfigMapper.getOne(nutritionConfig);
+	    }
+	    public List<Map<String, Object>> getList(NutritionConfig nutritionConfig) {
+	        return nutritionConfigMapper.getList(nutritionConfig);
+	    }
+	    public List<Map<String, Object>> getADList(NutritionConfig nutritionConfig) {
+	        return nutritionConfigMapper.getADList(nutritionConfig);
+	    }
+	    
+}

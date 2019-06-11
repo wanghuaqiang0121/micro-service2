@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.web.module.bone.age.dao.BaseMedicalImagingDataMapper">
+  <resultMap id="BaseResultMap" type="org.web.module.bone.age.domain.BaseMedicalImagingData">
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="user_id" jdbcType="INTEGER" property="userId" />
+    <result column="current_age" jdbcType="INTEGER" property="currentAge" />
+    <result column="height" jdbcType="REAL" property="height" />
+    <result column="weight" jdbcType="REAL" property="weight" />
+    <result column="sex" jdbcType="INTEGER" property="sex" />
+    <result column="menarche_type" jdbcType="VARCHAR" property="menarcheType" />
+    <result column="menarche_age" jdbcType="REAL" property="menarcheAge" />
+    <result column="left_wrist_img" jdbcType="VARCHAR" property="leftWristImg" />
+    <result column="left_wrist_number" jdbcType="VARCHAR" property="leftWristNumber" />
+    <result column="left_wrist_date" jdbcType="DATE" property="leftWristDate" />
+    <result column="pelvis_img" jdbcType="VARCHAR" property="pelvisImg" />
+    <result column="pelvis_number" jdbcType="VARCHAR" property="pelvisNumber" />
+    <result column="pelvis_date" jdbcType="DATE" property="pelvisDate" />
+    <result column="bilateral_sternoclavicular_img" jdbcType="VARCHAR" property="bilateralSternoclavicularImg" />
+    <result column="bilateral_sternoclavicular_number" jdbcType="VARCHAR" property="bilateralSternoclavicularNumber" />
+    <result column="bilateral_sternoclavicular_date" jdbcType="DATE" property="bilateralSternoclavicularDate" />
+    <result column="ct_tomography" jdbcType="VARCHAR" property="ctTomography" />
+    <result column="ct_tomography_number" jdbcType="VARCHAR" property="ctTomographyNumber" />
+    <result column="ct_tomography_date" jdbcType="DATE" property="ctTomographyDate" />
+    <result column="advisory_img" jdbcType="VARCHAR" property="advisoryImg" />
+    <result column="advisory_status" jdbcType="INTEGER" property="advisoryStatus" />
+    <result column="advisory_reason" jdbcType="VARCHAR" property="advisoryReason" />
+    <result column="entrus_img" jdbcType="VARCHAR" property="entrusImg" />
+    <result column="entrus_img_status" jdbcType="INTEGER" property="entrusImgStatus" />
+    <result column="judicialexpertise_status" jdbcType="INTEGER" property="judicialexpertiseStatus" />
+    <result column="medical_imaging_status" jdbcType="INTEGER" property="medicalImagingStatus" />
+    <result column="medical_imaging_reason" jdbcType="VARCHAR" property="medicalImagingReason" />
+    <result column="bone_age_status" jdbcType="INTEGER" property="boneAgeStatus" />
+    <result column="organization_user_id" jdbcType="INTEGER" property="organizationUserId" />
+    <result column="organization_id" jdbcType="INTEGER" property="organizationId" />
+    <result column="organization_team_id" jdbcType="INTEGER" property="organizationTeamId" />
+    <result column="judicial_bone_age_organization_id" jdbcType="INTEGER" property="judicialBoneAgeOrganizationId" />
+    <result column="judicial_bone_age_organization_team_id" jdbcType="INTEGER" property="judicialBoneAgeOrganizationTeamId" />
+    <result column="supplementary_materials_img" jdbcType="VARCHAR" property="supplementaryMaterialsImg" />
+    <result column="supplementary_materials_status" jdbcType="INTEGER" property="supplementaryMaterialsStatus" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="left_knee_joint_img" jdbcType="VARCHAR" property="leftKneeJointImg" />
+    <result column="left_knee_joint_img_number" jdbcType="VARCHAR" property="leftKneeJointImgNumber" />
+    <result column="left_knee_joint_date" jdbcType="DATE" property="leftKneeJointDate" />
+    <result column="left_knee_joint_lateral_img" jdbcType="VARCHAR" property="leftKneeJointLateralImg" />
+    <result column="left_knee_joint_lateral_number" jdbcType="VARCHAR" property="leftKneeJointLateralNumber" />
+    <result column="left_knee_joint_lateral_date" jdbcType="DATE" property="leftKneeJointLateralDate" />
+    <result column="update_organization_team_id" jdbcType="INTEGER" property="updateOrganizationTeamId" />
+    <result column="update_organization_user_id" jdbcType="INTEGER" property="updateOrganizationUserId" />
+  </resultMap>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from base_medical_imaging_data
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="org.web.module.bone.age.domain.BaseMedicalImagingData">
+    insert into base_medical_imaging_data (id, user_id, current_age, 
+      height, weight, sex, menarche_type, 
+      menarche_age, left_wrist_img, left_wrist_number, 
+      left_wrist_date, pelvis_img, pelvis_number, 
+      pelvis_date, bilateral_sternoclavicular_img, 
+      bilateral_sternoclavicular_number, bilateral_sternoclavicular_date, 
+      ct_tomography, ct_tomography_number, ct_tomography_date, 
+      advisory_img, advisory_status, advisory_reason, 
+      entrus_img, entrus_img_status, judicialexpertise_status, 
+      medical_imaging_status, medical_imaging_reason, 
+      bone_age_status, organization_user_id, organization_id, 
+      organization_team_id, judicial_bone_age_organization_id, 
+      judicial_bone_age_organization_team_id, supplementary_materials_img, 
+      supplementary_materials_status, create_time, 
+      left_knee_joint_img, left_knee_joint_img_number, 
+      left_knee_joint_date, left_knee_joint_lateral_img, 
+      left_knee_joint_lateral_number, left_knee_joint_lateral_date, 
+      update_organization_team_id, update_organization_user_id
+      )
+    values (#{id,jdbcType=INTEGER}, #{userId,jdbcType=INTEGER}, #{currentAge,jdbcType=INTEGER}, 
+      #{height,jdbcType=REAL}, #{weight,jdbcType=REAL}, #{sex,jdbcType=INTEGER}, #{menarcheType,jdbcType=VARCHAR}, 
+      #{menarcheAge,jdbcType=REAL}, #{leftWristImg,jdbcType=VARCHAR}, #{leftWristNumber,jdbcType=VARCHAR}, 
+      #{leftWristDate,jdbcType=DATE}, #{pelvisImg,jdbcType=VARCHAR}, #{pelvisNumber,jdbcType=VARCHAR}, 
+      #{pelvisDate,jdbcType=DATE}, #{bilateralSternoclavicularImg,jdbcType=VARCHAR}, 
+      #{bilateralSternoclavicularNumber,jdbcType=VARCHAR}, #{bilateralSternoclavicularDate,jdbcType=DATE}, 
+      #{ctTomography,jdbcType=VARCHAR}, #{ctTomographyNumber,jdbcType=VARCHAR}, #{ctTomographyDate,jdbcType=DATE}, 
+      #{advisoryImg,jdbcType=VARCHAR}, #{advisoryStatus,jdbcType=INTEGER}, #{advisoryReason,jdbcType=VARCHAR}, 
+      #{entrusImg,jdbcType=VARCHAR}, #{entrusImgStatus,jdbcType=INTEGER}, #{judicialexpertiseStatus,jdbcType=INTEGER}, 
+      #{medicalImagingStatus,jdbcType=INTEGER}, #{medicalImagingReason,jdbcType=VARCHAR}, 
+      #{boneAgeStatus,jdbcType=INTEGER}, #{organizationUserId,jdbcType=INTEGER}, #{organizationId,jdbcType=INTEGER}, 
+      #{organizationTeamId,jdbcType=INTEGER}, #{judicialBoneAgeOrganizationId,jdbcType=INTEGER}, 
+      #{judicialBoneAgeOrganizationTeamId,jdbcType=INTEGER}, #{supplementaryMaterialsImg,jdbcType=VARCHAR}, 
+      #{supplementaryMaterialsStatus,jdbcType=INTEGER}, #{createTime,jdbcType=TIMESTAMP}, 
+      #{leftKneeJointImg,jdbcType=VARCHAR}, #{leftKneeJointImgNumber,jdbcType=VARCHAR}, 
+      #{leftKneeJointDate,jdbcType=DATE}, #{leftKneeJointLateralImg,jdbcType=VARCHAR}, 
+      #{leftKneeJointLateralNumber,jdbcType=VARCHAR}, #{leftKneeJointLateralDate,jdbcType=DATE}, 
+      #{updateOrganizationTeamId,jdbcType=INTEGER}, #{updateOrganizationUserId,jdbcType=INTEGER}
+      )
+  </insert>
+  <update id="updateByPrimaryKey" parameterType="org.web.module.bone.age.domain.BaseMedicalImagingData">
+    update base_medical_imaging_data
+    set user_id = #{userId,jdbcType=INTEGER},
+      current_age = #{currentAge,jdbcType=INTEGER},
+      height = #{height,jdbcType=REAL},
+      weight = #{weight,jdbcType=REAL},
+      sex = #{sex,jdbcType=INTEGER},
+      menarche_type = #{menarcheType,jdbcType=VARCHAR},
+      menarche_age = #{menarcheAge,jdbcType=REAL},
+      left_wrist_img = #{leftWristImg,jdbcType=VARCHAR},
+      left_wrist_number = #{leftWristNumber,jdbcType=VARCHAR},
+      left_wrist_date = #{leftWristDate,jdbcType=DATE},
+      pelvis_img = #{pelvisImg,jdbcType=VARCHAR},
+      pelvis_number = #{pelvisNumber,jdbcType=VARCHAR},
+      pelvis_date = #{pelvisDate,jdbcType=DATE},
+      bilateral_sternoclavicular_img = #{bilateralSternoclavicularImg,jdbcType=VARCHAR},
+      bilateral_sternoclavicular_number = #{bilateralSternoclavicularNumber,jdbcType=VARCHAR},
+      bilateral_sternoclavicular_date = #{bilateralSternoclavicularDate,jdbcType=DATE},
+      ct_tomography = #{ctTomography,jdbcType=VARCHAR},
+      ct_tomography_number = #{ctTomographyNumber,jdbcType=VARCHAR},
+      ct_tomography_date = #{ctTomographyDate,jdbcType=DATE},
+      advisory_img = #{advisoryImg,jdbcType=VARCHAR},
+      advisory_status = #{advisoryStatus,jdbcType=INTEGER},
+      advisory_reason = #{advisoryReason,jdbcType=VARCHAR},
+      entrus_img = #{entrusImg,jdbcType=VARCHAR},
+      entrus_img_status = #{entrusImgStatus,jdbcType=INTEGER},
+      judicialexpertise_status = #{judicialexpertiseStatus,jdbcType=INTEGER},
+      medical_imaging_status = #{medicalImagingStatus,jdbcType=INTEGER},
+      medical_imaging_reason = #{medicalImagingReason,jdbcType=VARCHAR},
+      bone_age_status = #{boneAgeStatus,jdbcType=INTEGER},
+      organization_user_id = #{organizationUserId,jdbcType=INTEGER},
+      organization_id = #{organizationId,jdbcType=INTEGER},
+      organization_team_id = #{organizationTeamId,jdbcType=INTEGER},
+      judicial_bone_age_organization_id = #{judicialBoneAgeOrganizationId,jdbcType=INTEGER},
+      judicial_bone_age_organization_team_id = #{judicialBoneAgeOrganizationTeamId,jdbcType=INTEGER},
+      supplementary_materials_img = #{supplementaryMaterialsImg,jdbcType=VARCHAR},
+      supplementary_materials_status = #{supplementaryMaterialsStatus,jdbcType=INTEGER},
+      create_time = #{createTime,jdbcType=TIMESTAMP},
+      left_knee_joint_img = #{leftKneeJointImg,jdbcType=VARCHAR},
+      left_knee_joint_img_number = #{leftKneeJointImgNumber,jdbcType=VARCHAR},
+      left_knee_joint_date = #{leftKneeJointDate,jdbcType=DATE},
+      left_knee_joint_lateral_img = #{leftKneeJointLateralImg,jdbcType=VARCHAR},
+      left_knee_joint_lateral_number = #{leftKneeJointLateralNumber,jdbcType=VARCHAR},
+      left_knee_joint_lateral_date = #{leftKneeJointLateralDate,jdbcType=DATE},
+      update_organization_team_id = #{updateOrganizationTeamId,jdbcType=INTEGER},
+      update_organization_user_id = #{updateOrganizationUserId,jdbcType=INTEGER}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    select id, user_id, current_age, height, weight, sex, menarche_type, menarche_age, 
+    left_wrist_img, left_wrist_number, left_wrist_date, pelvis_img, pelvis_number, pelvis_date, 
+    bilateral_sternoclavicular_img, bilateral_sternoclavicular_number, bilateral_sternoclavicular_date, 
+    ct_tomography, ct_tomography_number, ct_tomography_date, advisory_img, advisory_status, 
+    advisory_reason, entrus_img, entrus_img_status, judicialexpertise_status, medical_imaging_status, 
+    medical_imaging_reason, bone_age_status, organization_user_id, organization_id, organization_team_id, 
+    judicial_bone_age_organization_id, judicial_bone_age_organization_team_id, supplementary_materials_img, 
+    supplementary_materials_status, create_time, left_knee_joint_img, left_knee_joint_img_number, 
+    left_knee_joint_date, left_knee_joint_lateral_img, left_knee_joint_lateral_number, 
+    left_knee_joint_lateral_date, update_organization_team_id, update_organization_user_id
+    from base_medical_imaging_data
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <select id="selectAll" resultMap="BaseResultMap">
+    select id, user_id, current_age, height, weight, sex, menarche_type, menarche_age, 
+    left_wrist_img, left_wrist_number, left_wrist_date, pelvis_img, pelvis_number, pelvis_date, 
+    bilateral_sternoclavicular_img, bilateral_sternoclavicular_number, bilateral_sternoclavicular_date, 
+    ct_tomography, ct_tomography_number, ct_tomography_date, advisory_img, advisory_status, 
+    advisory_reason, entrus_img, entrus_img_status, judicialexpertise_status, medical_imaging_status, 
+    medical_imaging_reason, bone_age_status, organization_user_id, organization_id, organization_team_id, 
+    judicial_bone_age_organization_id, judicial_bone_age_organization_team_id, supplementary_materials_img, 
+    supplementary_materials_status, create_time, left_knee_joint_img, left_knee_joint_img_number, 
+    left_knee_joint_date, left_knee_joint_lateral_img, left_knee_joint_lateral_number, 
+    left_knee_joint_lateral_date, update_organization_team_id, update_organization_user_id
+    from base_medical_imaging_data
+  </select>
+</mapper>

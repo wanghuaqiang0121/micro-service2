@@ -1,0 +1,595 @@
+package org.web.module.bone.age.controller;
+
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+
+import javax.annotation.Resource;
+
+import org.service.core.api.ApiCodeEnum;
+import org.service.core.api.JsonApi;
+import org.service.core.api.MultiLine;
+import org.service.core.auth.control.RequiresAuthentication;
+import org.service.core.auth.level.Level;
+import org.service.core.entity.BaseEntity;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RestController;
+import org.web.module.bone.age.domain.BaseAgeOrder;
+import org.web.module.bone.age.domain.MedicalImagingData;
+import org.web.module.bone.age.domain.User;
+import org.web.module.bone.age.global.BaseGlobal;
+import org.web.module.bone.age.global.GlobalEnum;
+import org.web.module.bone.age.message.Prompt;
+import org.web.module.bone.age.service.AgeOrderService;
+import org.web.module.bone.age.service.MedicalImagingDataService;
+import org.web.module.bone.age.service.UserService;
+import org.web.module.bone.age.service.feign.IOrganizationUserRoleService;
+
+import com.github.pagehelper.Page;
+import com.github.pagehelper.PageHelper;
+/**
+ * Copyright © 2019 四川易迅通健康医疗技术发展有限公司. All rights reserved.
+ *
+ * @author: ChenYan
+ * @date: 2019年4月8日
+ * @description: 影像资料
+ */
+@RestController
+public class MedicalImagingDataController {
+	@Resource
+	private MedicalImagingDataService medicalImagingDataService;
+	
+	@Resource
+	private IOrganizationUserRoleService organizationUserRoleService;
+	
+	@Resource
+	private UserService userService;
+	
+	
+	@Resource
+	private AgeOrderService  ageOrderService;
+	
+	/**
+	 * @author: ChenYan
+	 * @date: 2019年4月8日
+	 * @param medicalImagingData
+	 * @param result
+	 * @param token
+	 * @param organizationId
+	 * @param organizationTeamId
+	 * @return
+	 * @description: 档案管理列表
+	 */
+	@RequiresAuthentication(level=Level.OPERATION,value = { "web-module-bone-age:medical-imaging-data:get-list" })
+	@GetMapping(value = { "/medical/imaging/datas" })
+	public JsonApi getList( @Validated({ BaseEntity.SelectAll.class })  MedicalImagingData medicalImagingData, BindingResult result,
+			@RequestHeader(required = true, value = BaseGlobal.TOKEN_FLAG) String token,
+			@RequestHeader(required = true, value = BaseGlobal.ORGANIZATION_ID) Integer organizationId
+			,@RequestHeader(required = true, value = BaseGlobal.ORGANIZATION_TEAM_ID) Integer organizationTeamId) {
+		medicalImagingData.setOrganizationId(organizationId);
+		medicalImagingData.setOrganizationTeamId(organizationTeamId);
+		Page<?> page = PageHelper.startPage(medicalImagingData.getPage(), medicalImagingData.getPageSize());
+		List<Map<String, Object>> readFilmRechargeRecordList = medicalImagingDataService.getList(medicalImagingData);
+		if (readFilmRechargeRecordList != null && !readFilmRechargeRecordList.isEmpty()) {
+			return new JsonApi(ApiCodeEnum.OK, new MultiLine(page.getTotal(), readFilmRechargeRecordList));
+		}
+		return new JsonApi(ApiCodeEnum.NOT_FOUND);
+	}
+	
+	
+	/**
+	 * @author: ChenYan
+	 * @date: 2019年4月24日
+	 * @param medicalImagingData
+	 * @param result
+	 * @param token
+	 * @param organizationId
+	 * @param organizationTeamId
+	 * @return
+	 * @description:  影像资料列表
+	 */
+	@RequiresAuthentication(level=Level.OPERATION,value = { "web-module-bone-age:medical-imaging-data:get-medical-list" })
+	@GetMapping(value = { "/medical/imaging/list" })
+	public JsonApi getMedicalImagingList( @Validated({ BaseEntity.SelectAll.class })  MedicalImagingData medicalImagingData, BindingResult result,
+			@RequestHeader(required = true, value = BaseGlobal.TOKEN_FLAG) String token,
+			@RequestHeader(required = true, value = BaseGlobal.ORGANIZATION_ID) Integer organizationId
+			,@RequestHeader(required = true, value = BaseGlobal.ORGANIZATION_TEAM_ID) Integer organizationTeamId) {
+		medicalImagingData.setUpdateOrganizationTeamId(organizationTeamId);
+		Page<?> page = PageHelper.startPage(medicalImagingData.getPage(), medicalImagingData.getPageSize());
+		List<Map<String, Object>> readFilmRechargeRecordList = medicalImagingDataService.getMedicalImagingList(medicalImagingData);
+		if (readFilmRechargeRecordList != null && !readFilmRechargeRecordList.isEmpty()) {
+			return new JsonApi(ApiCodeEnum.OK, new MultiLine(page.getTotal(), readFilmRechargeRecordList));
+		}
+		return new JsonApi(ApiCodeEnum.NOT_FOUND);
+	}
+	
+	/**
+	 * @author: ChenYan
+	 * @date: 2019年4月24日
+	 * @param medicalImagingData
+	 * @param result
+	 * @param token
+	 * @param organizationId
+	 * @param organizationTeamId
+	 * @return
+	 * @description:  搜索用户
+	 */
+	@RequiresAuthentication(level=Level.OPERATION,value = { "web-module-bone-age:medical-imaging-data:get-medical-query-list" })
+	@GetMapping(value = { "/medical/imaging/query/data" })
+	public JsonApi getMedicalImagingQueryList( @Validated({ BaseEntity.SelectAll.class })  MedicalImagingData medicalImagingData, BindingResult result,
+			@RequestHeader(required = true, value = BaseGlobal.TOKEN_FLAG) String token,
+			@RequestHeader(required = true, value = BaseGlobal.ORGANIZATION_ID) Integer organizationId
+			,@RequestHeader(required = true, value = BaseGlobal.ORGANIZATION_TEAM_ID) Integer organizationTeamId) {
+		medicalImagingData.setOrganizationId(organizationId);
+		Page<?> page = PageHelper.startPage(medicalImagingData.getPage(), medicalImagingData.getPageSize());
+		List<Map<String, Object>> readFilmRechargeRecordList = medicalImagingDataService.getMedicalImagingQueryList(medicalImagingData);
+		if (readFilmRechargeRecordList != null && !readFilmRechargeRecordList.isEmpty()) {
+			return new JsonApi(ApiCodeEnum.OK, new MultiLine(page.getTotal(), readFilmRechargeRecordList));
+		}
+		return new JsonApi(ApiCodeEnum.NOT_FOUND);
+	}
+	
+	
+	/**
+	 * @author: ChenYan
+	 * @date: 2019年4月8日
+	 * @param medicalImagingData
+	 * @param result
+	 * @param token
+	 * @param organizationId
+	 * @param organizationTeamId
+	 * @return
+	 * @description: 新增人到影像资料
+	 */
+	@RequiresAuthentication(value = { "web-module-bone-age:medical-imaging-data:insert" },level = Level.OPERATION)
+	@PostMapping(value = { "/medical/imaging/data" })
+	public JsonApi insert(@RequestBody @Validated({ BaseEntity.Insert.class }) MedicalImagingData medicalImagingData,
+			BindingResult result, @RequestHeader(required = true, value = BaseGlobal.TOKEN_FLAG) String token,
+			@RequestHeader(required = true, value = BaseGlobal.ORGANIZATION_ID) Integer organizationId,
+			@RequestHeader(required = true, value = BaseGlobal.ORGANIZATION_TEAM_ID) Integer organizationTeamId) {
+		 /*获取机构用户ID*/
+		Integer organizationUserId = null;
+		JsonApi jsonApi = organizationUserRoleService.getSession(BaseGlobal.CACHE_ORGANIZATION_USER, token,token);
+		if (jsonApi.getCode() == ApiCodeEnum.OK.getValue()) {
+			organizationUserId = Integer.parseInt(jsonApi.getData().toString());
+			medicalImagingData.setOrganizationUserId(organizationUserId);
+		}else {
+			 return new JsonApi(ApiCodeEnum.NOT_FOUND).setMsg(Prompt.bundle("user.id.is.notblank.valid"));
+		}
+		
+		medicalImagingData.setId(organizationId);
+		Map<String, Object> organiztionMap=medicalImagingDataService.getOrganiztionOne(medicalImagingData);
+		if (organiztionMap!=null) {
+			 if (organiztionMap.get("judicialBoneAgeOrganizationId")!=null && organiztionMap.get("judicialBoneAgeOrganizationTeamId")!=null  && organiztionMap.get("judicialBoneAgeOrganizationId").toString()!=null && organiztionMap.get("judicialBoneAgeOrganizationTeamId").toString()!=null ) {
+				 medicalImagingData.setJudicialBoneAgeOrganizationId(Integer.parseInt(organiztionMap.get("judicialBoneAgeOrganizationId").toString()));
+				 medicalImagingData.setJudicialBoneAgeOrganizationTeamId(Integer.parseInt(organiztionMap.get("judicialBoneAgeOrganizationTeamId").toString()));
+			}
+		}/*else {
+			return new JsonApi(ApiCodeEnum.NOT_FOUND);
+		}*/
+		
+		medicalImagingData.setUserId(medicalImagingData.getUserId());
+		/*查询该用户的影像资料 骨龄完成否*/
+		List<Map<String, Object>> medicalImagingDataList=medicalImagingDataService.getUser(medicalImagingData);
+		if (medicalImagingDataList!=null  && medicalImagingDataList.size()>0) {
+			for (int i = 0; i < medicalImagingDataList.size(); i++) {
+				if ( Integer.parseInt(medicalImagingDataList.get(i).get("boneAgeStatus").toString())==1 ) {// 骨龄未完成
+					 return new JsonApi(ApiCodeEnum.CONFLICT).setMsg(Prompt.bundle("user.bone.age.is.not.finish"));
+				}
+			}
+		}
+		User user=new User();
+		user.setId(medicalImagingData.getUserId());
+		Map<String, Object> map=userService.getOne(user);
+		if (map==null) {
+			 return new JsonApi(ApiCodeEnum.NOT_FOUND);
+		}
+		/*设置默认值*/
+		medicalImagingData.setOrganizationId(organizationId);
+		medicalImagingData.setOrganizationTeamId(organizationTeamId);
+		medicalImagingData.setCurrentAge(Integer.parseInt(map.get("age").toString()));
+		medicalImagingData.setCreateTime(new Date());
+		medicalImagingData.setBoneAgeStatus(1);//骨龄报告(送检)状态\n1.未完成\n2.已完成
+		medicalImagingData.setAdvisoryStatus(1);// 咨询意见书状态\n1.未上传\n2.已上传\n3.退回\n4.重新上传
+		medicalImagingData.setMedicalImagingStatus(1);//医学影像资料状态\n1.未上传\n2.已上传\n3.退回\n4.重新上传
+		medicalImagingData.setJudicialexpertiseStatus(0);//司法鉴定状态(也是标志这条测骨龄的工单完成的状态)\n0.未开\n1.已开
+		medicalImagingData.setEntrusImgStatus(1);// 咨询意见结果\n1.未开具\\n2.已开具
+		medicalImagingData.setSupplementaryMaterialsStatus(1);// 补充材料
+		if (medicalImagingDataService.insert(medicalImagingData)>0) {
+			
+			BaseAgeOrder  ageOrder=new BaseAgeOrder();
+			ageOrder.setCreateTime(new Date());
+		   // '算法\\n1:(TW2-CHN13骨法)TW2-R;\\n2:(TW2-CHN20骨法)TW2-T;\\n3:(TW3-CHN13骨法)TW3-R;\\n4:(TW3-CHN7骨法)TW3-C;',
+			ageOrder.setAlgorithm(2);
+			//检查部位\\n1：左手\\n2：右手
+			ageOrder.setCheckPoint(1);
+			ageOrder.setBaseMedicalImagingDataId(medicalImagingData.getId());
+			if (ageOrderService.insert(ageOrder) > 0) {
+				return new JsonApi(ApiCodeEnum.OK);
+			}
+			throw new RuntimeException();
+		}
+		return new JsonApi(ApiCodeEnum.NOT_FOUND);
+	}
+	
+	
+	/**
+	 * @author: ChenYan
+	 * @date: 2019年4月8日
+	 * @param id
+	 * @param medicalImagingData
+	 * @param result
+	 * @param token
+	 * @param organizationId
+	 * @param organizationTeamId
+	 * @return
+	 * @description: 上传影像资料 
+	 */
+	@RequiresAuthentication(value = { "web-module-bone-age:medical-imaging-data:update-medical" }, level = Level.OPERATION )
+	@PutMapping(value = { "/medical/imaging/data/medical/{id}" })
+	public JsonApi updateMedical(@PathVariable("id") Integer id,
+			@RequestBody @Validated({ MedicalImagingData.UpdateMedical.class }) MedicalImagingData medicalImagingData, BindingResult result, @RequestHeader(required = true, value = BaseGlobal.TOKEN_FLAG) String token,
+			@RequestHeader(required = true, value = BaseGlobal.ORGANIZATION_ID) Integer organizationId,
+			@RequestHeader(required = true, value = BaseGlobal.ORGANIZATION_TEAM_ID) Integer organizationTeamId) {
+		 /*获取机构用户ID*/
+		Integer organizationUserId = null;
+		JsonApi jsonApi = organizationUserRoleService.getSession(BaseGlobal.CACHE_ORGANIZATION_USER, token,token);
+		if (jsonApi.getCode() == ApiCodeEnum.OK.getValue()) {
+			organizationUserId = Integer.parseInt(jsonApi.getData().toString());
+			medicalImagingData.setOrganizationUserId(organizationUserId);
+		}else {
+			 return new JsonApi(ApiCodeEnum.NOT_FOUND).setMsg(Prompt.bundle("user.id.is.notblank.valid"));
+		}
+		medicalImagingData.setId(id);
+		Map<String, Object> map=medicalImagingDataService.getOne(medicalImagingData);
+		if (map==null) {
+			return new JsonApi(ApiCodeEnum.NOT_FOUND);
+		}
+		else {
+			if (Integer.parseInt(map.get("medicalImagingStatus").toString())==GlobalEnum.MedicalImagingStatus.NOT_UPLOAD.getValue()//1.未上传
+					|| Integer.parseInt(map.get("medicalImagingStatus").toString())==GlobalEnum.MedicalImagingStatus.RETURN.getValue()) {//3.退回
+				medicalImagingData.setMedicalImagingStatus(GlobalEnum.MedicalImagingStatus.UPLOAD.getValue());//2.已上传
+				medicalImagingData.setUpdateOrganizationTeamId(organizationTeamId);
+				medicalImagingData.setUpdateOrganizationUserId(organizationUserId);
+				if (medicalImagingDataService.update(medicalImagingData)>0) {
+					return new JsonApi(ApiCodeEnum.OK);
+				}
+				return new JsonApi(ApiCodeEnum.FAIL);
+			}
+			 return new JsonApi(ApiCodeEnum.CONFLICT).setMsg(Prompt.bundle("medical.imaging.status.status.is.error"));
+		}
+	
+	}
+	
+	/**
+	 * @author: ChenYan
+	 * @date: 2019年4月10日
+	 * @param id
+	 * @param medicalImagingData
+	 * @param result
+	 * @param token
+	 * @param organizationId
+	 * @param organizationTeamId
+	 * @return
+	 * @description: 选择用户到团队
+	 */
+	@RequiresAuthentication(value = { "web-module-bone-age:medical-imaging-data:update" }, level = Level.OPERATION )
+	@PutMapping(value = { "/medical/imaging/data/{id}" })
+	public JsonApi update(@PathVariable("id") Integer id,
+			@RequestBody @Validated({ MedicalImagingData.Update.class }) MedicalImagingData medicalImagingData, BindingResult result, @RequestHeader(required = true, value = BaseGlobal.TOKEN_FLAG) String token,
+			@RequestHeader(required = true, value = BaseGlobal.ORGANIZATION_ID) Integer organizationId,
+			@RequestHeader(required = true, value = BaseGlobal.ORGANIZATION_TEAM_ID) Integer organizationTeamId) {
+		medicalImagingData.setId(id);
+		Map<String, Object> map=medicalImagingDataService.getOne(medicalImagingData);
+		if (map==null) {
+			return new JsonApi(ApiCodeEnum.NOT_FOUND);
+		}
+		else {// 判断用户是否在其他团队
+			     if (map.get("updateOrganizationTeamId")!=null) {
+			    	 return new JsonApi(ApiCodeEnum.CONFLICT).setMsg(Prompt.bundle("user.id.is.in.other.team"));
+				}
+			     // 判断影像资料是否上传或完成
+			if (Integer.parseInt(map.get("medicalImagingStatus").toString())==GlobalEnum.MedicalImagingStatus.UPLOAD.getValue() 
+					|| Integer.parseInt(map.get("medicalImagingStatus").toString())==GlobalEnum.MedicalImagingStatus.COMPLETED.getValue() ) {
+				 return new JsonApi(ApiCodeEnum.CONFLICT).setMsg(Prompt.bundle("medical.imaging.is.upload.or.completed"));
+			}
+			// 修改上传影像资料的团队id
+			medicalImagingData.setUpdateOrganizationTeamId(organizationTeamId);
+				if (medicalImagingDataService.update(medicalImagingData)>0) {
+					return new JsonApi(ApiCodeEnum.OK);
+				}
+				return new JsonApi(ApiCodeEnum.FAIL);
+		}
+	}
+	
+	
+	
+	/**
+	 * @author: ChenYan
+	 * @date: 2019年4月10日
+	 * @param id
+	 * @param medicalImagingData
+	 * @param result
+	 * @param token
+	 * @param organizationId
+	 * @param organizationTeamId
+	 * @return
+	 * @description: 提交咨询意见书,// 医学影像资料为已上传，咨询意见书未上传，退回状态，如有补充材料，就修改完成状态，无补充材料，则不管。
+	 */
+	@RequiresAuthentication(value = { "web-module-bone-age:medical-imaging-data:update-advisory" }, level = Level.OPERATION )
+	@PutMapping(value = { "/medical/imaging/data/advisory/{id}" })
+	public JsonApi updateAdvisory(@PathVariable("id") Integer id,
+			@RequestBody @Validated({ BaseEntity.Update.class }) MedicalImagingData medicalImagingData, BindingResult result, @RequestHeader(required = true, value = BaseGlobal.TOKEN_FLAG) String token,
+			@RequestHeader(required = true, value = BaseGlobal.ORGANIZATION_ID) Integer organizationId,
+			@RequestHeader(required = true, value = BaseGlobal.ORGANIZATION_TEAM_ID) Integer organizationTeamId) {
+		medicalImagingData.setId(id);
+		Map<String, Object> map=medicalImagingDataService.getOne(medicalImagingData);
+		if (map==null) {
+			return new JsonApi(ApiCodeEnum.NOT_FOUND);
+		}
+		else {
+			if ( (Integer.parseInt(map.get("advisoryStatus").toString())==GlobalEnum.AdvisoryStatus.NOT_UPLOAD.getValue()
+				||  Integer.parseInt(map.get("advisoryStatus").toString())==GlobalEnum.AdvisoryStatus.RETURN.getValue())) {
+				medicalImagingData.setAdvisoryStatus(GlobalEnum.AdvisoryStatus.UPLOAD.getValue());
+				medicalImagingData.setMedicalImagingStatus(GlobalEnum.MedicalImagingStatus.COMPLETED.getValue());
+				
+				if (Integer.parseInt(map.get("supplementaryMaterialsStatus").toString())==GlobalEnum.SupplementaryStatus.UPLOAD.getValue()) {
+					medicalImagingData.setSupplementaryMaterialsStatus(GlobalEnum.SupplementaryStatus.COMPLETED.getValue());
+				}
+				if (medicalImagingDataService.update(medicalImagingData)>0) {
+					return new JsonApi(ApiCodeEnum.OK);
+				}
+				return new JsonApi(ApiCodeEnum.FAIL);
+			}
+			 return new JsonApi(ApiCodeEnum.CONFLICT).setMsg(Prompt.bundle("medical.maging.tatusa.dvisory.tatus.status.is.error"));
+			}
+	}	
+	
+	
+	/**
+	 * @author: ChenYan
+	 * @date: 2019年4月10日
+	 * @param id
+	 * @param medicalImagingData
+	 * @param result
+	 * @param token
+	 * @param organizationId
+	 * @param organizationTeamId
+	 * @return
+	 * @description: 打回医学影像资料
+	 */
+	@RequiresAuthentication(value = { "web-module-bone-age:medical-imaging-data:update-return-medical" }, level = Level.OPERATION )
+	@PutMapping(value = { "/medical/imaging/data/return/medical/{id}" })
+	public JsonApi updateReturn(@PathVariable("id") Integer id,
+			@RequestBody @Validated({ BaseEntity.Update.class }) MedicalImagingData medicalImagingData, BindingResult result, @RequestHeader(required = true, value = BaseGlobal.TOKEN_FLAG) String token,
+			@RequestHeader(required = true, value = BaseGlobal.ORGANIZATION_ID) Integer organizationId,
+			@RequestHeader(required = true, value = BaseGlobal.ORGANIZATION_TEAM_ID) Integer organizationTeamId) {
+		medicalImagingData.setId(id);
+		Map<String, Object> map=medicalImagingDataService.getOne(medicalImagingData);
+		if (map==null) {
+			return new JsonApi(ApiCodeEnum.NOT_FOUND);
+		}else {
+			/*骨龄报告状态为未完成 */
+			if (Integer.parseInt(map.get("boneAgeStatus").toString())==1) {
+				/*状态改为退回*/
+				medicalImagingData.setMedicalImagingStatus(GlobalEnum.MedicalImagingStatus.RETURN.getValue());
+				medicalImagingData.setAdvisoryStatus(1);//咨询意见书状态未上传
+				medicalImagingData.setEntrusImgStatus(1);//咨询意见结果未开
+				if (medicalImagingDataService.update(medicalImagingData)>0) {
+					return new JsonApi(ApiCodeEnum.OK);
+				}
+				return new JsonApi(ApiCodeEnum.FAIL);
+		}
+			 return new JsonApi(ApiCodeEnum.CONFLICT).setMsg(Prompt.bundle("bone.age.status.status.is.error"));
+	}
+	}
+
+	
+	/**
+	 * @author: ChenYan
+	 * @date: 2019年4月10日
+	 * @param id
+	 * @param medicalImagingData
+	 * @param result
+	 * @param token
+	 * @param organizationId
+	 * @param organizationTeamId
+	 * @return
+	 * @description: 打回咨询意见书
+	 */
+	@RequiresAuthentication(value = { "web-module-bone-age:medical-imaging-data:update-return-advisory" }, level = Level.OPERATION )
+	@PutMapping(value = { "/medical/imaging/data/return/advisory/{id}" })
+	public JsonApi updateReturnAdvisory(@PathVariable("id") Integer id,
+			@RequestBody @Validated({ BaseEntity.Update.class }) MedicalImagingData medicalImagingData, BindingResult result, @RequestHeader(required = true, value = BaseGlobal.TOKEN_FLAG) String token,
+			@RequestHeader(required = true, value = BaseGlobal.ORGANIZATION_ID) Integer organizationId,
+			@RequestHeader(required = true, value = BaseGlobal.ORGANIZATION_TEAM_ID) Integer organizationTeamId) {
+		medicalImagingData.setId(id);
+		Map<String, Object> map=medicalImagingDataService.getOne(medicalImagingData);
+		if (map==null) {
+			return new JsonApi(ApiCodeEnum.NOT_FOUND);
+		}else {
+			/*已上传*/
+			if (Integer.parseInt(map.get("advisoryStatus").toString())==GlobalEnum.AdvisoryStatus.UPLOAD.getValue()) {
+				/*状态改为退回*/
+				medicalImagingData.setAdvisoryStatus(GlobalEnum.AdvisoryStatus.RETURN.getValue());
+				if (medicalImagingDataService.update(medicalImagingData)>0) {
+					return new JsonApi(ApiCodeEnum.OK);
+				}
+				return new JsonApi(ApiCodeEnum.FAIL);
+		}
+			 return new JsonApi(ApiCodeEnum.CONFLICT).setMsg(Prompt.bundle("advisory.status.is.error"));
+	}
+	}
+	
+	/**
+	 * @author: ChenYan
+	 * @date: 2019年4月10日
+	 * @param id
+	 * @param medicalImagingData
+	 * @param result
+	 * @param token
+	 * @param organizationId
+	 * @param organizationTeamId
+	 * @return
+	 * @description: 上传咨询意见结果
+	 */
+	@RequiresAuthentication(value = { "web-module-bone-age:medical-imaging-data:update-entrus" }, level = Level.OPERATION )
+	@PutMapping(value = { "/medical/imaging/data/entrus/{id}" })
+	public JsonApi updateEntrus(@PathVariable("id") Integer id,
+			@RequestBody @Validated({ BaseEntity.Update.class }) MedicalImagingData medicalImagingData, BindingResult result, @RequestHeader(required = true, value = BaseGlobal.TOKEN_FLAG) String token,
+			@RequestHeader(required = true, value = BaseGlobal.ORGANIZATION_ID) Integer organizationId,
+			@RequestHeader(required = true, value = BaseGlobal.ORGANIZATION_TEAM_ID) Integer organizationTeamId) {
+		medicalImagingData.setId(id);
+		Map<String, Object> map=medicalImagingDataService.getOne(medicalImagingData);
+		if (map==null) {
+			return new JsonApi(ApiCodeEnum.NOT_FOUND);
+		}else {
+			/*未开具*/
+			if (Integer.parseInt(map.get("entrusImgStatus").toString())==GlobalEnum.EntrusImgStatus.NOT_UPLOAD.getValue()) {
+				/*状态改为已开具*/
+				medicalImagingData.setEntrusImgStatus(GlobalEnum.EntrusImgStatus.UPLOAD.getValue());
+				medicalImagingData.setAdvisoryStatus(GlobalEnum.AdvisoryStatus.COMPLETED.getValue());
+				if (medicalImagingDataService.update(medicalImagingData)>0) {
+					return new JsonApi(ApiCodeEnum.OK);
+				}
+				return new JsonApi(ApiCodeEnum.FAIL);
+		}
+			 return new JsonApi(ApiCodeEnum.CONFLICT).setMsg(Prompt.bundle("entrus.img.status.status.is.error"));
+	}
+	}
+	
+	
+	/**
+	 * @author: ChenYan
+	 * @date: 2019年4月10日
+	 * @param id
+	 * @param medicalImagingData
+	 * @param result
+	 * @param token
+	 * @param organizationId
+	 * @param organizationTeamId
+	 * @return
+	 * @description: 上传补充材料// 当咨询意见书变成提交状态后,完成状态，补充材料不可修改
+	 */
+	@RequiresAuthentication(value = { "web-module-bone-age:medical-imaging-data:update-supplementary" }, level = Level.OPERATION )
+	@PutMapping(value = { "/medical/imaging/data/supplementary/{id}" })
+	public JsonApi updateSupplementary(@PathVariable("id") Integer id,
+			@RequestBody @Validated({ BaseEntity.Update.class }) MedicalImagingData medicalImagingData, BindingResult result, @RequestHeader(required = true, value = BaseGlobal.TOKEN_FLAG) String token,
+			@RequestHeader(required = true, value = BaseGlobal.ORGANIZATION_ID) Integer organizationId,
+			@RequestHeader(required = true, value = BaseGlobal.ORGANIZATION_TEAM_ID) Integer organizationTeamId) {
+		medicalImagingData.setId(id);
+		Map<String, Object> map=medicalImagingDataService.getOne(medicalImagingData);
+		if (map==null) {
+			return new JsonApi(ApiCodeEnum.NOT_FOUND);
+		}
+		else {
+			if (Integer.parseInt(map.get("advisoryStatus").toString())!=GlobalEnum.AdvisoryStatus.COMPLETED.getValue() && Integer.parseInt(map.get("advisoryStatus").toString())!=GlobalEnum.AdvisoryStatus.UPLOAD.getValue() ) {//没有完成
+				medicalImagingData.setSupplementaryMaterialsStatus(GlobalEnum.SupplementaryStatus.UPLOAD.getValue());
+				if (medicalImagingDataService.update(medicalImagingData)>0) {
+					return new JsonApi(ApiCodeEnum.OK);
+				}
+				return new JsonApi(ApiCodeEnum.FAIL);
+			}
+			 return new JsonApi(ApiCodeEnum.CONFLICT).setMsg(Prompt.bundle("advisory.status.status.is.error"));
+		}
+	
+	}
+	
+	
+	/**
+	 * @author: ChenYan
+	 * @date: 2019年4月8日
+	 * @param id
+	 * @param medicalImagingData
+	 * @param result
+	 * @param token
+	 * @param organizationId
+	 * @param organizationTeamId
+	 * @return
+	 * @description: 查询详情，查看咨询意见书，查看委托书，查看退回原因
+	 */
+	@RequiresAuthentication(value = { "web-module-bone-age:medical-imaging-data:get-one" }, level = Level.OPERATION)
+	@GetMapping(value = { "/medical/imaging/data/{id}" })
+	public JsonApi getOne(@PathVariable("id") Integer id,@Validated({BaseEntity.SelectOne.class })MedicalImagingData medicalImagingData,
+			BindingResult result, @RequestHeader(required = true, value = BaseGlobal.TOKEN_FLAG) String token,
+			@RequestHeader(required = true, value = BaseGlobal.ORGANIZATION_ID) Integer organizationId,
+			@RequestHeader(required = true, value = BaseGlobal.ORGANIZATION_TEAM_ID) Integer organizationTeamId
+			) {
+		medicalImagingData.setId(id);
+		Map<String, Object> medicalImagingDataMap =medicalImagingDataService.getOne(medicalImagingData);
+		if (medicalImagingDataMap != null) {
+			return new JsonApi(ApiCodeEnum.OK, medicalImagingDataMap);
+		}
+		return new JsonApi(ApiCodeEnum.NOT_FOUND);
+	}
+	
+	
+	/**
+	 * @author: ChenYan
+	 * @date: 2019年4月17日
+	 * @param medicalImagingData
+	 * @param result
+	 * @param token
+	 * @param organizationId
+	 * @param organizationTeamId
+	 * @return
+	 * @description: 查询骨龄司法鉴定列表
+	 */
+	@RequiresAuthentication(level=Level.OPERATION,value = { "web-module-bone-age:medical-imaging-data:get-udicial-list" })
+	@GetMapping(value = { "/medical/imaging/data/judicial" })
+	public JsonApi getJudicialBoneAgeList( @Validated({ BaseEntity.SelectAll.class })  MedicalImagingData medicalImagingData, BindingResult result,
+			@RequestHeader(required = true, value = BaseGlobal.TOKEN_FLAG) String token,
+			@RequestHeader(required = true, value = BaseGlobal.ORGANIZATION_ID) Integer organizationId
+			,@RequestHeader(required = true, value = BaseGlobal.ORGANIZATION_TEAM_ID) Integer organizationTeamId) {
+		medicalImagingData.setJudicialBoneAgeOrganizationId(organizationId);
+		medicalImagingData.setJudicialBoneAgeOrganizationTeamId(organizationTeamId);
+		medicalImagingData.setAdvisoryStatus(GlobalEnum.AdvisoryStatus.UPLOAD.getValue());// 咨询意见书状态\n2.已上传\n3.退回\n4.已完成
+		medicalImagingData.setMedicalImagingStatus(GlobalEnum.MedicalImagingStatus.COMPLETED.getValue());//4.医学影像资料状态已完成
+		Page<?> page = PageHelper.startPage(medicalImagingData.getPage(), medicalImagingData.getPageSize());
+		List<Map<String, Object>> readFilmRechargeRecordList = medicalImagingDataService.getJudicialBoneAgeList(medicalImagingData);
+		if (readFilmRechargeRecordList != null && !readFilmRechargeRecordList.isEmpty()) {
+			return new JsonApi(ApiCodeEnum.OK, new MultiLine(page.getTotal(), readFilmRechargeRecordList));
+		}
+		return new JsonApi(ApiCodeEnum.NOT_FOUND);
+	}
+	
+	
+	/**
+	 * @author: ChenYan
+	 * @date: 2019年4月17日
+	 * @param medicalImagingData
+	 * @param result
+	 * @param token
+	 * @param organizationId
+	 * @param organizationTeamId
+	 * @return
+	 * @description: 查询临床鉴定委托书列表// 骨龄报告(送检)状态为2 已完成
+	 */
+	@RequiresAuthentication(level=Level.OPERATION,value = { "web-module-bone-age:medical-imaging-data:get-entrus-list" })
+	@GetMapping(value = { "/medical/imaging/data/entrus" })
+	public JsonApi getentrusImgList( @Validated({ BaseEntity.SelectAll.class })  MedicalImagingData medicalImagingData, BindingResult result,
+			@RequestHeader(required = true, value = BaseGlobal.TOKEN_FLAG) String token,
+			@RequestHeader(required = true, value = BaseGlobal.ORGANIZATION_ID) Integer organizationId
+			,@RequestHeader(required = true, value = BaseGlobal.ORGANIZATION_TEAM_ID) Integer organizationTeamId) {
+		medicalImagingData.setJudicialBoneAgeOrganizationId(organizationId);
+		medicalImagingData.setBoneAgeStatus(2);
+		Page<?> page = PageHelper.startPage(medicalImagingData.getPage(), medicalImagingData.getPageSize());
+		List<Map<String, Object>> readFilmRechargeRecordList = medicalImagingDataService.getentrusImgList(medicalImagingData);
+		if (readFilmRechargeRecordList != null && !readFilmRechargeRecordList.isEmpty()) {
+			return new JsonApi(ApiCodeEnum.OK, new MultiLine(page.getTotal(), readFilmRechargeRecordList));
+		}
+		return new JsonApi(ApiCodeEnum.NOT_FOUND);
+	}
+	
+	
+	
+	
+	
+}

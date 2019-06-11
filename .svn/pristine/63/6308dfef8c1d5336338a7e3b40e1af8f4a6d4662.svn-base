@@ -1,0 +1,8 @@
+#\u62e6\u622a\u5668\u6d88\u606f
+organization.user.forbidden=\u6743\u9650\u4e0d\u8db3
+# \u56e2\u961f\u673a\u6784\u670d\u52a1\u5305\u5173\u8054\u8868
+team.organization.service.package.shelves=\u670d\u52a1\u5305\u5df2\u4e0a\u67b6
+team.organization.service.package.offshelves=\u670d\u52a1\u5305\u5df2\u4e0b\u67b6
+team.organization.service.package.is.exists=\u56e2\u961f\u673a\u6784\u670d\u52a1\u5305\u5df2\u5b58\u5728
+#\u673a\u6784\u56e2\u961f
+organization.team.organization.name.is.exists=\u673a\u6784\u56e2\u961f\u540d\u79f0\u5df2\u5b58\u5728

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.web.module.height.obesity.dao.WhoStandardBmiSdTempMapper">
+  <delete id="delete" parameterType="org.web.module.height.obesity.entity.WhoStandardBmiSdTemp">
+    delete from who_standard_bmi_Sd_temp
+    where id = #{id}
+  </delete>
+  <insert id="insert" parameterType="org.web.module.height.obesity.entity.WhoStandardBmiSdTemp">
+    insert into who_standard_bmi_Sd_temp (id, month_age, sex, 
+      fifty_th, eighty_five_th, ninety_five_th, 
+      ninety_seven_th)
+    values (#{id}, #{monthAge}, #{sex}, 
+      #{fiftyTh}, #{eightyFiveTh}, #{ninetyFiveTh}, 
+      #{ninetySevenTh})
+  </insert>
+  <update id="update" parameterType="org.web.module.height.obesity.entity.WhoStandardBmiSdTemp">
+    update who_standard_bmi_Sd_temp
+    set month_age = #{monthAge},
+      sex = #{sex},
+      fifty_th = #{fiftyTh},
+      eighty_five_th = #{eightyFiveTh},
+      ninety_five_th = #{ninetyFiveTh},
+      ninety_seven_th = #{ninetySevenTh}
+    where id = #{id}
+  </update>
+  <select id="getOne" parameterType="org.web.module.height.obesity.entity.WhoStandardBmiSdTemp" resultType="map">
+    select id, month_age, sex, fifty_th, eighty_five_th, ninety_five_th, ninety_seven_th
+    from who_standard_bmi_Sd_temp
+    where id = #{id}
+  </select>
+  <select id="getList" parameterType="org.web.module.height.obesity.entity.WhoStandardBmiSdTemp" resultType="map">
+    select id, month_age, sex, fifty_th, eighty_five_th, ninety_five_th, ninety_seven_th
+    from who_standard_bmi_Sd_temp
+  </select>
+</mapper>

@@ -1,0 +1,211 @@
+package org.web.module.height.obesity.controller.configuration;
+
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+
+import javax.annotation.Resource;
+
+import org.service.core.api.ApiCodeEnum;
+import org.service.core.api.JsonApi;
+import org.service.core.api.MultiLine;
+import org.service.core.auth.control.RequiresAuthentication;
+import org.service.core.auth.level.Level;
+import org.service.core.entity.BaseEntity;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
+import org.web.module.height.obesity.entity.BehavioralDevelopmentConfig;
+import org.web.module.height.obesity.entity.ChildrenMeasure;
+import org.web.module.height.obesity.service.BehavioralDevelopmentConfigService;
+import org.web.module.height.obesity.service.ChildrenMeasureService;
+
+import com.github.pagehelper.Page;
+import com.github.pagehelper.PageHelper;
+
+/**
+ * Copyright © 2018 四川易迅通健康医疗技术发展有限公司. All rights reserved.
+ *
+ * @author: ChenYan
+ * @date: 2018年12月25日
+ * @description: 运动方式
+ */
+@RestController
+public class BehavioralDevelopmentConfigController {
+	@Resource
+	private BehavioralDevelopmentConfigService behavioralDevelopmentConfigService;
+	@Resource
+	private ChildrenMeasureService childrenMeasureService;
+	/**
+	 * @author: ChenYan
+	 * @date: 2018年12月25日
+	 * @param behavioralDevelopmentConfig
+	 * @param result
+	 * @return
+	 * @description: 新增运动方式
+	 */
+	@RequiresAuthentication(level = Level.OPERATION, value = { "web-module-height-obesity:behavioral-development-config:insert" })
+	@PostMapping(value = { "/behavioral/development/config" })
+	public JsonApi insert(@Validated({ BaseEntity.Insert.class }) @RequestBody BehavioralDevelopmentConfig behavioralDevelopmentConfig, BindingResult result) {
+		behavioralDevelopmentConfig.setCreateDateTime(new Date());
+		/*新增*/
+		if (behavioralDevelopmentConfigService.insert(behavioralDevelopmentConfig) > 0) {
+			return new JsonApi(ApiCodeEnum.OK);
+		}
+		return new JsonApi(ApiCodeEnum.FAIL);
+	}
+	
+	
+	/**
+	 * @author: ChenYan
+	 * @date: 2018年12月25日
+	 * @param id
+	 * @param behavioralDevelopmentConfig
+	 * @param result
+	 * @return
+	 * @description: 修改运动方式
+	 */
+	@RequiresAuthentication(level = Level.OPERATION, value = { "web-module-height-obesity:behavioral-development-config:update" })
+	@PutMapping(value = { "/behavioral/development/config/{id}" })
+	public JsonApi update(@PathVariable("id") Integer id, @Validated({ BaseEntity.Update.class }) @RequestBody BehavioralDevelopmentConfig behavioralDevelopmentConfig, BindingResult result) {
+		behavioralDevelopmentConfig.setId(id);
+		/* 检查数据是否存在 */
+		Map<String, Object> behavioralDevelopmentConfigMap = behavioralDevelopmentConfigService.getOne(behavioralDevelopmentConfig);
+		if (behavioralDevelopmentConfigMap == null ) {
+			return new JsonApi(ApiCodeEnum.NOT_FOUND);
+		}
+		if (behavioralDevelopmentConfigService.update(behavioralDevelopmentConfig) > 0) {
+			return new JsonApi(ApiCodeEnum.OK);
+		}
+		return new JsonApi(ApiCodeEnum.FAIL);
+	}
+	
+	/**
+	 * @author: ChenYan
+	 * @date: 2018年12月25日
+	 * @param id
+	 * @param behavioralDevelopmentConfig
+	 * @param result
+	 * @return
+	 * @description: 查询详情
+	 */
+	@RequiresAuthentication(level = Level.OPERATION, value = { "web-module-height-obesity:behavioral-development-config:get-detail" })
+	@GetMapping(value = { "/behavioral/development/config/{id}" })
+	public JsonApi getDetail(@PathVariable("id") Integer id, @Validated({ BaseEntity.SelectOne.class }) BehavioralDevelopmentConfig behavioralDevelopmentConfig, BindingResult result) {
+		behavioralDevelopmentConfig.setId(id);
+		Map<String, Object> behavioralDevelopmentConfigMap = behavioralDevelopmentConfigService.getOne(behavioralDevelopmentConfig);
+		if (behavioralDevelopmentConfigMap != null ) {
+			return new JsonApi(ApiCodeEnum.OK, behavioralDevelopmentConfigMap);
+		}
+		return new JsonApi(ApiCodeEnum.NOT_FOUND);
+	}
+	
+	
+	/**
+	 * @author: ChenYan
+	 * @date: 2018年12月25日
+	 * @param id
+	 * @param behavioralDevelopmentConfig
+	 * @param result
+	 * @return
+	 * @description: 删除
+	 */
+	@RequiresAuthentication(level = Level.OPERATION, value = { "web-module-height-obesity:behavioral-development-config:delete" })
+	@DeleteMapping(value = { "/behavioral/development/config/{id}" })
+	public JsonApi delete(@PathVariable("id") Integer id, @Validated({ BaseEntity.Delete.class }) BehavioralDevelopmentConfig behavioralDevelopmentConfig, BindingResult result) {
+		behavioralDevelopmentConfig.setId(id);
+		/* 检查数据是否存在 */
+		Map<String, Object> behavioralDevelopmentConfigMapMap = behavioralDevelopmentConfigService.getOne(behavioralDevelopmentConfig);
+		if (behavioralDevelopmentConfigMapMap == null) {
+			return new JsonApi(ApiCodeEnum.NOT_FOUND);
+		}
+		if (behavioralDevelopmentConfigService.delete(behavioralDevelopmentConfig) > 0) {
+			return new JsonApi(ApiCodeEnum.OK);
+		}
+		return new JsonApi(ApiCodeEnum.FAIL);
+	}
+	
+	
+	/**
+	 * @author: ChenYan
+	 * @date: 2018年12月25日
+	 * @param behavioralDevelopmentConfig
+	 * @param result
+	 * @return
+	 * @description: 查询运动方式列表
+	 */
+	@RequiresAuthentication(level = Level.OPERATION, value = { "web-module-height-obesity:behavioral-development-config:get-list" })
+	@GetMapping(value = { "/behavioral/development/configs" })
+	public JsonApi getList(@Validated({ BaseEntity.SelectAll.class })  BehavioralDevelopmentConfig behavioralDevelopmentConfig, BindingResult result) {
+		Integer configsId = null;
+		if (behavioralDevelopmentConfig.getChildrenMeasureId() != null) {
+			ChildrenMeasure childrenMeasure = new ChildrenMeasure();
+			childrenMeasure.setId(behavioralDevelopmentConfig.getChildrenMeasureId());
+			Map<String, Object> childrenMeasureMap = childrenMeasureService.getOne(childrenMeasure);
+			if (childrenMeasureMap != null ) {
+				behavioralDevelopmentConfig.setMonthAge(Integer.parseInt(childrenMeasureMap.get("monthAge").toString()));
+			}
+			// 查询对应月龄的运动方式
+			PageHelper.startPage(behavioralDevelopmentConfig.getPage(), behavioralDevelopmentConfig.getPageSize());
+			List<Map<String, Object>> monthAgeConfigList = behavioralDevelopmentConfigService.getList(behavioralDevelopmentConfig);
+			if(monthAgeConfigList != null && monthAgeConfigList.size() > 0){
+				Map<String, Object> map = monthAgeConfigList.get(0);
+				if(map != null && map.get("id") != null){
+					Integer configId = (Integer) map.get("id");
+					configsId = configId;
+				}
+			}
+		}
+		// 如果有月龄默认值，设置是否默认字段
+		Page<?> page = PageHelper.startPage(behavioralDevelopmentConfig.getPage(), behavioralDevelopmentConfig.getPageSize());
+		List<Map<String, Object>> behavioralDevelopmentConfigMapMapList = behavioralDevelopmentConfigService.getList(behavioralDevelopmentConfig);
+		if (behavioralDevelopmentConfigMapMapList != null && !behavioralDevelopmentConfigMapMapList.isEmpty()) {
+			for (Map<String, Object> map : behavioralDevelopmentConfigMapMapList) {
+				if(configsId != null && ((Integer) map.get("id") == configsId.intValue())){
+					map.put("isDefault", true);
+				}
+				map.put("isDefault", false);
+			}
+			return new JsonApi(ApiCodeEnum.OK, new MultiLine(page.getTotal(), behavioralDevelopmentConfigMapMapList));
+		}
+		return new JsonApi(ApiCodeEnum.NOT_FOUND);
+	}
+	
+	
+	/**
+	 * @author: ChenYan
+	 * @date: 2019年3月22日
+	 * @param behavioralDevelopmentConfig
+	 * @param result
+	 * @return
+	 * @description: 预警征
+	 */
+	@RequiresAuthentication(level = Level.OPERATION, value = { "web-module-height-obesity:behavioral-development-config:get-warning-list" })
+	@GetMapping(value = { "/child/warning/sign" })
+	public JsonApi getChildWarningSign(@Validated({ BaseEntity.SelectOne.class })  BehavioralDevelopmentConfig behavioralDevelopmentConfig, BindingResult result) {
+		if (behavioralDevelopmentConfig.getChildrenMeasureId() != null) {
+			ChildrenMeasure childrenMeasure = new ChildrenMeasure();
+			childrenMeasure.setId(behavioralDevelopmentConfig.getChildrenMeasureId());
+			Map<String, Object> childrenMeasureMap = childrenMeasureService.getOne(childrenMeasure);
+			if (childrenMeasureMap != null ) {
+				behavioralDevelopmentConfig.setMonthAge(Integer.parseInt(childrenMeasureMap.get("monthAge").toString()));
+			}
+		}
+			Map<String, Object> behavioralDevelopmentConfigMapMapList = behavioralDevelopmentConfigService.getChildWarningSign(behavioralDevelopmentConfig);
+			if (behavioralDevelopmentConfigMapMapList != null ) {
+				return new JsonApi(ApiCodeEnum.OK, behavioralDevelopmentConfigMapMapList);
+			}
+			return new JsonApi(ApiCodeEnum.NOT_FOUND);
+}
+		
+		
+	
+	
+	
+}

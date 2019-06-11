@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.wechat.module.height.obesity.dao.FoodRecipesConfigHasBaseFoodMapper">
+
+	<delete id="delete" parameterType="org.wechat.module.height.obesity.entity.FoodRecipesConfigHasBaseFood">
+	DELETE
+	FROM
+		base_food_recipes_config_has_base_food
+	WHERE
+		id = #{id}
+	</delete>
+	<!-- 批量新增菜谱与儿童关联表 -->
+	<insert id="batchInsert" parameterType="list" keyProperty="id" useGeneratedKeys="true">
+    INSERT INTO base_food_recipes_config_has_base_food 
+     	(  food_recipes_code, food_recipes_name, food_code,food_name,number,base_food_recipes_has_base_food_recipes_config_id
+      )
+    VALUES
+		<foreach collection="list" separator="," item="foodRecipesConfigs">
+     ( #{foodRecipesConfigs.foodRecipesCode}, #{foodRecipesConfigs.foodRecipesName},#{foodRecipesConfigs.foodCode},#{foodRecipesConfigs.foodName} , #{foodRecipesConfigs.number},#{foodRecipesConfigs.foodRecipesHasBaseFoodRecipesConfigId})
+		</foreach>
+	</insert>
+	<insert id="insert" parameterType="org.wechat.module.height.obesity.entity.FoodRecipesConfigHasBaseFood" keyProperty="id" useGeneratedKeys="true">
+    INSERT INTO base_food_recipes_config_has_base_food
+    	 ( food_recipes_config_id, food_id, number)
+    VALUES 
+    	( #{foodRecipesConfigId}, #{foodId},  #{number})
+	</insert>
+
+	<update id="update" parameterType="org.wechat.module.height.obesity.entity.FoodRecipesConfigHasBaseFood">
+    UPDATE base_food_recipes_config_has_base_food SET id=#{id}
+		<if test="foodRecipesConfigId!=null">
+	       ,food_recipes_config_id = #{foodRecipesConfigId}
+		</if>
+		<if test="foodId!=null">
+	        ,food_id = #{foodId}
+		</if>
+		<if test="number!=null">
+	      , number = #{number}
+		</if>
+     WHERE
+     	 id = #{id}
+	</update>
+
+	<select id="getOne" parameterType="org.wechat.module.height.obesity.entity.FoodRecipesConfigHasBaseFood" resultType="map">
+	SELECT
+		id,
+		food_recipes_config_id foodRecipesConfigId,
+		food_id foodId,
+		number
+	FROM
+		base_food_recipes_config_has_base_food
+	WHERE
+		id = #{id}
+	</select>
+
+	<select id="getList" parameterType="org.wechat.module.height.obesity.entity.FoodRecipesConfigHasBaseFood" resultType="map">
+	 SELECT
+			id,
+			food_recipes_code foodRecipesCode,
+			food_recipes_name foodRecipesName,
+			food_code foodCode,
+			food_name foodName,
+			number,
+			base_food_recipes_has_base_food_recipes_config_id foodRecipesHasBaseFoodRecipesConfigId
+		FROM
+			base_food_recipes_config_has_base_food
+		<where>
+			<if test="foodRecipesHasBaseFoodRecipesConfigId!=null">base_food_recipes_has_base_food_recipes_config_id=#{foodRecipesHasBaseFoodRecipesConfigId}</if>
+		</where>
+	</select>
+</mapper>

@@ -1,0 +1,105 @@
+package org.web.module.height.obesity.controller;
+
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+
+import javax.annotation.Resource;
+
+import org.service.core.api.ApiCodeEnum;
+import org.service.core.api.JsonApi;
+import org.service.core.api.MultiLine;
+import org.service.core.auth.control.RequiresAuthentication;
+import org.service.core.auth.level.Level;
+import org.service.core.entity.BaseEntity;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RestController;
+import org.web.module.height.obesity.entity.InfluenceHeightDisease;
+import org.web.module.height.obesity.global.BaseGlobal;
+import org.web.module.height.obesity.message.Prompt;
+import org.web.module.height.obesity.service.InfluenceHeightDiseaseService;
+
+import com.github.pagehelper.Page;
+import com.github.pagehelper.PageHelper;
+
+@RestController
+public class InfluenceHeightDiseaseController {
+	
+	@Resource
+	private InfluenceHeightDiseaseService  influenceHeightDiseaseService;
+
+	/**
+	 * @author: ChenYan
+	 * @date: 2019年1月17日
+	 * @param influenceHeightDisease
+	 * @param result
+	 * @return
+	 * @description: 新增用户影响身高的疾病
+	 */
+	@RequiresAuthentication(level = Level.OPERATION, value = { "web-module-height-obesity:influence-height-disease:insert" })
+	@PostMapping(value = { "/influence/height/disease" })
+	@Transactional
+	public JsonApi insert(@Validated({ BaseEntity.Insert.class }) @RequestBody InfluenceHeightDisease influenceHeightDisease, BindingResult result, @RequestHeader(required = true, value = BaseGlobal.TOKEN_FLAG) String token) {
+		List<InfluenceHeightDisease> influenceHeightDiseases=influenceHeightDisease.getInfluenceHeightDiseases();
+		/*验证数据不能为空*/
+		for (InfluenceHeightDisease influence : influenceHeightDiseases) {
+			if (influence.getName()==null) {
+				  return new JsonApi(ApiCodeEnum.NOT_FOUND).setMsg(Prompt.bundle("name.is.notblank.valid"));
+			}
+			if (influence.getCode()==null) {
+				 return new JsonApi(ApiCodeEnum.NOT_FOUND).setMsg(Prompt.bundle("code.is.notblank.valid"));
+			}
+		}
+		/*判断是否有数据，有 删除*/
+		int userId=influenceHeightDisease.getUserId();
+		influenceHeightDisease.setUserId(userId);
+		List<Map<String, Object>> influenceHeightDiseaseList =influenceHeightDiseaseService.getList(influenceHeightDisease);
+		if (influenceHeightDiseaseList!=null &&  influenceHeightDiseaseList.size()>0) {
+			
+			if (influenceHeightDiseaseService.delete(influenceHeightDisease)<0) {
+				return new JsonApi(ApiCodeEnum.FAIL);
+			}
+		}
+		if (influenceHeightDiseases.isEmpty()) {
+			return new JsonApi(ApiCodeEnum.OK);
+		}
+		/*重新批量添加*/
+		for (InfluenceHeightDisease influenceHeight : influenceHeightDiseases) {
+			influenceHeight.setCreateDateTime(new Date());
+			influenceHeight.setUserId(userId);
+		}
+		if (influenceHeightDiseaseService.batchInsert(influenceHeightDiseases)!=influenceHeightDiseases.size()) {
+	         	throw new RuntimeException();
+		}
+		return new JsonApi(ApiCodeEnum.OK);
+	}
+	
+	
+	/**
+	 * @author: ChenYan
+	 * @date: 2019年1月17日
+	 * @param userId
+	 * @param influenceHeightDisease
+	 * @param result
+	 * @return
+	 * @description: 查询用户的影响身高的疾病
+	 */
+	@RequiresAuthentication(level = Level.OPERATION, value = { "web-module-height-obesity:influence-height-disease:get-list" })
+	@GetMapping(value = { "/influence/height/disease/{userId}" })
+	public JsonApi getList(@PathVariable("userId") Integer userId,@Validated({ BaseEntity.SelectAll.class })  InfluenceHeightDisease influenceHeightDisease, BindingResult result, @RequestHeader(required = true, value = BaseGlobal.TOKEN_FLAG) String token) {
+		influenceHeightDisease.setUserId(userId);
+		Page<?> page = PageHelper.startPage(influenceHeightDisease.getPage(), influenceHeightDisease.getPageSize());
+		List<Map<String, Object>> influenceHeightDiseaseList = influenceHeightDiseaseService.getList(influenceHeightDisease);
+		if (influenceHeightDiseaseList != null && !influenceHeightDiseaseList.isEmpty()) {
+			return new JsonApi(ApiCodeEnum.OK, new MultiLine(page.getTotal(), influenceHeightDiseaseList));
+		}
+		return new JsonApi(ApiCodeEnum.NOT_FOUND);
+	}
+}

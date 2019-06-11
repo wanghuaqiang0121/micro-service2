@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.web.module.base.dao.permission.team.OrganizationTeamRolePermissionMapper">
+  
+  <!-- 删除团队角色关联 -->
+  <delete id="delete" parameterType="org.web.module.base.domain.permission.team.OrganizationTeamRolePermission">
+	DELETE
+	FROM
+		base_organization_team_role_permission
+	WHERE
+		organization_team_role_id = #{organizationTeamRoleId} and organization_team_permission_id=#{organizationTeamPermissionId}  
+  </delete>
+  
+  <!--  添加团队角色权限关联 -->
+  <insert id="insert" parameterType="org.web.module.base.domain.permission.team.OrganizationTeamRolePermission" useGeneratedKeys="true" keyProperty="id">
+	 INSERT INTO base_organization_team_role_permission (organization_team_role_id,organization_team_permission_id)
+	VALUES (#{organizationTeamRoleId}, #{organizationTeamPermissionId})   
+  </insert>
+  
+  <!-- 团队角色关联重复 -->
+  <select id="getRepeat" parameterType="org.web.module.base.domain.permission.team.OrganizationTeamRolePermission" resultType="map">
+	 SELECT
+		id,
+		organization_team_role_id,
+		organization_team_permission_id
+	FROM
+		base_organization_team_role_permission
+	WHERE
+		organization_team_role_id = #{organizationTeamRoleId} and organization_team_permission_id=#{organizationTeamPermissionId}   
+  </select>
+  
+  <!-- 团队角色关联详情 -->
+  <select id="getOne" parameterType="org.web.module.base.domain.permission.team.OrganizationTeamRolePermission" resultType="map">
+	SELECT
+		id,
+		organization_team_role_id,
+		organization_team_permission_id
+	FROM
+		base_organization_team_role_permission
+	WHERE
+		 id = #{id}
+  </select>
+  
+  <!-- 团队角色（拥有未拥有）的权限 -->
+  <select id="getTeamRoleHaveAndNotHavePermissions" parameterType="org.web.module.base.domain.permission.team.OrganizationTeamRolePermission" resultType="map">
+		SELECT
+			botp.id,
+			botp.`code`,
+			botp.`name`,
+			botp.remark,
+			botp.create_date createDate,
+			botp.is_used isUsed,
+		IF (botrp.id IS NULL, FALSE, TRUE) isChoose
+		FROM
+			base_organization_team_permission botp
+		LEFT JOIN base_organization_team_role_permission botrp ON botrp.organization_team_permission_id = botp.id
+		AND botrp.organization_team_role_id = #{organizationTeamRoleId}
+		WHERE
+			botp.is_used = TRUE
+			<if test="name!=null and name!=''">
+				and botp.`name` like CONCAT(CONCAT('%', #{name}), '%')
+			</if>
+			<if test="code!=null and code!=''">
+				and botp.`code` like CONCAT(CONCAT('%', #{code}), '%')
+			</if>
+  </select>
+</mapper>

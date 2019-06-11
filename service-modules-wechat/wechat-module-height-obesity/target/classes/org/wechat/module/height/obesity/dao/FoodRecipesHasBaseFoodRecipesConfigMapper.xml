@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.wechat.module.height.obesity.dao.FoodRecipesHasBaseFoodRecipesConfigMapper">
+
+
+  <insert id="insert" parameterType="org.wechat.module.height.obesity.entity.FoodRecipesHasBaseFoodRecipesConfig" keyProperty="id" useGeneratedKeys="true">
+  INSERT INTO base_food_recipes_has_base_food_recipes_config 
+     	(  food_recipes_config_id, food_recipes_code, food_recipes_name
+      )
+    VALUES
+     ( #{foodRecipesConfigId},#{foodRecipesCode},#{foodRecipesName})
+  </insert>
+
+  <select id="getList" parameterType="org.wechat.module.height.obesity.entity.FoodRecipesHasBaseFoodRecipesConfig" resultType="map">
+    SELECT c.id,c.food_recipes_config_id foodRecipesConfigId,c.food_recipes_code foodRecipesCode,c.food_recipes_name foodRecipesName,
+    b.code_type codeType,
+    b.code_name codeName,
+    b.id as foodRecipesConfigId
+    FROM base_food_recipes_has_base_food_recipes_config as c
+    INNER JOIN base_food_recipes_config as b
+    ON c.food_recipes_config_id = b.id  
+    WHERE b.name=#{name} AND b.code_type=#{codeType}
+  </select>
+  <select id="getMealTimes" parameterType="org.wechat.module.height.obesity.entity.FoodRecipesHasBaseFoodRecipesConfig" resultType="map">
+    SELECT id,type,`code`,`value`,`desc`,p_code pCode
+    FROM base_code_table
+    WHERE type='meal_times'
+  </select>
+</mapper>

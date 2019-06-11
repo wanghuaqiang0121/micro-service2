@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.wechat.module.height.obesity.dao.HisAllergicHistoryMapper">
+  
+  <delete id="delete" parameterType="org.wechat.module.height.obesity.entity.HisAllergicHistory">
+    delete from his_allergic_history
+    where user_id=#{userId}
+  </delete>
+  
+ <insert   id="batchInsert"  parameterType="list"   keyProperty="id"  useGeneratedKeys="true">
+    INSERT INTO his_allergic_history 
+     	(user_id,dic_code,dic_value,remark,create_by,create_date,modified_by,status,modified_date
+      )
+    VALUES
+    <foreach collection="list"  separator=","  item="hisAllergicHistorys">
+     (#{hisAllergicHistorys.userId},#{hisAllergicHistorys.dicCode},#{hisAllergicHistorys.dicValue},#{hisAllergicHistorys.remark},#{hisAllergicHistorys.createBy},
+     #{hisAllergicHistorys.createDate},#{hisAllergicHistorys.modifiedBy},#{hisAllergicHistorys.status},#{hisAllergicHistorys.modifiedDate})
+    </foreach>
+      </insert>
+      
+  
+  <select id="getList" parameterType="org.wechat.module.height.obesity.entity.HisAllergicHistory" resultType="map">
+	SELECT
+		id,
+		user_id userId,
+		dic_code dicCode,
+		dic_value dicValue,
+		remark,
+		create_by createBy,
+		create_date createDate,
+		modified_by modifiedBy,
+		`status`,
+		modified_date modifiedDate
+	FROM
+		his_allergic_history
+	WHERE user_id=#{userId}
+  </select>
+</mapper>

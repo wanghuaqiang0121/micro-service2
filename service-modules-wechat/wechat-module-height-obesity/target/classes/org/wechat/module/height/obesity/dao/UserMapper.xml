@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.wechat.module.height.obesity.dao.UserMapper">
+
+  <delete id="delete" parameterType="org.wechat.module.height.obesity.entity.User">
+    delete from base_user
+    where id = #{id}
+  </delete>
+  
+  <insert id="insert" parameterType="org.wechat.module.height.obesity.entity.User"  keyProperty="id"  useGeneratedKeys="true">
+    insert into base_user (id, name, sex, 
+      id_card, birthday, phone, 
+      phone_status, photo, province, 
+      city, area, street, 
+      lng, lat, address, status, 
+      is_bind_wechat, source, terminal_source, 
+      create_date, update_date, remark
+      )
+    values (#{id}, #{name}, #{sex}, 
+      #{idCard}, #{birthday}, #{phone}, 
+      #{phoneStatus}, #{photo}, #{province}, 
+      #{city}, #{area}, #{street}, 
+      #{lng}, #{lat}, #{address}, #{status}, 
+      #{isBindWechat,jdbcType=BIT}, #{source}, #{terminalSource}, 
+      #{createDate}, #{updateDate}, #{remark}
+      )
+  </insert>
+  <update id="update" parameterType="org.wechat.module.height.obesity.entity.User">
+    update base_user
+    set name = #{name},
+      sex = #{sex},
+      id_card = #{idCard},
+      birthday = #{birthday},
+      phone = #{phone},
+      phone_status = #{phoneStatus},
+      photo = #{photo},
+      province = #{province},
+      city = #{city},
+      area = #{area},
+      street = #{street},
+      lng = #{lng},
+      lat = #{lat},
+      address = #{address},
+      status = #{status},
+      is_bind_wechat = #{isBindWechat},
+      source = #{source},
+      terminal_source = #{terminalSource},
+      create_date = #{createDate},
+      update_date = #{updateDate},
+      remark = #{remark}
+    where id = #{id}
+  </update>
+  <select id="getOne" parameterType="org.wechat.module.height.obesity.entity.User"  resultType="map">
+    SELECT id, name, sex, id_card, birthday, phone, phone_status, photo, province, city,
+    area, street, lng, lat, address, status, is_bind_wechat, source, terminal_source,
+    create_date, update_date, remark,TIMESTAMPDIFF(MONTH,birthday,NOW()) monthAge
+    FROM base_user
+    WHERE id = #{id}
+  </select>
+  <select id="getNewOne" parameterType="org.wechat.module.height.obesity.entity.User"  resultType="map">
+    SELECT bu.id,buug.user_group_id groupId, name, sex, id_card, birthday, bu.phone, phone_status, photo, province, city,
+    area, street, lng, lat, address, status, is_bind_wechat, source, terminal_source,
+    bu.create_date, update_date, bu.remark,TIMESTAMPDIFF(MONTH,birthday,NOW()) monthAge
+    FROM base_user bu
+    INNER JOIN base_user_user_group buug ON bu.id = buug.user_id
+    WHERE bu.id = #{id}
+  </select>
+  <select id="getList" parameterType="org.wechat.module.height.obesity.entity.User"  resultType="map">
+    select id, name, sex, id_card, birthday, phone, phone_status, photo, province, city,
+    area, street, lng, lat, address, status, is_bind_wechat, source, terminal_source,
+    create_date, update_date, remark
+    from base_user
+  </select>
+  <select id="getChildInfo" parameterType="org.wechat.module.height.obesity.entity.User"  resultType="map">
+    select bu.id, bu.name, bu.sex, bu.id_card idCard, bu.birthday, bu.phone, buci.birth_height birthHeight,buci.birth_weight birthWeight,
+    buci.father_height fatherHeight,buci.father_weight fatherWeight,buci.mother_height motherHeight,buci.mother_weight motherWeight
+    from base_user bu
+    INNER JOIN base_user_child_info buci ON bu.id = buci.user_id
+    WHERE bu.id = #{id}
+  </select>
+  <select id="getChildProtectionNo" parameterType="org.wechat.module.height.obesity.entity.User"  resultType="map">
+    select buc.certificate_number certificateNumber
+    from base_code_table bct
+    INNER JOIN base_user_certificate buc ON bct.code = buc.certificate_type
+    WHERE buc.user_id = #{id} AND bct.type=#{type} AND bct.code=#{code}
+  </select>
+  <select id="getServerPackage" parameterType="org.wechat.module.height.obesity.entity.User"  resultType="map">
+    select bosp.name,bo.name,buspo.create_date createDate
+    from base_user_service_package_order buspo
+    LEFT JOIN base_organization_service_package bosp ON buspo.organization_service_package_id = bosp.id
+    LEFT JOIN base_service_package_type bspt ON bosp.service_package_type_id = bspt.id
+    LEFT JOIN base_organization bo ON bosp.organization_id = bo.id
+    WHERE bspt.code = #{type} AND buspo.user_id = #{id}
+    ORDER BY createDate DESC  LIMIT 1
+  </select>
+  <select id="getHighrisk" parameterType="org.wechat.module.height.obesity.entity.User"  resultType="map">
+    select id,user_id,high_risk_code highRiskCode,high_risk_name highriskName,create_date createDate
+    from base_child_high_risk
+    WHERE user_id=#{id}
+  </select>
+  <select id="getAllergy" parameterType="org.wechat.module.height.obesity.entity.User"  resultType="map">
+    select id,user_id,status,dic_value dicValue,dic_code dicCode,remark,create_by createBy,create_date createdate,modified_by modifiedBy,modified_date modifiedDate
+    from his_allergic_history
+    WHERE user_id=#{id}
+  </select>
+  <select id="getWHO" parameterType="org.wechat.module.height.obesity.entity.User"  resultType="map">
+    select type,plus_three_standard plusThreeStandard,plus_two_standard plusTwoStandard,plus_one_standard plusOneStandard,median_standard medianStandard,
+    sub_one_standard subOneStandard,sub_two_standard subTwoStandard,sub_three_standard subThreeStandard
+    from base_child_who_standard
+    WHERE sex=#{sex} AND month_age=#{monthAge}
+  </select>
+  <select id="getGrowth" parameterType="org.wechat.module.height.obesity.entity.User"  resultType="map">
+    select id,physical_examination_date physicalExaminationDate,next_physical_examination_date nextPphysicalExaminationDate,height,weight,head_circumference headCircumference,
+    physical_development_evaluation physicalDevelopmentEvaluation,month_age monthAge,guidance guidance,action_behavior actionBehavior,environmental_effect environmentalEffect,
+    infant_care infantCare,nutritive_diet nutritiveDiet,language_intelligence languageIntelligence,create_date createDate
+    from base_child_healthcare_records
+    WHERE user_id=#{id}
+    ORDER BY createDate DESC LIMIT 1
+  </select>
+  <select id="getTemplate" parameterType="org.wechat.module.height.obesity.entity.User"  resultType="map">
+    select id,month_age monthAge,guidance,action_behavior actionBehavior,environmental_effect environmentalEffect,infant_care infantCare,nutritive_diet nutritiveDiet,
+    language_intelligence languageIntelligence
+    from base_child_health_guidance_template
+    WHERE month_age=#{monthAge}
+  </select>
+  <select id="getNewRecord" parameterType="org.wechat.module.height.obesity.entity.User"  resultType="map">
+    select month_age monthAge
+    from base_child_healthcare_records
+    WHERE user_id=#{id}
+    ORDER BY monthAge DESC LIMIT 1
+  </select>
+  <select id="getMedian" parameterType="org.wechat.module.height.obesity.entity.User"  resultType="map">
+    select month_age x,median_standard y
+    from base_child_who_standard
+    WHERE sex=#{sex} AND type=#{heightOrWeightType} AND month_age &lt;= 37
+  </select>
+  <select id="getSubTwoStandard" parameterType="org.wechat.module.height.obesity.entity.User"  resultType="map">
+    select month_age x,sub_two_standard y
+    from base_child_who_standard
+    WHERE sex=#{sex} AND type=#{heightOrWeightType} AND month_age &lt;= 37
+  </select>
+  <select id="getPlusTwoStandard" parameterType="org.wechat.module.height.obesity.entity.User"  resultType="map">
+    select month_age x,plus_two_standard y
+    from base_child_who_standard
+    WHERE sex=#{sex} AND type=#{heightOrWeightType} AND month_age &lt;= 37
+  </select>
+  <select id="getChildData" parameterType="org.wechat.module.height.obesity.entity.User"  resultType="map">
+    select month_age x
+    <if test="heightOrWeightType==1">,height y</if>
+    <if test="heightOrWeightType==2">,weight y</if>
+    from base_child_healthcare_records
+    WHERE user_id=#{id} AND month_age &lt;= 37
+  </select>
+</mapper>

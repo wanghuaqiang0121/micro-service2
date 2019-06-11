@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.wechat.module.height.obesity.dao.SleepConfigMapper">
+  <delete id="delete" parameterType="org.wechat.module.height.obesity.entity.SleepConfig">
+	DELETE
+	FROM
+		base_sleep_config
+	WHERE
+		id = #{id}
+  </delete>
+  
+  <insert id="insert" parameterType="org.wechat.module.height.obesity.entity.SleepConfig" keyProperty="id"  useGeneratedKeys="true">
+    INSERT INTO base_sleep_config 
+   		 (sex, month_age_start, month_age_end, remark)
+    VALUES 
+   		 (#{sex}, #{monthAgeStart},  #{monthAgeEnd}, #{remark})
+  </insert>
+  
+  <update id="update" parameterType="org.wechat.module.height.obesity.entity.SleepConfig">
+    UPDATE base_sleep_config SET id=#{id}
+	    <if test="sex!=null">
+	     ,sex = #{sex}
+	    </if>
+	     <if test="monthAgeStart!=null">
+	     , month_age_start = #{monthAgeStart}
+	    </if>
+	     <if test="monthAgeEnd!=null">
+	      ,month_age_end = #{monthAgeEnd}
+	    </if>
+	     <if test="remark!=null">
+	     ,remark = #{remark}
+	    </if>
+    WHERE
+    	 id = #{id}
+  </update>
+  
+  <select id="getOne" parameterType="org.wechat.module.height.obesity.entity.SleepConfig" resultType="map">
+	SELECT
+		id,
+		sex,
+		month_age_start monthAgeStart,
+		month_age_end monthAgeEnd,
+		remark
+	FROM
+		base_sleep_config
+	WHERE
+		id = #{id}
+  </select>
+  
+  <select id="getList" parameterType="org.wechat.module.height.obesity.entity.SleepConfig" resultType="map">
+	SELECT
+		id,
+		sex,
+		month_age_start monthAgeStart,
+		month_age_end monthAgeEnd,
+		remark
+	FROM
+		base_sleep_config
+  </select>
+</mapper>

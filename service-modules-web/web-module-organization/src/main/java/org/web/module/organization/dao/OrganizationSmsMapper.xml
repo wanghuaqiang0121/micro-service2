@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.web.module.organization.dao.OrganizationSmsMapper">
+  
+  <insert id="insert" parameterType="org.web.module.organization.domain.OrganizationSms">
+    INSERT INTO base_organization_sms (sms_template_id, type, organization_id, organization_user_id, called_number,consume_times, content, status,  send_date, create_date, message)
+    VALUES ( #{smsTemplateId}, #{type},  #{organizationId}, #{organizationUserId}, #{calledNumber},  #{consumeTimes}, #{content}, #{status},  #{sendDate}, #{createDate}, #{message} )
+  </insert>
+  
+</mapper>

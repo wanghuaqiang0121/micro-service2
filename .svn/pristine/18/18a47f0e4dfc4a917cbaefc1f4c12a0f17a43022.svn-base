@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.wechat.module.height.obesity.dao.ChoiceItemMapper">
+
+  <delete id="delete" parameterType="org.wechat.module.height.obesity.entity.ChoiceItem">
+	DELETE
+	FROM
+		base_choice_item
+	WHERE
+		id = #{id} 
+  </delete>
+  
+  <insert id="insert" parameterType="org.wechat.module.height.obesity.entity.ChoiceItem"  keyProperty="id"  useGeneratedKeys="true">
+     INSERT INTO  base_choice_item 
+       	( choice_question_id, item, sort, create_date_time, remark )
+    VALUES
+    	 (#{choiceQuestionId}, #{item}, #{sort}, #{createDateTime}, #{remark} )
+  </insert>
+  
+  <update id="update" parameterType="org.wechat.module.height.obesity.entity.ChoiceItem">
+	UPDATE base_choice_item SET id=#{id}
+		<if test="choiceQuestionId!=null">
+		 choice_question_id = #{choiceQuestionId},
+		</if>
+		<if test="item!=null and item!=''">
+			,item = #{item}
+		</if>
+		<if test="sort!=null">
+		  ,sort = #{sort}
+		</if>
+		<if test="remark!=null">
+			,remark = #{remark}
+	    </if>
+	WHERE
+		id = #{id}
+  </update>
+  
+  <select id="getOne" parameterType="org.wechat.module.height.obesity.entity.ChoiceItem" resultType="map">
+	SELECT
+		id,
+		choice_question_id choiceQuestionId,
+		item,
+		sort,
+		create_date_time createDateTime,
+		remark
+	FROM
+		base_choice_item
+	WHERE
+		id = #{id}
+  </select>
+  
+  <select id="selectAll" parameterType="org.wechat.module.height.obesity.entity.ChoiceItem" resultType="map">
+	 SELECT
+			id,
+			choice_question_id choiceQuestionId,
+			item,
+			sort,
+			create_date_time createDateTime,
+			remark
+		FROM
+			base_choice_item
+  </select>
+</mapper>

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.web.module.height.obesity.dao.InfluenceHeightDiseaseMapper">
+
+  <delete id="delete" parameterType="org.web.module.height.obesity.entity.InfluenceHeightDisease">
+	DELETE
+	FROM
+		influence_height_disease
+	WHERE
+		user_id = #{userId}  
+  </delete>
+  
+    <!-- 批量新增菜谱与儿童关联表 -->
+  <insert   id="batchInsert"  parameterType="list"   keyProperty="id"  useGeneratedKeys="true">
+    INSERT INTO influence_height_disease 
+     	(user_id,name,code,create_date_time
+      )
+    VALUES
+    <foreach collection="list"  separator=","  item="influenceHeightDiseases">
+     (#{influenceHeightDiseases.userId},#{influenceHeightDiseases.name},#{influenceHeightDiseases.code},#{influenceHeightDiseases.createDateTime})
+    </foreach>
+      </insert>
+    
+    <select id="getList" parameterType="org.web.module.height.obesity.entity.InfluenceHeightDisease" resultType="map">
+	SELECT
+		id,
+		user_id userId,
+		`name`,
+		`code`,
+		create_date_time createDateTime
+	FROM
+		influence_height_disease
+	WHERE
+		user_id=#{userId}
+    </select>
+
+  
+  </mapper>

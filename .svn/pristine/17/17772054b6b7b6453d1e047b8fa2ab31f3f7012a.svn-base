@@ -1,0 +1,356 @@
+package org.web.module.bone.age.domain;
+
+import java.util.Date;
+import org.service.core.entity.BaseEntity;
+
+public class BaseAgeOrder extends BaseEntity {
+    private Integer id;
+
+    private Integer diagnosisId;
+
+    private String conclusion;
+
+    private String description;
+
+    private Integer baseMedicalImagingDataId;
+
+    private Date createTime;
+
+    private Integer checkPoint;
+
+    private String xRay;
+
+    private String xRayNo;
+
+    private Integer algorithm;
+
+    private String radiusLevel;
+
+    private String ulnaLevel;
+
+    private String metacarpal1Level;
+
+    private String metacarpal3Level;
+
+    private String metacarpal5Level;
+
+    private String nearPhalanges1Level;
+
+    private String nearPhalanges3Level;
+
+    private String nearPhalanges5Level;
+
+    private String inPhalanges3Level;
+
+    private String inPhalanges5Level;
+
+    private String farPhalanges1Level;
+
+    private String farPhalanges3LevelbaseAgeOrdercol;
+
+    private String farPhalanges5Level;
+
+    private String headBoneLevel;
+
+    private String hamateLevel;
+
+    private String pyramidalBoneLevel;
+
+    private String moonBoneLevel;
+
+    private String scaphoidLevel;
+
+    private String mostOfTheHornsLevel;
+
+    private String smallPolyhornsLevel;
+
+    private Float boneScore;
+
+    private String explain;
+
+    private String advise;
+
+    private String conclusions;
+
+    private String base64BonePlot;
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public Integer getDiagnosisId() {
+        return diagnosisId;
+    }
+
+    public void setDiagnosisId(Integer diagnosisId) {
+        this.diagnosisId = diagnosisId;
+    }
+
+    public String getConclusion() {
+        return conclusion;
+    }
+
+    public void setConclusion(String conclusion) {
+        this.conclusion = conclusion;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public Integer getBaseMedicalImagingDataId() {
+        return baseMedicalImagingDataId;
+    }
+
+    public void setBaseMedicalImagingDataId(Integer baseMedicalImagingDataId) {
+        this.baseMedicalImagingDataId = baseMedicalImagingDataId;
+    }
+
+    public Date getCreateTime() {
+        return createTime;
+    }
+
+    public void setCreateTime(Date createTime) {
+        this.createTime = createTime;
+    }
+
+    public Integer getCheckPoint() {
+        return checkPoint;
+    }
+
+    public void setCheckPoint(Integer checkPoint) {
+        this.checkPoint = checkPoint;
+    }
+
+    public String getxRay() {
+        return xRay;
+    }
+
+    public void setxRay(String xRay) {
+        this.xRay = xRay;
+    }
+
+    public String getxRayNo() {
+        return xRayNo;
+    }
+
+    public void setxRayNo(String xRayNo) {
+        this.xRayNo = xRayNo;
+    }
+
+    public Integer getAlgorithm() {
+        return algorithm;
+    }
+
+    public void setAlgorithm(Integer algorithm) {
+        this.algorithm = algorithm;
+    }
+
+    public String getRadiusLevel() {
+        return radiusLevel;
+    }
+
+    public void setRadiusLevel(String radiusLevel) {
+        this.radiusLevel = radiusLevel;
+    }
+
+    public String getUlnaLevel() {
+        return ulnaLevel;
+    }
+
+    public void setUlnaLevel(String ulnaLevel) {
+        this.ulnaLevel = ulnaLevel;
+    }
+
+    public String getMetacarpal1Level() {
+        return metacarpal1Level;
+    }
+
+    public void setMetacarpal1Level(String metacarpal1Level) {
+        this.metacarpal1Level = metacarpal1Level;
+    }
+
+    public String getMetacarpal3Level() {
+        return metacarpal3Level;
+    }
+
+    public void setMetacarpal3Level(String metacarpal3Level) {
+        this.metacarpal3Level = metacarpal3Level;
+    }
+
+    public String getMetacarpal5Level() {
+        return metacarpal5Level;
+    }
+
+    public void setMetacarpal5Level(String metacarpal5Level) {
+        this.metacarpal5Level = metacarpal5Level;
+    }
+
+    public String getNearPhalanges1Level() {
+        return nearPhalanges1Level;
+    }
+
+    public void setNearPhalanges1Level(String nearPhalanges1Level) {
+        this.nearPhalanges1Level = nearPhalanges1Level;
+    }
+
+    public String getNearPhalanges3Level() {
+        return nearPhalanges3Level;
+    }
+
+    public void setNearPhalanges3Level(String nearPhalanges3Level) {
+        this.nearPhalanges3Level = nearPhalanges3Level;
+    }
+
+    public String getNearPhalanges5Level() {
+        return nearPhalanges5Level;
+    }
+
+    public void setNearPhalanges5Level(String nearPhalanges5Level) {
+        this.nearPhalanges5Level = nearPhalanges5Level;
+    }
+
+    public String getInPhalanges3Level() {
+        return inPhalanges3Level;
+    }
+
+    public void setInPhalanges3Level(String inPhalanges3Level) {
+        this.inPhalanges3Level = inPhalanges3Level;
+    }
+
+    public String getInPhalanges5Level() {
+        return inPhalanges5Level;
+    }
+
+    public void setInPhalanges5Level(String inPhalanges5Level) {
+        this.inPhalanges5Level = inPhalanges5Level;
+    }
+
+    public String getFarPhalanges1Level() {
+        return farPhalanges1Level;
+    }
+
+    public void setFarPhalanges1Level(String farPhalanges1Level) {
+        this.farPhalanges1Level = farPhalanges1Level;
+    }
+
+    public String getFarPhalanges3LevelbaseAgeOrdercol() {
+        return farPhalanges3LevelbaseAgeOrdercol;
+    }
+
+    public void setFarPhalanges3LevelbaseAgeOrdercol(String farPhalanges3LevelbaseAgeOrdercol) {
+        this.farPhalanges3LevelbaseAgeOrdercol = farPhalanges3LevelbaseAgeOrdercol;
+    }
+
+    public String getFarPhalanges5Level() {
+        return farPhalanges5Level;
+    }
+
+    public void setFarPhalanges5Level(String farPhalanges5Level) {
+        this.farPhalanges5Level = farPhalanges5Level;
+    }
+
+    public String getHeadBoneLevel() {
+        return headBoneLevel;
+    }
+
+    public void setHeadBoneLevel(String headBoneLevel) {
+        this.headBoneLevel = headBoneLevel;
+    }
+
+    public String getHamateLevel() {
+        return hamateLevel;
+    }
+
+    public void setHamateLevel(String hamateLevel) {
+        this.hamateLevel = hamateLevel;
+    }
+
+    public String getPyramidalBoneLevel() {
+        return pyramidalBoneLevel;
+    }
+
+    public void setPyramidalBoneLevel(String pyramidalBoneLevel) {
+        this.pyramidalBoneLevel = pyramidalBoneLevel;
+    }
+
+    public String getMoonBoneLevel() {
+        return moonBoneLevel;
+    }
+
+    public void setMoonBoneLevel(String moonBoneLevel) {
+        this.moonBoneLevel = moonBoneLevel;
+    }
+
+    public String getScaphoidLevel() {
+        return scaphoidLevel;
+    }
+
+    public void setScaphoidLevel(String scaphoidLevel) {
+        this.scaphoidLevel = scaphoidLevel;
+    }
+
+    public String getMostOfTheHornsLevel() {
+        return mostOfTheHornsLevel;
+    }
+
+    public void setMostOfTheHornsLevel(String mostOfTheHornsLevel) {
+        this.mostOfTheHornsLevel = mostOfTheHornsLevel;
+    }
+
+    public String getSmallPolyhornsLevel() {
+        return smallPolyhornsLevel;
+    }
+
+    public void setSmallPolyhornsLevel(String smallPolyhornsLevel) {
+        this.smallPolyhornsLevel = smallPolyhornsLevel;
+    }
+
+    public Float getBoneScore() {
+        return boneScore;
+    }
+
+    public void setBoneScore(Float boneScore) {
+        this.boneScore = boneScore;
+    }
+
+    public String getExplain() {
+        return explain;
+    }
+
+    public void setExplain(String explain) {
+        this.explain = explain;
+    }
+
+    public String getAdvise() {
+        return advise;
+    }
+
+    public void setAdvise(String advise) {
+        this.advise = advise;
+    }
+
+    public String getConclusions() {
+        return conclusions;
+    }
+
+    public void setConclusions(String conclusions) {
+        this.conclusions = conclusions;
+    }
+
+    public String getBase64BonePlot() {
+        return base64BonePlot;
+    }
+
+    public void setBase64BonePlot(String base64BonePlot) {
+        this.base64BonePlot = base64BonePlot;
+    }
+}

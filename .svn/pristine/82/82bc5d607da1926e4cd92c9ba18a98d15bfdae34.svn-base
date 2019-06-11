@@ -1,0 +1,119 @@
+package org.web.module.height.obesity.entity;
+
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+
+import org.service.core.entity.BaseEntity;
+
+/**
+ * Copyright © 2018 四川易迅通健康医疗技术发展有限公司. All rights reserved.
+ *
+ * @author: ChenYan
+ * @date: 2018年12月19日
+ * @description: 营养素配置表
+ */
+public class NutritionConfig extends BaseEntity {
+   
+	private static final long serialVersionUID = -8211893410264081812L;
+
+	private Integer id;
+    @NotNull(message = "{nutrition.config.sex.notnull.valid}", groups = { Insert.class })
+    private Integer sex;
+    @NotNull(message = "{nutrition.config.month.age.start.notnull.valid}", groups = { Insert.class })
+    private Integer monthAgeStart;
+    @NotNull(message = "{nutrition.config.month.age.end.notnull.valid}", groups = { Insert.class })
+    private Integer monthAgeEnd;
+    @NotBlank(message = "{nutrition.config.code.type.notblank.valid}", groups = { Insert.class })
+    private String codeType;
+    @NotBlank(message = "{nutrition.config.code.name.notblank.valid}", groups = { Insert.class })
+    private String codeName;
+    @NotNull(message = "{nutrition.config.type.notnull.valid}", groups = { Insert.class })
+    private Integer type;
+    @NotNull(message = "{nutrition.config.value.notnull.valid}", groups = { Insert.class })
+    private Float value;
+    @NotBlank(message = "{nutrition.config.unit.notblank.valid}", groups = { Insert.class })
+    private String unit;
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public Integer getSex() {
+        return sex;
+    }
+
+    public void setSex(Integer sex) {
+        this.sex = sex;
+    }
+
+    public Integer getMonthAgeStart() {
+        return monthAgeStart;
+    }
+
+    public void setMonthAgeStart(Integer monthAgeStart) {
+        this.monthAgeStart = monthAgeStart;
+    }
+
+    public Integer getMonthAgeEnd() {
+        return monthAgeEnd;
+    }
+
+    public void setMonthAgeEnd(Integer monthAgeEnd) {
+        this.monthAgeEnd = monthAgeEnd;
+    }
+
+    public String getCodeType() {
+        return codeType;
+    }
+
+    public void setCodeType(String codeType) {
+        this.codeType = codeType;
+    }
+
+    public String getCodeName() {
+        return codeName;
+    }
+
+    public void setCodeName(String codeName) {
+        this.codeName = codeName;
+    }
+
+    public Integer getType() {
+        return type;
+    }
+
+    public void setType(Integer type) {
+        this.type = type;
+    }
+
+    public Float getValue() {
+        return value;
+    }
+
+    public void setValue(Float value) {
+        this.value = value;
+    }
+
+    public String getUnit() {
+        return unit;
+    }
+
+    public void setUnit(String unit) {
+        this.unit = unit;
+    }
+    @Override
+    @NotNull(message = "{page.empty}", groups = { SelectAll.class})
+    public Integer getPage() {
+        return super.getPage();
+    }
+
+    @Override
+    @NotNull(message = "{pageSize.empty}", groups = { SelectAll.class})
+    public Integer getPageSize() {
+        return super.getPageSize();
+    }
+}

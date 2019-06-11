@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.wechat.module.height.obesity.dao.ExaminationCodeTableMapper">
+
+  <delete id="delete" parameterType="org.wechat.module.height.obesity.entity.ExaminationCodeTable">
+	DELETE
+	FROM
+		base_examination_code_table
+	WHERE
+		id = #{id}
+  </delete>
+  
+  <insert id="insert" parameterType="org.wechat.module.height.obesity.entity.ExaminationCodeTable" keyProperty="id"  useGeneratedKeys="true">
+    INSERT INTO base_examination_code_table 
+    		( type, code,  name, pcode, unit,  initial, acronym)
+    VALUES
+    		 (#{type}, #{code},  #{name}, #{pcode}, #{unit}, #{initial}, #{acronym})
+  </insert>
+  
+  <update id="update" parameterType="org.wechat.module.height.obesity.entity.ExaminationCodeTable">
+    UPDATE base_examination_code_table  SET id=#{id}
+	    <if test="type!=null and type!=''">
+	     ,type = #{type}
+	    </if>
+	    <if test="code!=null and code!=''">
+	      ,code = #{code}
+	    </if>
+	    <if test="name!=null and name!=''">
+	     , name = #{name}
+	    </if>
+	    <if test="pcode!=null and pcode!=''">
+	     , pcode = #{pcode}
+	    </if>
+	    <if test="unit!=null and unit!=''">
+	     , unit = #{unit}
+	    </if>
+	    <if test="initial!=null and initial!=''">
+	       , initial = #{initial}
+	    </if>
+	    <if test="acronym!=null and acronym!=''">
+	     , acronym = #{acronym}
+	    </if>
+    WHERE
+    	 id = #{id}
+  </update>
+  
+  <select id="getOne" parameterType="org.wechat.module.height.obesity.entity.ExaminationCodeTable" resultType="map">
+	SELECT
+		id,
+		type,
+		`code`,
+		`name`,
+		pcode,
+		unit,
+		initial,
+		acronym,
+		reference_start referenceSstart,
+		reference_end referenceEnd,
+		remark
+	FROM
+		base_examination_code_table
+	WHERE
+		id = #{id}
+  </select>
+  
+  <!-- 查询检查检验列表 -->
+  <select id="getList" parameterType="org.wechat.module.height.obesity.entity.ExaminationCodeTable" resultType="map">
+	SELECT
+		id,
+		type,
+		`code`,
+		`name`,
+		pcode,
+		unit,
+		initial,
+		acronym,
+		reference_start referenceSstart,
+		reference_end referenceEnd,
+		remark
+	FROM
+		base_examination_code_table
+		<where>
+		    <if test="pcode!=null and pcode!=''">
+		    pcode=#{pcode}
+		  </if>
+		   <if test="code!=null and code!=''">
+		   and `code`=#{code}
+		   </if>	 
+		   <if test="initial!=null and initial!=''">
+		   and initial=#{initial}
+		   </if>
+		   <if test="name!=null and name!=''">
+		   and  `name` like CONCAT(CONCAT('%', #{name}), '%')
+		   </if>
+		</where>
+  </select>
+  
+  <!-- 查询检查项目列表 -->
+  <select id="getInspectionItems" parameterType="org.wechat.module.height.obesity.entity.ExaminationCodeTable" resultType="map">
+	SELECT
+		id,
+		type,
+		`code`,
+		`name`,
+		pcode,
+		unit,
+		initial,
+		acronym
+	FROM
+		base_examination_code_table
+		<where>
+		  <if test="pcode!=null and pcode!=''">
+		    pcode=#{pcode}
+		  </if>
+		</where>  
+  
+  
+  </select>
+</mapper>

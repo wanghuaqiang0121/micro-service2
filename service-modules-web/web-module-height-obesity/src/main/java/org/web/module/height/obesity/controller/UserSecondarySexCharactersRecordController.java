@@ -1,0 +1,178 @@
+package org.web.module.height.obesity.controller;
+
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+
+import javax.annotation.Resource;
+
+import org.service.core.api.ApiCodeEnum;
+import org.service.core.api.JsonApi;
+import org.service.core.api.MultiLine;
+import org.service.core.auth.control.RequiresAuthentication;
+import org.service.core.auth.level.Level;
+import org.service.core.entity.BaseEntity.Insert;
+import org.service.core.entity.BaseEntity.SelectAll;
+import org.service.core.entity.BaseEntity.SelectOne;
+import org.service.core.entity.BaseEntity.Update;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RestController;
+import org.web.module.height.obesity.entity.ChildrenMeasure;
+import org.web.module.height.obesity.entity.UserSecondarySexCharactersRecord;
+import org.web.module.height.obesity.global.BaseGlobal;
+import org.web.module.height.obesity.message.Prompt;
+import org.web.module.height.obesity.service.ChildrenMeasureService;
+import org.web.module.height.obesity.service.UserSecondarySexCharactersRecordService;
+import org.web.module.height.obesity.service.feign.IOrganizationUserRoleService;
+
+import com.github.pagehelper.Page;
+import com.github.pagehelper.PageHelper;
+
+/**
+ * Copyright © 2018 四川易迅通健康医疗技术发展有限公司. All rights reserved.
+ *
+ * @author: WangHuaQiang
+ * @date: 2018年12月26日
+ * @description: 用户第二性征发育记录
+ */
+@RestController
+public class UserSecondarySexCharactersRecordController {
+
+	@Resource
+	private UserSecondarySexCharactersRecordService userSecondarySexCharactersRecordService;
+	@Resource
+	private ChildrenMeasureService childrenMeasureService;
+	@Resource
+	private IOrganizationUserRoleService organizationUserRoleService;
+	
+	/** 
+	 * @author: WangHuaQiang
+	 * @date: 2018年12月26日
+	 * @param userSecondarySexCharactersRecord
+	 * @param result
+	 * @return
+	 * @description: 用户第二性征发育记录列表
+	 */
+	@RequiresAuthentication(ignore = false, value = { "web-module-height-obesity:secondary-sexCharacters:get-list" },level=Level.OPERATION)
+	@GetMapping("/secondary/sexCharacters/records")
+	public JsonApi getList(@Validated({ SelectAll.class }) UserSecondarySexCharactersRecord userSecondarySexCharactersRecord, BindingResult result, @RequestHeader(required = true, value = BaseGlobal.TOKEN_FLAG) String token) {
+		Page<?> page = PageHelper.startPage(userSecondarySexCharactersRecord.getPage(), userSecondarySexCharactersRecord.getPageSize());
+		List<Map<String, Object>> secondarySexCharactersConfigList = userSecondarySexCharactersRecordService.getList(userSecondarySexCharactersRecord);
+		if (secondarySexCharactersConfigList != null && !secondarySexCharactersConfigList.isEmpty()) {
+			return new JsonApi(ApiCodeEnum.OK, new MultiLine(page.getTotal(), secondarySexCharactersConfigList));
+		}
+		return new JsonApi(ApiCodeEnum.NOT_FOUND);
+	}
+	
+	/** 
+	 * @author: WangHuaQiang
+	 * @date: 2018年12月26日
+	 * @param childrenMeasureId
+	 * @param userSecondarySexCharactersRecord
+	 * @param result
+	 * @return
+	 * @description: 用户第二性征发育记录详情
+	 */
+	@RequiresAuthentication(ignore = false, value = { "web-module-height-obesity:secondary-sexCharacters:detail" },level=Level.OPERATION)
+	@GetMapping("/secondary/sexCharacters/record/{childrenMeasureId}")
+	public JsonApi detail(@PathVariable("childrenMeasureId") Integer childrenMeasureId,@Validated({ SelectOne.class }) UserSecondarySexCharactersRecord userSecondarySexCharactersRecord, BindingResult result, @RequestHeader(required = true, value = BaseGlobal.TOKEN_FLAG) String token) {
+		userSecondarySexCharactersRecord.setChildrenMeasureId(childrenMeasureId);
+		Map<String, Object> secondarySexCharactersConfigMap = userSecondarySexCharactersRecordService.getOne(userSecondarySexCharactersRecord);
+		if (secondarySexCharactersConfigMap != null ) {
+			return new JsonApi(ApiCodeEnum.OK, secondarySexCharactersConfigMap);
+		}
+		return new JsonApi(ApiCodeEnum.NOT_FOUND);
+	}
+	
+	/** 
+	 * @author: WangHuaQiang
+	 * @date: 2018年12月26日
+	 * @param id
+	 * @param userSecondarySexCharactersRecord
+	 * @param result
+	 * @return
+	 * @description: 修改用户第二性征发育记录
+	 */
+	@RequiresAuthentication(ignore = false, value = { "web-module-height-obesity:secondary-sexCharacters:update" },level=Level.OPERATION)
+	@PutMapping("/secondary/sexCharacters/record/{childrenMeasureId}")
+	public JsonApi update(@PathVariable("childrenMeasureId") Integer childrenMeasureId,@RequestBody @Validated({ Update.class }) UserSecondarySexCharactersRecord userSecondarySexCharactersRecord, BindingResult result
+			,@RequestHeader(required = true, value = BaseGlobal.TOKEN_FLAG) String token) {
+		userSecondarySexCharactersRecord.setChildrenMeasureId(childrenMeasureId);
+		/* 删除后再添加 */
+		if (userSecondarySexCharactersRecordService.deleteByChildrenMeasureId(userSecondarySexCharactersRecord) < 0) {
+			throw new RuntimeException();
+		}
+		/* 查询儿童测量信息是否存在 */
+		ChildrenMeasure childrenMeasure = new ChildrenMeasure();
+		childrenMeasure.setId(childrenMeasureId);
+		Map<String, Object> childrenMeasureMap = childrenMeasureService.getOne(childrenMeasure);
+		if (childrenMeasureMap == null) {
+			return new JsonApi(ApiCodeEnum.FAIL,Prompt.bundle("children.measure.is.null"));
+		}
+		/* 查询当前测量是否存在第二性征发育记录 */
+		/*Map<String, Object> userSecondarySexCharactersRecordMap = userSecondarySexCharactersRecordService.getOne(userSecondarySexCharactersRecord);
+		if (userSecondarySexCharactersRecordMap == null) {
+			return new JsonApi(ApiCodeEnum.NOT_FOUND);
+		}*/
+		userSecondarySexCharactersRecord.setUserId((Integer)childrenMeasureMap.get("userId"));
+		userSecondarySexCharactersRecord.setChildrenMeasureId(childrenMeasureId);
+		userSecondarySexCharactersRecord.setCreateDateTime(new Date());
+		/* 获取登录机构用户id */
+		JsonApi jsonApi = organizationUserRoleService.getSession(BaseGlobal.CACHE_ORGANIZATION_USER, token,token);
+		if (jsonApi.getCode() == ApiCodeEnum.OK.getValue()) {
+			userSecondarySexCharactersRecord.setOrganizationUserId(Integer.parseInt(jsonApi.getData().toString()));
+		}
+		if (userSecondarySexCharactersRecordService.insert(userSecondarySexCharactersRecord) > 0) {
+			return new JsonApi(ApiCodeEnum.OK);
+		}
+		return new JsonApi(ApiCodeEnum.FAIL);
+	}
+	
+	/** 
+	 * @author: WangHuaQiang
+	 * @date: 2018年12月26日
+	 * @param userSecondarySexCharactersRecord
+	 * @param result
+	 * @param token
+	 * @return
+	 * @description: 新增用户第二性征发育记录
+	 */
+	@RequiresAuthentication(ignore = false, value = { "web-module-height-obesity:secondary-sexCharacters:insert" },level=Level.OPERATION)
+	@PostMapping("/secondary/sexCharacters/record")
+	public JsonApi insert(@RequestBody @Validated({ Insert.class }) UserSecondarySexCharactersRecord userSecondarySexCharactersRecord, BindingResult result,
+			@RequestHeader(required = true, value = BaseGlobal.TOKEN_FLAG) String token) {
+		/* 查询儿童测量信息是否存在 */
+		ChildrenMeasure childrenMeasure = new ChildrenMeasure();
+		childrenMeasure.setId(userSecondarySexCharactersRecord.getChildrenMeasureId());
+		Map<String, Object> childrenMeasureMap = childrenMeasureService.getOne(childrenMeasure);
+		if (childrenMeasureMap == null) {
+			return new JsonApi(ApiCodeEnum.FAIL,Prompt.bundle("children.measure.is.null"));
+		}
+		/* 查询当前测量是否存在第二性征发育记录 */
+		Map<String, Object> userSecondarySexCharactersRecordMap = userSecondarySexCharactersRecordService.getOne(userSecondarySexCharactersRecord);
+		if (userSecondarySexCharactersRecordMap != null) {
+			return new JsonApi(ApiCodeEnum.CONFLICT);
+		}
+		userSecondarySexCharactersRecord.setUserId((Integer)childrenMeasureMap.get("userId"));
+		userSecondarySexCharactersRecord.setCreateDateTime(new Date());
+		/* 获取登录机构用户id */
+		JsonApi jsonApi = organizationUserRoleService.getSession(BaseGlobal.CACHE_ORGANIZATION_USER, token,token);
+		if (jsonApi.getCode() == ApiCodeEnum.OK.getValue()) {
+			userSecondarySexCharactersRecord.setOrganizationUserId(Integer.parseInt(jsonApi.getData().toString()));
+		}
+		if (userSecondarySexCharactersRecordService.insert(userSecondarySexCharactersRecord) > 0) {
+			return new JsonApi(ApiCodeEnum.OK);
+		}
+		return new JsonApi(ApiCodeEnum.FAIL);
+	}
+	
+	
+	
+}

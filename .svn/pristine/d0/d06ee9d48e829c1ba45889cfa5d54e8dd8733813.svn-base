@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.wechat.module.service.dao.user.UserUserTypeMapper">
+
+<!--删除用户用户类型关联表  -->
+<delete id="delete" parameterType="org.wechat.module.service.domain.user.UserUserType">
+    DELETE FROM base_user_user_type WHERE user_id=#{userId}
+</delete>
+
+<!--批量新增用户用户类型关联表  -->
+<insert id="batchInsert" parameterType="list" >
+INSERT INTO base_user_user_type(
+	user_id,
+	user_type_id
+) 
+VALUES 
+<foreach collection="list" item="userUserType" separator=",">
+(
+	#{userUserType.userId},
+	#{userUserType.userTypeId}
+)
+</foreach>
+</insert>
+</mapper>

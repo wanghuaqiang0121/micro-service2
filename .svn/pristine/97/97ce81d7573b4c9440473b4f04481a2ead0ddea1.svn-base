@@ -1,0 +1,17 @@
+package org.web.module.bone.age.dao;
+
+import java.util.List;
+import org.service.core.dao.IBaseMapper;
+import org.web.module.bone.age.domain.BaseMedicalImagingData;
+
+public interface BaseMedicalImagingDataMapper extends IBaseMapper<BaseMedicalImagingData> {
+    int deleteByPrimaryKey(Integer id);
+
+    int insert(BaseMedicalImagingData record);
+
+    BaseMedicalImagingData selectByPrimaryKey(Integer id);
+
+    List<BaseMedicalImagingData> selectAll();
+
+    int updateByPrimaryKey(BaseMedicalImagingData record);
+}

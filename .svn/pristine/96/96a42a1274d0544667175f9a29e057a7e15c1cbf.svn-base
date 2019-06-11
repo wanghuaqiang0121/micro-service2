@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.wechat.module.height.obesity.dao.UserHeightObesityProjectMapper">
+
+  <delete id="deleteByChildrenMeasureId" parameterType="org.wechat.module.height.obesity.entity.UserHeightObesityProject">
+    delete from base_user_height_obesity_project
+    where children_measure_id = #{childrenMeasureId}
+  </delete>
+  <insert id="insert" parameterType="org.wechat.module.height.obesity.entity.UserHeightObesityProject">
+    insert into base_user_height_obesity_project (
+      user_id,
+      children_measure_id, 
+      organization_user_id,
+      sleep_content,
+      nutrition_method_content, 
+      nutrition_details,
+      nutrition_remark,
+      eer_id, emotion_content, 
+      motion_name, 
+      motion_remark, 
+      motion_picture, 
+      matters_needing_attention,
+      create_date_time
+      )
+    values (
+      #{userId}, 
+      #{childrenMeasureId},
+      #{organizationUserId},
+      #{sleepContent}, 
+      #{nutritionMethodContent},
+      #{nutritionDetails},
+      #{nutritionRemark},
+      #{eerId},
+      #{emotionContent},
+      #{motionName}, 
+      #{motionRemark}, 
+      #{motionPicture},
+      #{mattersNeedingAttention},
+      #{createDateTime}
+      )
+  </insert>
+  <update id="updateByPrimaryKey" parameterType="org.wechat.module.height.obesity.entity.UserHeightObesityProject">
+    update base_user_height_obesity_project
+    set user_id = #{userId},
+      children_measure_id = #{childrenMeasureId},
+      organization_user_id = #{organizationUserId},
+      sleep_content = #{sleepContent},
+      nutrition_method_content = #{nutritionMethodContent},
+      nutrition_remark = #{nutritionRemark},
+      eer_id = #{eerId},
+      emotion_content = #{emotionContent},
+      motion_name = #{motionName},
+      motion_remark = #{motionRemark},
+      motion_picture = #{motionPicture},
+      matters_needing_attention = #{mattersNeedingAttention},
+      create_date_time = #{createDateTime}
+    where id = #{id}
+  </update>
+  <select id="getOne" parameterType="org.wechat.module.height.obesity.entity.UserHeightObesityProject" resultType="map">
+    SELECT 
+      id, 
+      user_id userId, 
+      children_measure_id childrenMeasureId, 
+      organization_user_id organizationUserId,
+      sleep_content sleepContent, 
+      nutrition_method_content nutritionMethodContent, 
+      nutrition_remark nutritionRemark, 
+      eer_id eerId, 
+      emotion_content emotionContent, 
+      motion_name motionName, 
+      motion_remark motionRemark, 
+      motion_picture motionPicture, 
+      matters_needing_attention mattersNeedingAttention, 
+      create_date_time createDateTime
+    FROM base_user_height_obesity_project  
+    <where>
+      <if test="childrenMeasureId!=null">children_measure_id=#{childrenMeasureId}</if>
+    </where>
+    ORDER BY createDateTime DESC
+    LIMIT 1
+  </select>
+  <select id="getList" parameterType="org.wechat.module.height.obesity.entity.UserHeightObesityProject" resultType="map">
+    select 
+      id, 
+      user_id userId, 
+      children_measure_id childrenMeasureId, 
+      organization_user_id organizationUserId,
+      sleep_content sleepContent, 
+      nutrition_method_content nutritionMethodContent, 
+      nutrition_remark nutritionRemark, 
+      eer_id eerId, 
+      emotion_content emotionContent, 
+      motion_name motionName, 
+      motion_remark motionRemark, 
+      motion_picture motionPicture, 
+      matters_needing_attention mattersNeedingAttention, 
+      create_date_time createDateTime    
+    from base_user_height_obesity_project
+  </select>
+</mapper>

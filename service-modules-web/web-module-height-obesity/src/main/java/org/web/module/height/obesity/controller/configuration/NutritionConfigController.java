@@ -1,0 +1,183 @@
+package org.web.module.height.obesity.controller.configuration;
+
+import java.util.List;
+import java.util.Map;
+
+import javax.annotation.Resource;
+
+import org.service.core.api.ApiCodeEnum;
+import org.service.core.api.JsonApi;
+import org.service.core.api.MultiLine;
+import org.service.core.auth.control.RequiresAuthentication;
+import org.service.core.auth.level.Level;
+import org.service.core.entity.BaseEntity;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RestController;
+import org.web.module.height.obesity.entity.NutritionConfig;
+import org.web.module.height.obesity.entity.User;
+import org.web.module.height.obesity.global.BaseGlobal;
+import org.web.module.height.obesity.service.NutritionConfigService;
+import org.web.module.height.obesity.service.UserService;
+
+import com.github.pagehelper.Page;
+import com.github.pagehelper.PageHelper;
+
+/**
+ * Copyright © 2018 四川易迅通健康医疗技术发展有限公司. All rights reserved.
+ *
+ * @author: ChenYan
+ * @date: 2018年12月19日
+ * @description: 营养素配置
+ */
+@RestController
+public class NutritionConfigController {
+
+	@Resource
+	private NutritionConfigService  nutritionConfigService;
+	@Resource
+	private UserService uuserService;
+	/**
+	 * @author: ChenYan
+	 * @date: 2018年12月19日
+	 * @param nutritionConfig
+	 * @param result
+	 * @return
+	 * @description: 新增营养素配置
+	 */
+	@RequiresAuthentication(level = Level.OPERATION, value = { "web-module-height-obesity:nutrition-config:insert" })
+	@PostMapping(value = { "/nutrition/config" })
+	public JsonApi insert(@Validated({ BaseEntity.Insert.class }) @RequestBody NutritionConfig nutritionConfig, BindingResult result, @RequestHeader(required = true, value = BaseGlobal.TOKEN_FLAG) String token) {
+		if (nutritionConfigService.insert(nutritionConfig) > 0) {
+			return new JsonApi(ApiCodeEnum.OK);
+		}
+		return new JsonApi(ApiCodeEnum.FAIL);
+	}
+	
+	
+	/**
+	 * @author: ChenYan
+	 * @date: 2018年12月19日
+	 * @param id
+	 * @param nutritionConfig
+	 * @param result
+	 * @return
+	 * @description: 修改营养素配置
+	 */
+	@RequiresAuthentication(level = Level.OPERATION, value = { "web-module-height-obesity:nutrition-config:update" })
+	@PutMapping(value = { "/nutrition/config/{id}" })
+	public JsonApi update(@PathVariable("id") Integer id, @Validated({ BaseEntity.Update.class }) @RequestBody NutritionConfig nutritionConfig, BindingResult result, @RequestHeader(required = true, value = BaseGlobal.TOKEN_FLAG) String token) {
+		nutritionConfig.setId(id);
+		/* 检查数据是否存在 */
+		Map<String, Object> nutritionConfigMap = nutritionConfigService.getOne(nutritionConfig);
+		if (nutritionConfigMap == null || nutritionConfigMap.isEmpty()) {
+			return new JsonApi(ApiCodeEnum.NOT_FOUND);
+		}
+		if (nutritionConfigService.update(nutritionConfig) > 0) {
+			return new JsonApi(ApiCodeEnum.OK);
+		}
+		return new JsonApi(ApiCodeEnum.FAIL);
+	}
+	
+	/**
+	 * @author: ChenYan
+	 * @date: 2018年12月19日
+	 * @param id
+	 * @param nutritionConfig
+	 * @param result
+	 * @return
+	 * @description: 查询营养素配置详情
+	 */
+	@RequiresAuthentication(level = Level.OPERATION, value = { "web-module-height-obesity:nutrition-config:get-detail" })
+	@GetMapping(value = { "/nutrition/config/{id}" })
+	public JsonApi getDetail(@PathVariable("id") Integer id, @Validated({ BaseEntity.SelectOne.class }) NutritionConfig nutritionConfig, BindingResult result, @RequestHeader(required = true, value = BaseGlobal.TOKEN_FLAG) String token) {
+		nutritionConfig.setId(id);
+		Map<String, Object> nutritionConfigMap = nutritionConfigService.getOne(nutritionConfig);
+		if (nutritionConfigMap != null && !nutritionConfigMap.isEmpty()) {
+			return new JsonApi(ApiCodeEnum.OK, nutritionConfigMap);
+		}
+		return new JsonApi(ApiCodeEnum.NOT_FOUND);
+	}
+
+	/**
+	 * @author: ChenYan
+	 * @date: 2018年12月19日
+	 * @param id
+	 * @param nutritionConfig
+	 * @param result
+	 * @return
+	 * @description: 删除营养素配置
+	 */
+	@RequiresAuthentication(level = Level.OPERATION, value = { "web-module-height-obesity:nutrition-config:delete" })
+	@DeleteMapping(value = { "/nutrition/config/{id}" })
+	public JsonApi delete(@PathVariable("id") Integer id, @Validated({ BaseEntity.Delete.class }) NutritionConfig nutritionConfig, BindingResult result, @RequestHeader(required = true, value = BaseGlobal.TOKEN_FLAG) String token) {
+		nutritionConfig.setId(id);
+		/* 检查数据是否存在 */
+		Map<String, Object> nutritionConfigMap = nutritionConfigService.getOne(nutritionConfig);
+		if (nutritionConfigMap == null || nutritionConfigMap.isEmpty()) {
+			return new JsonApi(ApiCodeEnum.NOT_FOUND);
+		}
+		if (nutritionConfigService.delete(nutritionConfig) > 0) {
+			return new JsonApi(ApiCodeEnum.OK);
+		}
+		return new JsonApi(ApiCodeEnum.FAIL);
+	}
+	
+	/**
+	 * @author: ChenYan
+	 * @date: 2018年12月19日
+	 * @param drugsConfig
+	 * @param result
+	 * @return
+	 * @description: 查询列表
+	 */
+	@RequiresAuthentication(level = Level.OPERATION, value = { "web-module-height-obesity:nutrition-config:get-list" })
+	@GetMapping(value = { "/nutrition/configs" })
+	public JsonApi getList(@Validated({ BaseEntity.SelectAll.class })  NutritionConfig nutritionConfig, BindingResult result, @RequestHeader(required = true, value = BaseGlobal.TOKEN_FLAG) String token) {
+		Page<?> page = PageHelper.startPage(nutritionConfig.getPage(), nutritionConfig.getPageSize());
+		List<Map<String, Object>> nutritionConfigList = nutritionConfigService.getList(nutritionConfig);
+		if (nutritionConfigList != null && !nutritionConfigList.isEmpty()) {
+			return new JsonApi(ApiCodeEnum.OK, new MultiLine(page.getTotal(), nutritionConfigList));
+		}
+		return new JsonApi(ApiCodeEnum.NOT_FOUND);
+	}
+	
+	/**
+	 * @author: ChenYan
+	 * @date: 2019年2月26日
+	 * @param userId
+	 * @param nutritionConfig
+	 * @param result
+	 * @return
+	 * @description: 查询维生素A及维生素D推荐摄入量
+	 */
+	@RequiresAuthentication(level = Level.OPERATION, value = { "web-module-height-obesity:nutrition-config:get-wssad-list" })
+	@GetMapping(value = { "/nutrition/config/wss/{userId}" })
+	public JsonApi getADDetail(@PathVariable("userId") Integer userId, @Validated({ BaseEntity.SelectAll.class }) NutritionConfig nutritionConfig, BindingResult result, @RequestHeader(required = true, value = BaseGlobal.TOKEN_FLAG) String token) {
+    	User user=new User();
+		user.setId(userId);
+		Map<String, Object> userMap=uuserService.getOne(user);
+		if (userMap!=null) {
+			if (userMap.get("sex")!=null) {
+				int sex=(int) userMap.get("sex");
+				nutritionConfig.setSex(sex);
+			}if (userMap.get("monthAge")!=null) {
+				int monthAge=( (Long) userMap.get("monthAge")).intValue();
+				nutritionConfig.setMonthAge(monthAge);
+			}
+			Page<?> page = PageHelper.startPage(nutritionConfig.getPage(), nutritionConfig.getPageSize());
+			List<Map<String, Object>> nutritionConfigList = nutritionConfigService.getADList(nutritionConfig);
+			if (nutritionConfigList != null && !nutritionConfigList.isEmpty()) {
+				return new JsonApi(ApiCodeEnum.OK, new MultiLine(page.getTotal(), nutritionConfigList));
+			}
+		}
+		return new JsonApi(ApiCodeEnum.NOT_FOUND);
+	}
+}

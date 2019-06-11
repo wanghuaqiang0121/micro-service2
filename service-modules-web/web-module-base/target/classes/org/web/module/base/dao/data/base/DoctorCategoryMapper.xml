@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.web.module.base.dao.data.base.DoctorCategoryMapper">
+	<!--删除 -->
+	<delete id="delete" parameterType="org.web.module.base.domain.data.base.DoctorCategory">
+		DELETE
+		FROM
+			base_doctor_category
+		WHERE
+			id = #{id}
+	</delete>
+
+	<!--新增 -->
+	<insert id="insert" parameterType="org.web.module.base.domain.data.base.DoctorCategory" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO base_doctor_category ( `name`, create_date )
+		VALUES(#{name}, #{createDate} )
+	</insert>
+
+	<!--修改 -->
+	<update id="update" parameterType="org.web.module.base.domain.data.base.DoctorCategory">
+		UPDATE base_doctor_category SET id=#{id}
+		<if test="name!=null and name!=''">
+			,`name` =#{name}
+		</if>
+		WHERE id = #{id}
+	</update>
+
+	<!-- 查详情 -->
+	<select id="getOne" parameterType="org.web.module.base.domain.data.base.DoctorCategory" resultType="map">
+		SELECT
+			id,
+			`name`,
+			create_date createDate
+		FROM
+			base_doctor_category
+		WHERE
+			id = #{id}
+	</select>
+
+	<!-- 查询医生类别列表 -->
+	<select id="getList" parameterType="org.web.module.base.domain.data.base.DoctorCategory" resultType="map">
+		SELECT
+			id,
+			`name`,
+			create_date createDate 
+		FROM
+			base_doctor_category
+		<where>
+			<if test="name!=null and name!=''">
+				name like CONCAT(CONCAT('%', #{name}), '%')
+			</if>
+		</where>
+	</select>
+</mapper>

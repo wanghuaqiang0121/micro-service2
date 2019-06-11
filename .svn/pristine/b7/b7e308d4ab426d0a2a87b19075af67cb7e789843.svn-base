@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.web.module.height.obesity.dao.ChildrenMaternityMapper">  
+
+  <delete id="delete" parameterType="org.web.module.height.obesity.entity.ChildrenMaternity">
+	DELETE
+	FROM
+		base_children_maternity
+	WHERE
+		id = #{id}
+  </delete>
+  
+  <!-- 添加儿童出生信息 -->
+  <insert id="insert" parameterType="org.web.module.height.obesity.entity.ChildrenMaternity"  keyProperty="id"  useGeneratedKeys="true">
+    INSERT INTO  base_children_maternity
+    	 ( 
+    	 	user_id,
+    	 	birth_gestational,
+    	 	birth_height,
+    	 	birth_weight,
+    	 	gravidity,
+    	 	parity,
+    	 	birth_model,
+    	 	postpartum_asphyxia,
+    	 	aie,
+    	 	encephalopathy,
+    	 	hyperbilirubinemia,
+    	 	pneumonia_of_newborn,
+    	 	neonatal_septicemia,
+    	 	severe_infectious_diseases,
+            severe_infectious_diseases_content,
+            hereditary_disease,
+            hereditary_disease_content,
+            birth_defect,
+            birth_defect_content,
+            genetic_height,
+            last_update_time,
+            create_date_time,
+            is_high_risk_children
+          )
+    VALUES
+       (
+       		#{userId},
+    	 	#{birthGestational},
+    	 	#{birthHeight},
+    	 	#{birthWeight},
+    	 	#{gravidity},
+    	 	#{parity},
+    	 	#{birthModel},
+    	 	#{postpartumAsphyxia},
+    	 	#{aie},
+    	 	#{encephalopathy},
+    	 	#{hyperbilirubinemia},
+    	 	#{pneumoniaOfNewborn},
+    	 	#{neonatalSepticemia},
+    	 	#{severeInfectiousDiseases},
+            #{severeInfectiousDiseasesContent},
+            #{hereditaryDisease},
+            #{hereditaryDiseaseContent},
+            #{birthDefect},
+            #{birthDefectContent},
+            #{geneticHeight},
+            #{lastUpdateTime},
+            #{createDateTime},
+            #{isHighRiskChildren}
+       )
+  </insert>
+  
+  <update id="update" parameterType="org.web.module.height.obesity.entity.ChildrenMaternity">
+    UPDATE base_children_maternity SET  user_id = #{userId}
+    	<if test="isHighRiskChildren!= null">
+    		,is_high_risk_children = #{isHighRiskChildren}
+    	</if>
+	    <if test="birthGestational!=null">
+	     , birth_gestational = #{birthGestational}
+	    </if>
+	    <if test="birthHeight!=null">
+	     , birth_height = #{birthHeight}
+	    </if>
+	    <if test="birthWeight">
+	      ,birth_weight = #{birthWeight}
+	    </if>
+	    <if test="gravidity!=null">
+	        , gravidity = #{gravidity}
+	    </if>
+	    <if test="parity!=null">
+	       ,parity = #{parity}
+	    </if>
+	    <if test="birthModel!=null">
+	       , birth_model = #{birthModel}
+	    </if>
+	    <if test="postpartumAsphyxia!=null">
+	     , postpartum_asphyxia = #{postpartumAsphyxia}
+	    </if>
+	    <if test="aie!=null">
+	      ,aie = #{aie}
+	    </if>
+	    <if test="encephalopathy!=null">
+	       ,encephalopathy = #{encephalopathy}
+	    </if>
+	    <if test="hyperbilirubinemia!=null">
+	     , hyperbilirubinemia = #{hyperbilirubinemia}
+	    </if>
+	    <if test="pneumoniaOfNewborn != null ">
+	    	,pneumonia_of_newborn = #{pneumoniaOfNewborn}
+	    </if>
+		<if test="neonatalSepticemia != null">
+			,neonatal_septicemia = #{neonatalSepticemia}
+		</if>
+	    <if test="severeInfectiousDiseases!=null">
+	      ,severe_infectious_diseases = #{severeInfectiousDiseases}
+	    </if>
+	    <if test="severeInfectiousDiseasesContent!=null and severeInfectiousDiseasesContent!=''">
+	     , severe_infectious_diseases_content = #{severeInfectiousDiseasesContent}
+	    </if>
+		  <if test="hereditaryDisease!=null">
+		     ,hereditary_disease = #{hereditaryDisease}
+		  </if>
+		  <if test="hereditaryDiseaseContent!=null and hereditaryDiseaseContent!=''" >
+		     ,hereditary_disease_content = #{hereditaryDiseaseContent}
+		  </if>
+		  <if test="birthDefect!=null">
+		   , birth_defect = #{birthDefect}
+		  </if>
+		  <if test="birthDefectContent!=null and birthDefectContent!=''" >
+		   ,birth_defect_content = #{birthDefectContent}
+		  </if>
+		  <if test="geneticHeight!=null">
+		     ,genetic_height = #{geneticHeight}
+		  </if>
+		  <if test="lastUpdateTime!=null">
+		  ,  last_update_time = #{lastUpdateTime}
+		  </if>
+    	WHERE 
+    		user_id = #{userId}
+  </update>
+  <!-- 儿童出生信息详情 -->
+  <select id="getOne" parameterType="org.web.module.height.obesity.entity.ChildrenMaternity" resultType="map">
+	 SELECT
+		id,
+		user_id userId,
+   	 	birth_gestational birthGestational,
+   	 	birth_height birthHeight,
+   	 	birth_weight birthWeight,
+   	 	gravidity,
+   	 	parity,
+   	 	birth_model birthModel,
+   	 	postpartum_asphyxia postpartumAsphyxia,
+   	 	aie,
+   	 	encephalopathy,
+   	 	hyperbilirubinemia,
+   	 	pneumonia_of_newborn pneumoniaOfNewborn,
+   	 	neonatal_septicemia neonatalSepticemia,
+   	 	severe_infectious_diseases severeInfectiousDiseases,
+        severe_infectious_diseases_content severeInfectiousDiseasesContent,
+        hereditary_disease  hereditaryDisease,
+        hereditary_disease_content  hereditaryDiseaseContent,
+        birth_defect  birthDefect,
+        birth_defect_content  birthDefectContent,
+        genetic_height  geneticHeight,
+        last_update_time  lastUpdateTime,
+        create_date_time  createDateTime,
+        is_high_risk_children  isHighRiskChildren
+	FROM
+		base_children_maternity
+	WHERE
+		user_id  = #{userId}  
+  </select>
+  
+  <select id="getList" parameterType="org.web.module.height.obesity.entity.ChildrenMaternity" resultType="map">
+	 SELECT
+		id,
+		user_id userId,
+   	 	birth_gestational birthGestational,
+   	 	birth_height birthHeight,
+   	 	birth_weight birthWeight,
+   	 	gravidity,
+   	 	parity,
+   	 	birth_model birthModel,
+   	 	postpartum_asphyxia postpartumAsphyxia,
+   	 	aie,
+   	 	encephalopathy,
+   	 	hyperbilirubinemia,
+   	 	pneumonia_of_newborn pneumoniaOfNewborn,
+   	 	neonatal_septicemia neonatalSepticemia,
+   	 	severe_infectious_diseases severeInfectiousDiseases,
+        severe_infectious_diseases_content severeInfectiousDiseasesContent,
+        hereditary_disease  hereditaryDisease,
+        hereditary_disease_content  hereditaryDiseaseContent,
+        birth_defect  birthDefect,
+        birth_defect_content  birthDefectContent,
+        genetic_height  geneticHeight,
+        last_update_time  lastUpdateTime,
+        create_date_time  createDateTime,
+        is_high_risk_children  isHighRiskChildren
+	FROM
+		base_children_maternity
+  </select>
+</mapper>

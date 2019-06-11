@@ -1,0 +1,196 @@
+package org.web.module.height.obesity.controller;
+
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+
+import javax.annotation.Resource;
+
+import org.service.core.api.ApiCodeEnum;
+import org.service.core.api.JsonApi;
+import org.service.core.api.MultiLine;
+import org.service.core.auth.control.RequiresAuthentication;
+import org.service.core.auth.level.Level;
+import org.service.core.entity.BaseEntity;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RestController;
+import org.web.module.height.obesity.entity.ChildrenMeasure;
+import org.web.module.height.obesity.entity.UserTriageRecord;
+import org.web.module.height.obesity.global.BaseGlobal;
+import org.web.module.height.obesity.global.GlobalEnum.ChildrenMeasureStatus;
+import org.web.module.height.obesity.global.GlobalEnum.TriageRecordStatus;
+import org.web.module.height.obesity.message.Prompt;
+import org.web.module.height.obesity.service.ChildrenMeasureService;
+import org.web.module.height.obesity.service.UserTriageRecordService;
+import org.web.module.height.obesity.service.feign.IOrganizationUserRoleService;
+
+import com.github.pagehelper.Page;
+import com.github.pagehelper.PageHelper;
+
+/**
+ * Copyright © 2018 四川易迅通健康医疗技术发展有限公司. All rights reserved.
+ *
+ * @author: WangHuaQiang
+ * @date: 2018年12月18日
+ * @description: 分诊记录
+ */
+@RestController
+public class UserTriageRecordController {
+
+	@Resource 
+	private UserTriageRecordService userTriageRecordService;
+	@Resource
+	private IOrganizationUserRoleService organizationUserRoleService;
+	@Resource
+	private ChildrenMeasureService childrenMeasureService;
+	/** 
+	 * @author: WangHuaQiang
+	 * @date: 2018年12月19日
+	 * @param userTriageRecord
+	 * @param result
+	 * @param organizationTeamId
+	 * @param organizationId
+	 * @return
+	 * @description: 新增分诊
+	 */
+	@RequiresAuthentication(ignore = false, value = { "web-module-height-obesity:user-triage-record:insert" },level=Level.OPERATION)
+	@PostMapping("/user/triage/record/insert")
+	public JsonApi insert(@RequestBody @Validated({ BaseEntity.Insert.class }) UserTriageRecord userTriageRecord, BindingResult result,
+			@RequestHeader(required = true, value = BaseGlobal.TOKEN_FLAG) String token,
+			@RequestHeader(required = true,value = BaseGlobal.ORGANIZATION_TEAM_ID) Integer organizationTeamId,
+			@RequestHeader(required = true,value = BaseGlobal.ORGANIZATION_ID) Integer organizationId) {
+		/* 设置参数 */
+		userTriageRecord.setOrganizationId(organizationId);
+		userTriageRecord.setOrganizationTeamId(organizationTeamId);
+		/* 获取登录机构用户id */
+		JsonApi jsonApi = organizationUserRoleService.getSession(BaseGlobal.CACHE_ORGANIZATION_USER, token,token);
+		if (jsonApi.getCode() == ApiCodeEnum.OK.getValue()) {
+			userTriageRecord.setOrganizationUserId(Integer.parseInt(jsonApi.getData().toString()));
+		}
+		userTriageRecord.setStatus(TriageRecordStatus.WAITING.getValue());
+		userTriageRecord.setCreateDateTime(new Date());
+		Map<String, Object> userTriageRecordMap = userTriageRecordService.getOne(userTriageRecord);
+		/* 存在未接诊的分诊 就修改*/
+		if (userTriageRecordMap != null) {
+			userTriageRecord.setId((Integer)userTriageRecordMap.get("id"));
+			/* 修改分诊 */
+			if (userTriageRecordService.update(userTriageRecord) > 0) {
+				return new JsonApi(ApiCodeEnum.OK);
+			}
+		}
+		/* 不存在未接诊的分诊 就添加*/
+		if (userTriageRecordService.insert(userTriageRecord) > 0) {
+			return new JsonApi(ApiCodeEnum.OK);
+		}
+		return new JsonApi(ApiCodeEnum.FAIL);
+	}	
+	
+	/** 
+	 * @author: WangHuaQiang
+	 * @date: 2018年12月21日
+	 * @param id
+	 * @param userTriageRecord
+	 * @param result
+	 * @return
+	 * @description: 接诊
+	 */
+	@Transactional
+	@RequiresAuthentication(ignore = false, value = { "web-module-height-obesity:user-triage-record:triaged" },level=Level.OPERATION)
+	@PutMapping("/user/triage/record/triaged/{id}")
+	public JsonApi triaged(@PathVariable("id") Integer id,@Validated({ BaseEntity.Update.class }) UserTriageRecord userTriageRecord, BindingResult result,
+			@RequestHeader(required = true, value = BaseGlobal.TOKEN_FLAG) String token) {
+		userTriageRecord.setId(id);
+		userTriageRecord.setStatus(TriageRecordStatus.WAITING.getValue());
+		userTriageRecord.setGetTriageTime(new Date());
+		/* 查询分诊详情 */
+		Map<String, Object> userTriageRecordMap =userTriageRecordService.getOne(userTriageRecord);
+		if (userTriageRecordMap == null) {
+			return new JsonApi(ApiCodeEnum.NOT_FOUND);
+		}
+		/* 查看是否存在最新的状态为：1已测量 的测量记录  如果有：修改状态为：2服务中 如果没有：提示用户添加身高测量*/
+		ChildrenMeasure childrenMeasure = new ChildrenMeasure();
+		childrenMeasure.setUserId(Integer.parseInt(userTriageRecordMap.get("userId").toString()));
+		Map<String, Object> childrenMeasureMap = childrenMeasureService.getNewOne(childrenMeasure);
+		if (childrenMeasureMap == null) {
+			return new JsonApi(ApiCodeEnum.FAIL,Prompt.bundle("children.measure.is.null"));
+		}
+		/* 修改状态为2已接诊 并 修改儿童测量信息 为 2服务中*/
+		userTriageRecord.setStatus(TriageRecordStatus.ALREADYACCEPTED.getValue());
+		if (userTriageRecordService.update(userTriageRecord) > 0) {
+			childrenMeasure.setId(Integer.parseInt(childrenMeasureMap.get("id").toString()));
+			/* 获取登录机构用户id */
+			JsonApi jsonApi = organizationUserRoleService.getSession(BaseGlobal.CACHE_ORGANIZATION_USER, token,token);
+			if (jsonApi.getCode() == ApiCodeEnum.OK.getValue()) {
+				/* 设置服务者的id */
+				childrenMeasure.setServiceOrganizationUserId(Integer.parseInt(jsonApi.getData().toString()));
+			}
+			childrenMeasure.setStatus(ChildrenMeasureStatus.INSERVICE.getValue());
+			if (childrenMeasureService.update(childrenMeasure) < 1) {
+				throw new RuntimeException();
+			}
+			return new JsonApi(ApiCodeEnum.OK);
+		}
+		return new JsonApi(ApiCodeEnum.FAIL);
+	}	
+	
+	/** 
+	 * @author: WangHuaQiang
+	 * @date: 2018年12月18日
+	 * @param userTriageRecord
+	 * @param result
+	 * @return
+	 * @description: 某团队的今日分诊记录
+	 */
+	@RequiresAuthentication(ignore = false, value = { "web-module-height-obesity:user-triage-record:today-list" },level=Level.OPERATION)
+	@GetMapping("/user/triage/records/today")
+	public JsonApi todayList(@Validated({ UserTriageRecord.TodayList.class }) UserTriageRecord userTriageRecord, BindingResult result,
+			@RequestHeader(required = true,value = BaseGlobal.ORGANIZATION_TEAM_ID) Integer organizationTeamId,
+			@RequestHeader(required = false,value = "organizationConsultingRoomId") Integer organizationConsultingRoomId, @RequestHeader(required = true, value = BaseGlobal.TOKEN_FLAG) String token) {
+		userTriageRecord.setOrganizationTeamId(organizationTeamId);
+		if (organizationConsultingRoomId != null) {
+			userTriageRecord.setOrganizationConsultingRoomId(organizationConsultingRoomId);
+		}
+		Page<?> page = PageHelper.startPage(userTriageRecord.getPage(), userTriageRecord.getPageSize());
+		List<Map<String, Object>> userTriageRecordServiceList = userTriageRecordService.getTodayList(userTriageRecord);
+		if (userTriageRecordServiceList != null && !userTriageRecordServiceList.isEmpty()) {
+			return new JsonApi(ApiCodeEnum.OK, new MultiLine(page.getTotal(), userTriageRecordServiceList));
+		}
+		return new JsonApi(ApiCodeEnum.NOT_FOUND);
+	}
+	
+	/** 
+	 * @author: WangHuaQiang
+	 * @date: 2018年12月18日
+	 * @param userTriageRecord
+	 * @param result
+	 * @param organizationTeamId
+	 * @return
+	 * @description: 某团队的历史分诊记录
+	 */
+	@RequiresAuthentication(ignore = false, value = { "web-module-height-obesity:user-triage-record:get-list" },level=Level.OPERATION)
+	@GetMapping("/user/triage/records")
+	public JsonApi getList(@Validated({ BaseEntity.SelectAll.class }) UserTriageRecord userTriageRecord, BindingResult result,
+			@RequestHeader(required = true,value = BaseGlobal.ORGANIZATION_TEAM_ID) Integer organizationTeamId,
+			@RequestHeader(required = false,value = "organizationConsultingRoomId") Integer organizationConsultingRoomId, @RequestHeader(required = true, value = BaseGlobal.TOKEN_FLAG) String token) {
+		userTriageRecord.setOrganizationTeamId(organizationTeamId);
+		if (organizationConsultingRoomId != null) {
+			userTriageRecord.setOrganizationConsultingRoomId(organizationConsultingRoomId);
+		}
+		Page<?> page = PageHelper.startPage(userTriageRecord.getPage(), userTriageRecord.getPageSize());
+		List<Map<String, Object>> userTriageRecordServiceList = userTriageRecordService.getList(userTriageRecord);
+		if (userTriageRecordServiceList != null && !userTriageRecordServiceList.isEmpty()) {
+			return new JsonApi(ApiCodeEnum.OK, new MultiLine(page.getTotal(), userTriageRecordServiceList));
+		}
+		return new JsonApi(ApiCodeEnum.NOT_FOUND);
+	}	
+	
+	
+}

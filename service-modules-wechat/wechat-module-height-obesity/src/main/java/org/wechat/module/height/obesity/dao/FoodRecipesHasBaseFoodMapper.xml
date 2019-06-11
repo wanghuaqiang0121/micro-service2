@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.wechat.module.height.obesity.dao.FoodRecipesHasBaseFoodMapper">
+
+  <delete id="delete" parameterType="org.wechat.module.height.obesity.entity.FoodRecipesHasBaseFood">
+	DELETE
+	FROM
+		base_food_recipes_has_base_food
+	WHERE
+		id = #{id} 
+  </delete>
+  <insert id="insert" parameterType="org.wechat.module.height.obesity.entity.FoodRecipesHasBaseFood" keyProperty="id"  useGeneratedKeys="true">
+     INSERT INTO base_food_recipes_has_base_food 
+     	(food_recipes_id, food_id )
+    VALUES
+    	 (#{foodRecipesId}, #{foodId})
+  </insert>
+  
+  <update id="update" parameterType="org.wechat.module.height.obesity.entity.FoodRecipesHasBaseFood">
+    UPDATE base_food_recipes_has_base_food  SET id=#{id}
+    <if test="foodRecipesId!=null">
+     , food_recipes_id = #{foodRecipesId}
+    </if>
+   <if test="foodId!=null">
+    ,food_id = #{foodId}
+   </if>
+    WHERE 
+    	id = #{id}
+  </update>
+  
+  <select id="getOne" parameterType="org.wechat.module.height.obesity.entity.FoodRecipesHasBaseFood" resultType="map">
+	SELECT
+		id,
+		food_recipes_id foodRecipesId,
+		food_id foodId
+	FROM
+		base_food_recipes_has_base_food
+	WHERE
+		id = #{id}   
+  </select>
+  <select id="getList" parameterType="org.wechat.module.height.obesity.entity.FoodRecipesHasBaseFood" resultType="map">
+	SELECT
+		id,
+		food_recipes_id foodRecipesId,
+		food_id foodId
+	FROM
+		base_food_recipes_has_base_food
+  </select>
+</mapper>

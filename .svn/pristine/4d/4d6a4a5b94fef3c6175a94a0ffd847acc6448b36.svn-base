@@ -1,0 +1,145 @@
+package org.web.module.height.obesity.controller.configuration;
+
+import java.util.List;
+import java.util.Map;
+
+import javax.annotation.Resource;
+
+import org.service.core.api.ApiCodeEnum;
+import org.service.core.api.JsonApi;
+import org.service.core.api.MultiLine;
+import org.service.core.auth.control.RequiresAuthentication;
+import org.service.core.auth.level.Level;
+import org.service.core.entity.BaseEntity;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
+import org.web.module.height.obesity.entity.SleepConfig;
+import org.web.module.height.obesity.service.SleepConfigService;
+
+import com.github.pagehelper.Page;
+import com.github.pagehelper.PageHelper;
+
+/**
+ * Copyright © 2018 四川易迅通健康医疗技术发展有限公司. All rights reserved.
+ *
+ * @author: ChenYan
+ * @date: 2018年12月19日
+ * @description: 睡眠配置
+ */
+@RestController
+public class SleepConfigController {
+	
+	@Resource
+	private SleepConfigService  sleepConfigService;
+
+	/**
+	 * @author: ChenYan
+	 * @date: 2018年12月19日
+	 * @param nutritionConfig
+	 * @param result
+	 * @return
+	 * @description: 新增睡眠配置
+	 */
+	@RequiresAuthentication(level = Level.OPERATION, value = { "web-module-height-obesity:sleep-config:insert" })
+	@PostMapping(value = { "/sleep/config" })
+	public JsonApi insert(@Validated({ BaseEntity.Insert.class }) @RequestBody SleepConfig sleepConfig, BindingResult result) {
+		if (sleepConfigService.insert(sleepConfig) > 0) {
+			return new JsonApi(ApiCodeEnum.OK);
+		}
+		return new JsonApi(ApiCodeEnum.FAIL);
+	}
+	
+	/**
+	 * @author: ChenYan
+	 * @date: 2018年12月19日
+	 * @param id
+	 * @param nutritionConfig
+	 * @param result
+	 * @return
+	 * @description: 修改睡眠配置
+	 */
+	@RequiresAuthentication(level = Level.OPERATION, value = { "web-module-height-obesity:sleep-config:update" })
+	@PutMapping(value = { "/sleep/config/{id}" })
+	public JsonApi update(@PathVariable("id") Integer id, @Validated({ BaseEntity.Update.class }) @RequestBody SleepConfig sleepConfig, BindingResult result) {
+		sleepConfig.setId(id);
+		/* 检查数据是否存在 */
+		Map<String, Object> sleepConfigMap = sleepConfigService.getOne(sleepConfig);
+		if (sleepConfigMap == null) {
+			return new JsonApi(ApiCodeEnum.NOT_FOUND);
+		}
+		if (sleepConfigService.update(sleepConfig) > 0) {
+			return new JsonApi(ApiCodeEnum.OK);
+		}
+		return new JsonApi(ApiCodeEnum.FAIL);
+	}
+	
+	/**
+	 * @author: ChenYan
+	 * @date: 2018年12月19日
+	 * @param id
+	 * @param nutritionConfig
+	 * @param result
+	 * @return
+	 * @description: 查询睡眠配置详情
+	 */
+	@RequiresAuthentication(level = Level.OPERATION, value = { "web-module-height-obesity:sleep-config:get-detail" })
+	@GetMapping(value = { "/sleep/config/{id}" })
+	public JsonApi getDetail(@PathVariable("id") Integer id, @Validated({ BaseEntity.SelectOne.class }) SleepConfig sleepConfig, BindingResult result) {
+		sleepConfig.setId(id);
+		Map<String, Object> sleepConfigMap = sleepConfigService.getOne(sleepConfig);
+		if (sleepConfigMap != null ) {
+			return new JsonApi(ApiCodeEnum.OK, sleepConfigMap);
+		}
+		return new JsonApi(ApiCodeEnum.NOT_FOUND);
+	}
+
+	/**
+	 * @author: ChenYan
+	 * @date: 2018年12月19日
+	 * @param id
+	 * @param nutritionConfig
+	 * @param result
+	 * @return
+	 * @description: 删除睡眠配置
+	 */
+	@RequiresAuthentication(level = Level.OPERATION, value = { "web-module-height-obesity:sleep-config:delete" })
+	@DeleteMapping(value = { "/sleep/config/{id}" })
+	public JsonApi delete(@PathVariable("id") Integer id, @Validated({ BaseEntity.Delete.class }) SleepConfig sleepConfig, BindingResult result) {
+		sleepConfig.setId(id);
+		/* 检查数据是否存在 */
+		Map<String, Object> sleepConfigMap = sleepConfigService.getOne(sleepConfig);
+		if (sleepConfigMap == null ) {
+			return new JsonApi(ApiCodeEnum.NOT_FOUND);
+		}
+		if (sleepConfigService.delete(sleepConfig) > 0) {
+			return new JsonApi(ApiCodeEnum.OK);
+		}
+		return new JsonApi(ApiCodeEnum.FAIL);
+	}
+	
+	/**
+	 * @author: ChenYan
+	 * @date: 2018年12月19日
+	 * @param sleepConfig
+	 * @param result
+	 * @return
+	 * @description: 查询列表
+	 */
+	@RequiresAuthentication(level = Level.OPERATION, value = { "web-module-height-obesity:sleep-config:get-list" })
+	@GetMapping(value = { "/sleep/configs" })
+	public JsonApi getList(@Validated({ BaseEntity.SelectAll.class })  SleepConfig sleepConfig, BindingResult result) {
+		Page<?> page = PageHelper.startPage(sleepConfig.getPage(), sleepConfig.getPageSize());
+		List<Map<String, Object>> sleepConfigList = sleepConfigService.getList(sleepConfig);
+		if (sleepConfigList != null && !sleepConfigList.isEmpty()) {
+			return new JsonApi(ApiCodeEnum.OK, new MultiLine(page.getTotal(), sleepConfigList));
+		}
+		return new JsonApi(ApiCodeEnum.NOT_FOUND);
+	}
+}

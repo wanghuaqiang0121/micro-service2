@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.web.module.height.obesity.dao.FoodRecipesHasBaseFoodRecipesRonfigMapper">
+
+  
+  <insert id="insert"  parameterType="org.web.module.height.obesity.entity.FoodRecipesHasBaseFoodRecipesRonfig"  keyProperty="id"  useGeneratedKeys="true">
+  INSERT INTO base_food_recipes_has_base_food_recipes_config 
+     	(  food_recipes_config_id, food_recipes_code, food_recipes_name
+      )
+    VALUES
+     ( #{foodRecipesConfigId},#{foodRecipesCode},#{foodRecipesName})
+  </insert>
+  
+  <delete id="delete" parameterType="org.web.module.height.obesity.entity.FoodRecipesHasBaseFoodRecipesRonfig">
+	DELETE
+	FROM
+		base_food_recipes_has_base_food_recipes_config
+	WHERE
+		food_recipes_config_id = #{foodRecipesConfigId} 
+	</delete>
+</mapper>

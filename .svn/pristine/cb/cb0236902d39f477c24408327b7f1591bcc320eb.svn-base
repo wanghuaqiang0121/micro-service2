@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.web.module.height.obesity.dao.WhoStandardBmiSdMapper">
+	<delete id="delete" parameterType="org.web.module.height.obesity.entity.WhoStandardBmiSd">
+		delete from who_standard_bmi_sd
+		where id = #{id}
+	</delete>
+	<insert id="insert" parameterType="org.web.module.height.obesity.entity.WhoStandardBmiSd">
+		insert into who_standard_bmi_sd (id, month_age, sex,
+		sd,
+		standard_value)
+		values (#{id}, #{monthAge}, #{sex},
+		#{sd},
+		#{standardValue})
+	</insert>
+	<update id="update" parameterType="org.web.module.height.obesity.entity.WhoStandardBmiSd">
+		update who_standard_bmi_sd
+		set month_age = #{monthAge},
+		sex = #{sex},
+		sd = #{sd},
+		standard_value = #{standardValue}
+		where id =
+		#{id}
+	</update>
+	<select id="getOne" parameterType="org.web.module.height.obesity.entity.WhoStandardBmiSd" resultType="map">
+		select id, month_age monthAge, sex, sd, standard_value standardValue
+		from
+		who_standard_bmi_sd
+		where id = #{id}
+	</select>
+	<select id="getBmiStandValue" parameterType="org.web.module.height.obesity.entity.WhoStandardBmiSd" resultType="map">
+		select id, month_age monthAge, sex, sd, standard_value standardValue
+		from
+		who_standard_bmi_sd
+		where sex=#{sex} AND month_age=#{monthAge} AND sd&gt;=#{sd}
+		order by id asc
+		limit 1
+	</select>
+	<select id="getBmiSd" parameterType="org.web.module.height.obesity.entity.WhoStandardBmiSd" resultType="map">
+		SELECT id, month_age monthAge, sex, sd, standard_value standardValue
+		FROM
+		who_standard_bmi_sd
+		<where>
+			<if test="sex!=null">sex=#{sex}</if>
+			<if test="monthAge!=null">AND month_age=#{monthAge}</if>
+		</where>
+		ORDER BY ABS(standard_value-#{standardValue})
+		limit 1		
+	</select>
+
+	<select id="getList" parameterType="org.web.module.height.obesity.entity.WhoStandardBmiSd" resultType="map">
+		SELECT
+		id,
+		month_age monthAge,
+		sex, sd,
+		standard_value standardValue
+		FROM
+		who_standard_bmi_sd
+		<where>
+			<if test="sex!=null">sex=#{sex}</if>
+			<if test="sd!=null">AND sd=#{sd}</if>
+			<if test="startMonthAge!=null">AND month_age &gt;=#{startMonthAge}</if>
+			<if test="endMonthAge!=null">AND month_age &lt;=#{endMonthAge}</if>
+		</where>
+	</select>
+</mapper>

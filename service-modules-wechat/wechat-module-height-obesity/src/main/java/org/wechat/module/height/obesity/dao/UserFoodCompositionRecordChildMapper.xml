@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.wechat.module.height.obesity.dao.UserFoodCompositionRecordChildMapper">
+
+ <insert id="insert" parameterType="org.wechat.module.height.obesity.entity.UserFoodCompositionRecordChild" keyProperty="id"  useGeneratedKeys="true">
+     INSERT INTO base_user_food_composition_record_child 
+     	(user_id ,user_food_composition_record_id, code, name, value, create_date_time
+      )
+    VALUES
+    	 (  #{userId},  #{userFoodCompositionRecordId}, #{code}, #{name}, #{value}, #{createDateTime}
+      )
+  </insert>
+  
+  <!-- 批量新增用户饮食记录 -->
+   <insert id="batchInsert" parameterType="list">
+  INSERT INTO base_user_food_composition_record_child 
+     	(user_id ,user_food_composition_record_id, code, name, value, create_date_time
+      )
+      VALUES
+       <foreach collection="list" separator="," item="userFoodCompositionRecordChild">
+     (  #{userFoodCompositionRecordChild.userId},  #{userFoodCompositionRecordChild.userFoodCompositionRecordId}, #{userFoodCompositionRecordChild.code}, #{userFoodCompositionRecordChild.name}, #{userFoodCompositionRecordChild.value}, #{userFoodCompositionRecordChild.createDateTime}
+      )
+      </foreach>
+  </insert>
+  
+  <!-- 饮食分析列表 -->
+  <select id="getList" parameterType="org.wechat.module.height.obesity.entity.UserFoodCompositionRecordChild"  resultType="map">
+	SELECT
+		bufcrc.id,
+		bufcrc.`name`,
+		bufcrc.`code`,
+		DATE_FORMAT(bufcrc.create_date_time,'%Y-%m-%d') createDate,
+		SUM(ROUND(bufcrc.`value`, 2)) `value`
+	FROM
+		base_user_food_composition_record_child bufcrc
+	INNER JOIN base_user_food_composition_record bufcr ON bufcrc.user_food_composition_record_id = bufcr.id
+	WHERE 
+		bufcrc.user_id=#{userId}	
+		  <if test="code!=null and code!=''">
+		  AND bufcr.`code`=#{code}
+		  </if>
+	  	<if test="createDateTime!=null">
+	 	 AND  DATE_FORMAT(bufcr.create_date_time,'%Y-%m-%d') =DATE_FORMAT(#{createDateTime},'%Y-%m-%d')
+	 	</if>
+	 	GROUP BY bufcrc.`code`
+  </select>
+  
+</mapper>

@@ -1,0 +1,787 @@
+package org.web.module.height.obesity.controller;
+
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.annotation.Resource;
+
+import org.service.core.api.ApiCodeEnum;
+import org.service.core.api.JsonApi;
+import org.service.core.auth.control.RequiresAuthentication;
+import org.service.core.auth.level.Level;
+import org.service.core.entity.BaseEntity;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RestController;
+import org.web.module.height.obesity.dao.WhoStandardBmiSdMapper;
+import org.web.module.height.obesity.dao.WhoStandardHeightWeightSdMapper;
+import org.web.module.height.obesity.entity.BehavioralDevelopmentConfig;
+import org.web.module.height.obesity.entity.ChildrenFamily;
+import org.web.module.height.obesity.entity.ChildrenMaternity;
+import org.web.module.height.obesity.entity.ChildrenMeasure;
+import org.web.module.height.obesity.entity.Diagnosis;
+import org.web.module.height.obesity.entity.FoodRecipesConfig;
+import org.web.module.height.obesity.entity.FoodRecipesConfigHasBaseFood;
+import org.web.module.height.obesity.entity.FoodRecipesHasBaseFoodRecipesConfig;
+import org.web.module.height.obesity.entity.HeightObesityProject;
+import org.web.module.height.obesity.entity.NutritionProject;
+import org.web.module.height.obesity.entity.SleepConfig;
+import org.web.module.height.obesity.entity.StandardEerAmdrRni;
+import org.web.module.height.obesity.entity.StandardEmotionConfig;
+import org.web.module.height.obesity.entity.User;
+import org.web.module.height.obesity.entity.UserDrugsProject;
+import org.web.module.height.obesity.entity.UserHeightObesityProject;
+import org.web.module.height.obesity.entity.UserObesityManagerRecord;
+import org.web.module.height.obesity.entity.UserRecipesProject;
+import org.web.module.height.obesity.entity.WhoStandardBmiSd;
+import org.web.module.height.obesity.entity.WhoStandardHeightWeightSd;
+import org.web.module.height.obesity.global.BaseGlobal;
+import org.web.module.height.obesity.global.GlobalEnum.ChildrenMeasureStatus;
+import org.web.module.height.obesity.service.BehavioralDevelopmentConfigService;
+import org.web.module.height.obesity.service.ChildrenFamilyService;
+import org.web.module.height.obesity.service.ChildrenMaternityService;
+import org.web.module.height.obesity.service.ChildrenMeasureService;
+import org.web.module.height.obesity.service.DiagnosisService;
+import org.web.module.height.obesity.service.FoodRecipesConfigHasBaseFoodService;
+import org.web.module.height.obesity.service.FoodRecipesConfigService;
+import org.web.module.height.obesity.service.FoodRecipesHasBaseFoodRecipesConfigService;
+import org.web.module.height.obesity.service.HeightEvaluationService;
+import org.web.module.height.obesity.service.HighRiskChildrenService;
+import org.web.module.height.obesity.service.NutritionProjectService;
+import org.web.module.height.obesity.service.SleepConfigService;
+import org.web.module.height.obesity.service.StandardEerAmdrRniService;
+import org.web.module.height.obesity.service.StandardEmotionConfigService;
+import org.web.module.height.obesity.service.UserDrugsProjectService;
+import org.web.module.height.obesity.service.UserHeightObesityProjectService;
+import org.web.module.height.obesity.service.UserObesityManagerRecordService;
+import org.web.module.height.obesity.service.UserRecipesProjectService;
+import org.web.module.height.obesity.service.UserService;
+import org.web.module.height.obesity.service.WeightEvaluationService;
+import org.web.module.height.obesity.service.WhoStandardBmiSdService;
+import org.web.module.height.obesity.service.WhoStandardWeightSdService;
+import org.web.module.height.obesity.service.feign.IOrganizationUserRoleService;
+import org.web.module.height.obesity.tools.HeightObesityCalculation;
+
+/**
+ * Copyright © 2018 四川易迅通健康医疗技术发展有限公司. All rights reserved.
+ *
+ * @author: ZhangGuangZhi
+ * @date: 2018年12月17日
+ * @description: 方案内容
+ */
+@RestController
+public class ProjectController {
+
+    @Resource
+    private HeightEvaluationService heightEvaluationService;
+    @Resource
+    private HighRiskChildrenService highRiskChildrenService;
+    @Resource
+    private WeightEvaluationService weightEvaluationService;
+    @Resource
+    private DiagnosisService diagnosisService;
+    @Resource
+    private ChildrenMeasureService childrenMeasureService;
+    @Resource
+    private UserService userService;
+    @Resource
+    private ChildrenFamilyService childrenFamilyService;
+    @Resource
+    private ChildrenMaternityService childrenMaternityService;
+    @Resource
+    private WhoStandardHeightWeightSdMapper whoStandardHeightWeightSdMapper;
+    @Resource
+    private FoodRecipesHasBaseFoodRecipesConfigService foodRecipesHasBaseFoodRecipesConfigService;
+    @Resource
+    private FoodRecipesConfigService foodRecipesConfigService;
+    @Resource
+    private FoodRecipesConfigHasBaseFoodService foodRecipesConfigHasBaseFoodService;
+    @Resource
+    private NutritionProjectService nutritionProjectService;
+    @Resource
+    private StandardEerAmdrRniService standardEerAmdrRniService;
+    @Resource
+    private BehavioralDevelopmentConfigService behavioralDevelopmentConfigService;
+    @Resource
+    private SleepConfigService sleepConfigService;
+    @Resource
+    private StandardEmotionConfigService standardEmotionConfigService;
+    @Resource
+    private UserHeightObesityProjectService userHeightObesityProjectService;
+    @Resource
+    private UserRecipesProjectService userRecipesProjectService;
+    @Resource
+    private UserDrugsProjectService userDrugsProjectService;
+    @Resource
+    private WhoStandardBmiSdMapper whoStandardBmiSdMapper;
+    @Resource
+    private UserObesityManagerRecordService userObesityManagerRecordService;
+    @Resource
+    private IOrganizationUserRoleService organizationUserRoleService;
+    @Resource
+    private WhoStandardWeightSdService whoStandardWeightSdService;
+    @Resource
+    private WhoStandardBmiSdService whoStandardBmiSdService;
+
+    /**
+     * @author: ZhangGuangZhi
+     * @date: 2018年12月17日
+     * @param userId
+     * @param childrenMeasureId
+     * @return
+     * @description: 方案儿童生长水平
+     */
+    @RequiresAuthentication(ignore = false, value = {
+            "web-module-height-obesity:project/growthlevel" }, level = Level.OPERATION)
+    @GetMapping(value = { "/project/growthlevel" })
+    public JsonApi getGrowthLevel(@Validated({ BaseEntity.SelectAll.class }) Diagnosis diagnosis, BindingResult resul, @RequestHeader(required = true, value = BaseGlobal.TOKEN_FLAG) String token) {
+        diagnosis = getUserDiagnosis(diagnosis);
+        if (diagnosis == null) {
+            return new JsonApi(ApiCodeEnum.NOT_FOUND);
+        }
+        Map<String, Object> map = new HashMap<>();
+        /* 身高 */
+        map.put("height", diagnosis.getHeight());
+        /* 体重 */
+        map.put("weight", diagnosis.getWeight());
+        /* 头围 */
+        map.put("headCircumference", diagnosis.getHeadCircumference());
+
+        /* 身高别体重 */
+        double bmi = diagnosisService.getBMI(diagnosis.getHeight(), diagnosis.getWeight());
+        String tx = null;
+        /* 查询bmi所在的sd */
+        if (diagnosis.getMonthAge() <= 60) {
+
+            Integer bmiSd = null;
+            double bmiStand;
+            /* 身高别体重表 */
+            WhoStandardHeightWeightSd whoStandardHeightWeightSd = new WhoStandardHeightWeightSd();
+            whoStandardHeightWeightSd.setSex(diagnosis.getSex());
+            if (diagnosis.getMonthAge() >= 0 && diagnosis.getMonthAge() <= 24) {
+                whoStandardHeightWeightSd.setMonthAgeStart(0);
+                whoStandardHeightWeightSd.setMonthAgeEnd(24);
+            } else if (diagnosis.getMonthAge() >= 25 && diagnosis.getMonthAge() <= 60) {
+                whoStandardHeightWeightSd.setMonthAgeStart(25);
+                whoStandardHeightWeightSd.setMonthAgeEnd(72);
+            }
+            whoStandardHeightWeightSd.setStandardValue(new BigDecimal(bmi));
+            whoStandardHeightWeightSd.setHeight(new BigDecimal(diagnosis.getHeight()));
+
+            Map<String, Object> whoStandardHeightWeightSdMap = whoStandardHeightWeightSdMapper
+                    .getHeightWeightSd(whoStandardHeightWeightSd);
+            if (whoStandardHeightWeightSdMap != null) {
+                bmiSd = (Integer) whoStandardHeightWeightSdMap.get("sd");
+                bmiStand = ((BigDecimal) whoStandardHeightWeightSdMap.get("standardValue")).doubleValue();
+                if (bmiSd == -3) {
+                    if (bmiStand > diagnosis.getWeight()) {
+                        bmiSd = -2;
+                    }
+                }
+            }
+
+            if (bmiSd >= 1 && bmiSd < 2) {
+                tx = "超重";
+            } else if (bmiSd >= 2) {
+                tx = "肥胖";
+            } else if (bmiSd >= -2 && bmiSd < 1) {
+                tx = "正常";
+            } else if (bmiSd >= -3 && bmiSd < -2) {
+                tx = "消瘦";
+            } else if (bmiSd < -3) {
+                tx = "重度消瘦";
+            }
+        }
+
+        map.put("heightWeight", tx);
+
+        /* 年龄别身高 */
+        map.put("ageHeight", null);
+
+        /* 年龄别体重 */
+        map.put("ageWeight", null);
+
+        return new JsonApi(ApiCodeEnum.OK, map);
+    }
+
+    /**
+     * @author: ZhangGuangZhi
+     * @date: 2019年1月15日
+     * @param userId
+     * @param childrenMeasureId
+     * @return
+     * @description: 获取本次方案内容
+     */
+    @RequiresAuthentication(ignore = false, value = {
+            "web-module-height-obesity:project/content" }, level = Level.OPERATION)
+    @GetMapping(value = { "/project/content" })
+    public JsonApi getProject(@Validated({ BaseEntity.SelectAll.class }) Diagnosis diagnosis, BindingResult resul, @RequestHeader(required = true, value = BaseGlobal.TOKEN_FLAG) String token) {
+        diagnosis = getUserDiagnosis(diagnosis);
+        if (diagnosis == null) {
+            return new JsonApi(ApiCodeEnum.NOT_FOUND);
+        }
+
+        Map<String, Object> map = new HashMap<>();
+
+        /* 查询本次是否已生成方案内容 */
+        UserHeightObesityProject userHeightObesityProject = new UserHeightObesityProject();
+        userHeightObesityProject.setChildrenMeasureId(diagnosis.getChildrenMeasureId());
+        Map<String, Object> projectMap = userHeightObesityProjectService.getOne(userHeightObesityProject);
+        if (projectMap != null) {
+
+            /* 查询方案内容 */
+            /* 饮食 */
+            /* 营养干预 */
+            List<Map<String, Object>> nutritionList = new ArrayList<>();
+            Map<String, Object> nutritionMap = new HashMap<>();
+            nutritionMap.put("methodContent", projectMap.get("nutritionMethodContent"));
+            nutritionMap.put("details", projectMap.get("nutritionDetails"));
+            nutritionMap.put("remark", projectMap.get("nutritionRemark"));
+            nutritionList.add(nutritionMap);
+            map.put("nutrition", nutritionList);
+
+            List<Map<String, Object>> eerList = new ArrayList<>();
+            if (projectMap.get("eerId") != null) {
+                /* 推荐摄入 */
+                StandardEerAmdrRni standardEerAmdrRni = new StandardEerAmdrRni();
+                standardEerAmdrRni.setId((Integer) projectMap.get("eerId"));
+                eerList.add(standardEerAmdrRniService.getOne(standardEerAmdrRni));
+            }
+            map.put("eer", eerList);
+
+            /* 食谱 */
+            UserRecipesProject userRecipesProject = new UserRecipesProject();
+            userRecipesProject.setChildrenMeasureId(diagnosis.getChildrenMeasureId());
+            Map<String, Object> dietResultMap = userRecipesProjectService.getOne(userRecipesProject);
+
+            if (dietResultMap != null && dietResultMap.get("name") != null) {
+
+                List<Map<String, Object>> dietMapList = new ArrayList<>();
+                /* 根据配置名查询菜谱 */
+                FoodRecipesHasBaseFoodRecipesConfig foodRecipesHasBaseFoodRecipesConfig = new FoodRecipesHasBaseFoodRecipesConfig();
+                foodRecipesHasBaseFoodRecipesConfig.setName(dietResultMap.get("name").toString());
+
+                /* 查询餐次 */
+                List<Map<String, Object>> mealTimesList = foodRecipesHasBaseFoodRecipesConfigService
+                        .getMealTimes(foodRecipesHasBaseFoodRecipesConfig);
+                for (Map<String, Object> childMap : mealTimesList) {
+
+                    Map<String, Object> dietMap = new HashMap<>();
+                    foodRecipesHasBaseFoodRecipesConfig.setCodeType(childMap.get("code").toString());
+                    List<Map<String, Object>> foodResultList = foodRecipesHasBaseFoodRecipesConfigService
+                            .getList(foodRecipesHasBaseFoodRecipesConfig);
+                    dietMap.put("codeName", childMap.get("value"));
+                    dietMap.put("codeType", childMap.get("code"));
+
+                    /* 查询菜对应的食物 */
+                    List<Map<String, Object>> recipesMapList = new ArrayList<>();
+                    for (Map<String, Object> foodMap : foodResultList) {
+                        Map<String, Object> recipesMap = new HashMap<>();
+                        FoodRecipesConfigHasBaseFood hasBaseFood = new FoodRecipesConfigHasBaseFood();
+                        hasBaseFood.setFoodRecipesHasBaseFoodRecipesConfigId((Integer) foodMap.get("id"));
+
+                        dietMap.put("foodRecipesConfigId", foodMap.get("foodRecipesConfigId"));
+                        recipesMap.put("recipesName", foodMap.get("foodRecipesName"));
+                        recipesMap.put("food", foodRecipesConfigHasBaseFoodService.getList(hasBaseFood));
+                        recipesMapList.add(recipesMap);
+                    }
+                    dietMap.put("data", recipesMapList);
+                    dietMapList.add(dietMap);
+                }
+
+                map.put("recipes", dietMapList);
+            } else {
+                map.put("recipes", new ArrayList<Map<String, Object>>());
+            }
+            /* 睡眠 */
+            List<Map<String, Object>> sleepList = new ArrayList<>();
+            Map<String, Object> sleepMap = new HashMap<>();
+            sleepMap.put("content", projectMap.get("sleepContent"));
+            sleepList.add(sleepMap);
+            map.put("sleep", sleepList);
+
+            /* 运动 */
+            List<Map<String, Object>> motionList = new ArrayList<>();
+            Map<String, Object> motionMap = new HashMap<>();
+            motionMap.put("name", projectMap.get("motionName"));
+            motionMap.put("remark", projectMap.get("motionRemark"));
+            motionMap.put("picture", projectMap.get("motionPicture"));
+            motionList.add(motionMap);
+            map.put("motion", motionList);
+
+            /* 情绪 */
+            List<Map<String, Object>> emotionList = new ArrayList<>();
+            Map<String, Object> emotionMap = new HashMap<>();
+            emotionMap.put("content", projectMap.get("emotionContent"));
+            emotionList.add(emotionMap);
+            map.put("emotion", emotionList);
+
+            /* 注意事项 */
+            map.put("mattersNeedingAttention", projectMap.get("mattersNeedingAttention"));
+        } else
+
+        {
+
+            /* 饮食 */
+            /* 营养干预 */
+            NutritionProject nutritionProject = new NutritionProject();
+            nutritionProject.setStartMonthAge(diagnosis.getMonthAge());
+            nutritionProject.setEndMonthAge(diagnosis.getMonthAge());
+            map.put("nutrition", nutritionProjectService.getList(nutritionProject));
+
+            /* 推荐摄入 */
+            StandardEerAmdrRni standardEerAmdrRni = new StandardEerAmdrRni();
+            standardEerAmdrRni.setStartMonthAge(diagnosis.getMonthAge());
+            standardEerAmdrRni.setEndMonthAge(diagnosis.getMonthAge());
+            standardEerAmdrRni.setSex(diagnosis.getSex());
+            map.put("eer", standardEerAmdrRniService.getList(standardEerAmdrRni));
+
+            /* 食谱 */
+            /* 随机取一个配置名 */
+            FoodRecipesConfig foodRecipesConfig = new FoodRecipesConfig();
+            foodRecipesConfig.setSex(diagnosis.getSex());
+            foodRecipesConfig.setMonthAgeStart(diagnosis.getMonthAge());
+            foodRecipesConfig.setMonthAgeEnd(diagnosis.getMonthAge());
+
+            foodRecipesConfig.setCodeType("1");
+            Map<String, Object> dietResultMap = foodRecipesConfigService.getRandomConfig(foodRecipesConfig);
+            if (dietResultMap != null && dietResultMap.get("name") != null) {
+
+                List<Map<String, Object>> dietMapList = new ArrayList<>();
+                /* 根据配置名查询菜谱 */
+                FoodRecipesHasBaseFoodRecipesConfig foodRecipesHasBaseFoodRecipesConfig = new FoodRecipesHasBaseFoodRecipesConfig();
+                foodRecipesHasBaseFoodRecipesConfig.setName(dietResultMap.get("name").toString());
+
+                /* 查询餐次 */
+                List<Map<String, Object>> mealTimesList = foodRecipesHasBaseFoodRecipesConfigService
+                        .getMealTimes(foodRecipesHasBaseFoodRecipesConfig);
+                for (Map<String, Object> childMap : mealTimesList) {
+
+                    Map<String, Object> dietMap = new HashMap<>();
+                    foodRecipesHasBaseFoodRecipesConfig.setCodeType(childMap.get("code").toString());
+                    List<Map<String, Object>> foodResultList = foodRecipesHasBaseFoodRecipesConfigService
+                            .getList(foodRecipesHasBaseFoodRecipesConfig);
+                    dietMap.put("codeName", childMap.get("value"));
+                    dietMap.put("codeType", childMap.get("code"));
+
+                    /* 查询菜对应的食物 */
+                    List<Map<String, Object>> recipesMapList = new ArrayList<>();
+                    for (Map<String, Object> foodMap : foodResultList) {
+                        Map<String, Object> recipesMap = new HashMap<>();
+                        FoodRecipesConfigHasBaseFood hasBaseFood = new FoodRecipesConfigHasBaseFood();
+                        hasBaseFood.setFoodRecipesHasBaseFoodRecipesConfigId((Integer) foodMap.get("id"));
+
+                        dietMap.put("foodRecipesConfigId", foodMap.get("foodRecipesConfigId"));
+                        recipesMap.put("recipesName", foodMap.get("foodRecipesName"));
+                        recipesMap.put("food", foodRecipesConfigHasBaseFoodService.getList(hasBaseFood));
+                        recipesMapList.add(recipesMap);
+                    }
+                    dietMap.put("data", recipesMapList);
+                    dietMapList.add(dietMap);
+                }
+
+                map.put("recipes", dietMapList);
+            } else {
+                map.put("recipes", new ArrayList<Map<String, Object>>());
+            }
+
+            /* 睡眠 */
+            SleepConfig sleepConfig = new SleepConfig();
+            sleepConfig.setMonthAgeStart(diagnosis.getMonthAge());
+            sleepConfig.setMonthAgeEnd(diagnosis.getMonthAge());
+            sleepConfig.setSex(diagnosis.getSex());
+            map.put("sleep", sleepConfigService.getSleepList(sleepConfig));
+
+            /* 运动 */
+            BehavioralDevelopmentConfig behavioralDevelopmentConfig = new BehavioralDevelopmentConfig();
+            behavioralDevelopmentConfig.setMonthAgeStart(diagnosis.getMonthAge());
+            behavioralDevelopmentConfig.setMonthAgeEnd(diagnosis.getMonthAge());
+            map.put("motion", behavioralDevelopmentConfigService.getMotionList(behavioralDevelopmentConfig));
+
+            /* 情绪 */
+            StandardEmotionConfig standardEmotionConfig = new StandardEmotionConfig();
+            standardEmotionConfig.setStartMonthAge(diagnosis.getMonthAge());
+            standardEmotionConfig.setEndMonthAge(diagnosis.getMonthAge());
+            map.put("emotion", standardEmotionConfigService.getList(standardEmotionConfig));
+
+            /* 注意事项 */
+            map.put("mattersNeedingAttention", null);
+        }
+        return new JsonApi(ApiCodeEnum.OK, map);
+    }
+
+    /**
+     * @author: ZhangGuangZhi
+     * @date: 2019年1月15日
+     * @param userId
+     * @param childrenMeasureId
+     * @return
+     * @description: 提交本次方案内容
+     */
+    @RequiresAuthentication(ignore = false, value = {
+            "web-module-height-obesity:project/post/content" }, level = Level.OPERATION)
+    @PostMapping(value = { "/project/content" })
+    @Transactional
+    public JsonApi postProject(
+            @RequestBody @Validated({ BaseEntity.Insert.class }) HeightObesityProject heightObesityProject,
+            BindingResult resul, @RequestHeader(required = true, value = BaseGlobal.TOKEN_FLAG) String token) {
+
+        /* 获取登录机构用户id */
+        JsonApi jsonApi = organizationUserRoleService.getSession(BaseGlobal.CACHE_ORGANIZATION_USER, token, token);
+
+        try {
+            /* 饮食 */
+            // 删除原记录
+            UserRecipesProject deleteRecipes = new UserRecipesProject();
+            deleteRecipes
+                    .setChildrenMeasureId(heightObesityProject.getUserHeightObesityProject().getChildrenMeasureId());
+            userRecipesProjectService.deleteByChildrenMeasureId(deleteRecipes);
+
+            if (heightObesityProject.getUserRecipesProject() != null
+                    && heightObesityProject.getUserRecipesProject().size() > 0) {
+                for (UserRecipesProject item : heightObesityProject.getUserRecipesProject()) {
+                    item.setCreateDateTime(new Date());
+                }
+
+                userRecipesProjectService.insertBatch(heightObesityProject.getUserRecipesProject());
+            }
+
+            /* 药品 */
+            // 删除原记录
+            UserDrugsProject deleteDrugs = new UserDrugsProject();
+            deleteDrugs.setChildrenMeasureId(heightObesityProject.getUserHeightObesityProject().getChildrenMeasureId());
+            userDrugsProjectService.deleteByChildrenMeasureId(deleteDrugs);
+
+            if (heightObesityProject.getUserDrugsProject() != null
+                    && heightObesityProject.getUserDrugsProject().size() > 0) {
+                for (UserDrugsProject item : heightObesityProject.getUserDrugsProject()) {
+                    item.setCreateDateTime(new Date());
+                }
+                userDrugsProjectService.insertBatch(heightObesityProject.getUserDrugsProject());
+            }
+
+            /* 睡眠 */
+            /* 运动 */
+            /* 情绪 */
+            heightObesityProject.getUserHeightObesityProject().setCreateDateTime(new Date());
+            if (jsonApi.getCode() == ApiCodeEnum.OK.getValue()) {
+                heightObesityProject.getUserHeightObesityProject()
+                        .setOrganizationUserId(Integer.parseInt(jsonApi.getData().toString()));
+            }
+            // 删除原记录
+            userHeightObesityProjectService
+                    .deleteByChildrenMeasureId(heightObesityProject.getUserHeightObesityProject());
+            userHeightObesityProjectService.insert(heightObesityProject.getUserHeightObesityProject());
+
+            /* 修改测量记录状态为已完成 */
+            ChildrenMeasure childrenMeasure = new ChildrenMeasure();
+            // childrenMeasure.setId(heightObesityProject.getUserHeightObesityProject().getChildrenMeasureId());
+            childrenMeasure.setUserId(heightObesityProject.getUserHeightObesityProject().getUserId());
+            childrenMeasure.setStatus(ChildrenMeasureStatus.FINISHED.getValue());
+            childrenMeasureService.update(childrenMeasure);
+        } catch (Exception e) {
+            throw new RuntimeException("方案提交失败");
+        }
+
+        return new JsonApi(ApiCodeEnum.OK);
+    }
+
+    /**
+     * @author: ZhangGuangZhi
+     * @date: 2019年1月15日
+     * @param userId
+     * @param childrenMeasureId
+     * @return
+     * @description: 检测用户是否为肥胖儿童
+     */
+    @RequiresAuthentication(ignore = false, value = {
+            "web-module-height-obesity:user/obesity" }, level = Level.OPERATION)
+    @GetMapping(value = { "/user/obesity" })
+    public JsonApi getUserChildObesity(@Validated({ BaseEntity.SelectAll.class }) Diagnosis diagnosis,
+            BindingResult resul, @RequestHeader(required = true, value = BaseGlobal.TOKEN_FLAG) String token) {
+        diagnosis = getUserDiagnosis(diagnosis);
+        if (diagnosis == null) {
+            return new JsonApi(ApiCodeEnum.NOT_FOUND);
+        }
+
+        Map<String, Object> map = new HashMap<>();
+
+        /* 查询用户当前别体重 */
+        double bmi = diagnosisService.getBMI(diagnosis.getHeight(), diagnosis.getWeight());
+        Integer bmiSd = null;
+        double bmiStand = 0;
+
+        /* 查询用户现所在bmi sd */
+        if (diagnosis.getEndMonthAge() <= 60) {
+            /* 身高别体重表 */
+            WhoStandardHeightWeightSd whoStandardHeightWeightSd = new WhoStandardHeightWeightSd();
+            whoStandardHeightWeightSd.setSex(diagnosis.getSex());
+            if (diagnosis.getMonthAge() >= 0 && diagnosis.getMonthAge() <= 24) {
+                whoStandardHeightWeightSd.setMonthAgeStart(0);
+                whoStandardHeightWeightSd.setMonthAgeEnd(24);
+            } else if (diagnosis.getMonthAge() >= 25 && diagnosis.getMonthAge() <= 60) {
+                whoStandardHeightWeightSd.setMonthAgeStart(25);
+                whoStandardHeightWeightSd.setMonthAgeEnd(72);
+            }
+            whoStandardHeightWeightSd.setHeight(new BigDecimal(diagnosis.getHeight()));
+            whoStandardHeightWeightSd.setStandardValue(new BigDecimal(bmi));
+
+            Map<String, Object> whoStandardHeightWeightSdMap = whoStandardHeightWeightSdMapper
+                    .getHeightWeightSd(whoStandardHeightWeightSd);
+            if (whoStandardHeightWeightSdMap != null) {
+                bmiSd = (Integer) whoStandardHeightWeightSdMap.get("sd");
+                bmiStand = ((BigDecimal) whoStandardHeightWeightSdMap.get("standardValue")).doubleValue();
+                if (bmiSd == -3) {
+                    if (bmiStand > diagnosis.getWeight()) {
+                        bmiSd = -2;
+                    }
+                }
+            }
+
+        } else {
+            /* bmi表 */
+            WhoStandardBmiSd whoStandardBmiSd = new WhoStandardBmiSd();
+            whoStandardBmiSd.setSex(diagnosis.getSex());
+            whoStandardBmiSd.setMonthAge(diagnosis.getMonthAge());
+            whoStandardBmiSd.setStandardValue(new BigDecimal(bmi));
+
+            Map<String, Object> whoStandardBmiSdMap = whoStandardBmiSdMapper.getBmiSd(whoStandardBmiSd);
+            if (whoStandardBmiSdMap != null) {
+                bmiSd = (Integer) whoStandardBmiSdMap.get("sd");
+                bmiStand = ((BigDecimal) whoStandardBmiSdMap.get("standardValue")).doubleValue();
+
+                if (bmiSd == -3) {
+                    if (bmiStand > diagnosis.getWeight()) {
+                        bmiSd = -2;
+                    }
+                }
+            }
+        }
+
+        String evaluation = null;
+
+        if (bmiSd != null) {
+            if ((bmiSd >= 1 && bmiSd < 2)) {
+                /*
+                 * 1.M＋1SD≤当前体重/身长（身高）< M＋2SD(超重) 2.当前体重/身长（身高）≥M＋2SD(肥胖)
+                 */
+                evaluation = "超重";
+                map.put("isObesity", true);
+            } else if ((bmiSd >= 2)) {
+                /*
+                 * 2.当前体重/身长（身高）≥M＋2SD(肥胖)
+                 */
+                evaluation = "肥胖";
+                map.put("isObesity", true);
+            } else {
+                map.put("isObesity", false);
+            }
+        } else {
+            map.put("isObesity", false);
+        }
+        map.put("evaluation", evaluation);
+        return new JsonApi(ApiCodeEnum.OK, map);
+    }
+
+    /**
+     * @author: ZhangGuangZhi
+     * @date: 2019年1月15日
+     * @param userId
+     * @param childrenMeasureId
+     * @return
+     * @description: 提交肥胖记录
+     */
+    @RequiresAuthentication(ignore = false, value = {
+            "web-module-height-obesity:obesity/content" }, level = Level.OPERATION)
+    @PostMapping(value = { "/obesity/content" })
+    @Transactional
+    public JsonApi postObesityContent(
+            @RequestBody @Validated({ BaseEntity.Insert.class }) UserObesityManagerRecord userObesityManagerRecord,
+            BindingResult resul, @RequestHeader(required = true, value = BaseGlobal.TOKEN_FLAG) String token) {
+
+        /* 获取登录机构用户id */
+        JsonApi jsonApi = organizationUserRoleService.getSession(BaseGlobal.CACHE_ORGANIZATION_USER, token, token);
+
+        Diagnosis diagnosisCondition = new Diagnosis();
+        diagnosisCondition.setUserId(userObesityManagerRecord.getUserId());
+        diagnosisCondition.setChildrenMeasureId(userObesityManagerRecord.getChildrenMeasureId());
+        Diagnosis diagnosis = getUserDiagnosis(diagnosisCondition);
+
+        ChildrenMeasure childrenMeasure = new ChildrenMeasure();
+        childrenMeasure.setId(userObesityManagerRecord.getChildrenMeasureId());
+        Map<String, Object> childrenMeasureMap = childrenMeasureService.getOne(childrenMeasure);
+        if (childrenMeasureMap != null) {
+            userObesityManagerRecord.setSex(diagnosis.getSex());
+            userObesityManagerRecord.setMonthAge(diagnosis.getMonthAge());
+            userObesityManagerRecord.setHeight(diagnosis.getHeight().floatValue());
+            userObesityManagerRecord.setWeight(diagnosis.getWeight().floatValue());
+            Double bmi = diagnosisService.getBMI(diagnosis.getHeight(), diagnosis.getWeight());
+            userObesityManagerRecord.setBmi(bmi.floatValue());
+            Double obesityBmi = null;
+
+            /* 查询肥胖标准SD */
+            if (diagnosis.getMonthAge() <= 60) {
+                WhoStandardHeightWeightSd whoStandardHeightWeightSd = new WhoStandardHeightWeightSd();
+                whoStandardHeightWeightSd.setSex(diagnosis.getSex());
+                if (diagnosis.getMonthAge() >= 0 && diagnosis.getMonthAge() <= 24) {
+                    whoStandardHeightWeightSd.setMonthAgeStart(0);
+                    whoStandardHeightWeightSd.setMonthAgeEnd(24);
+                } else if (diagnosis.getMonthAge() >= 25 && diagnosis.getMonthAge() <= 60) {
+                    whoStandardHeightWeightSd.setMonthAgeStart(25);
+                    whoStandardHeightWeightSd.setMonthAgeEnd(60);
+                }
+                whoStandardHeightWeightSd.setSd(1);
+                whoStandardHeightWeightSd.setHeight(new BigDecimal(diagnosis.getHeight()));
+
+                Map<String, Object> whoStandardHeightWeightSdMap = whoStandardHeightWeightSdMapper
+                        .getStandValue(whoStandardHeightWeightSd);
+                if (whoStandardHeightWeightSdMap != null) {
+                    obesityBmi = ((BigDecimal) whoStandardHeightWeightSdMap.get("standardValue")).doubleValue();
+                }
+            } else {
+                WhoStandardBmiSd whoStandardBmiSd = new WhoStandardBmiSd();
+                whoStandardBmiSd.setSex(diagnosis.getSex());
+                whoStandardBmiSd.setMonthAge(diagnosis.getMonthAge());
+                whoStandardBmiSd.setSd(1);
+
+                Map<String, Object> bmiStandardMap = whoStandardBmiSdService.getBmiStandValue(whoStandardBmiSd);
+                if (bmiStandardMap != null) {
+                    obesityBmi = ((BigDecimal) bmiStandardMap.get("standardValue")).doubleValue();
+                }
+            }
+            userObesityManagerRecord.setBmiStandard(obesityBmi.floatValue());
+            userObesityManagerRecord.setOverproofBmi(bmi.floatValue() - obesityBmi.floatValue());
+            userObesityManagerRecord.setCrateDateTime(new Date());
+
+            if (jsonApi.getCode() == ApiCodeEnum.OK.getValue()) {
+                userObesityManagerRecord.setOrganizationUserId(Integer.parseInt(jsonApi.getData().toString()));
+            }
+
+        }
+        int flag = userObesityManagerRecordService.insert(userObesityManagerRecord);
+        if (flag > 0) {
+            return new JsonApi(ApiCodeEnum.OK);
+        } else {
+            return new JsonApi(ApiCodeEnum.FAIL);
+        }
+    }
+
+    /**
+     * @author: ZhangGuangZhi
+     * @date: 2019年1月22日
+     * @param userId
+     * @param childrenMeasureId
+     * @return
+     * @description: 检测药品记录表(营养素指导)
+     */
+    @RequiresAuthentication(ignore = false, value = { "web-module-height-obesity:drugs:list" }, level = Level.OPERATION)
+    @GetMapping(value = { "/drugs/user/list" })
+    public JsonApi getUserDrugsList(@Validated({ BaseEntity.SelectAll.class }) Diagnosis diagnosis,
+            BindingResult resul, @RequestHeader(required = true, value = BaseGlobal.TOKEN_FLAG) String token) {
+        diagnosis = getUserDiagnosis(diagnosis);
+        if (diagnosis == null) {
+            return new JsonApi(ApiCodeEnum.NOT_FOUND);
+        }
+        UserDrugsProject userDrugsProject = new UserDrugsProject();
+        userDrugsProject.setChildrenMeasureId(diagnosis.getChildrenMeasureId());
+        return new JsonApi(ApiCodeEnum.OK, userDrugsProjectService.getList(userDrugsProject));
+    }
+
+    /**
+     * @author: ZhangGuangZhi
+     * @date: 2018年12月19日
+     * @param userId            用户编号
+     * @param childrenMeasureId 测量记录编号
+     * @return
+     * @description:获取用户信息
+     */
+    private Diagnosis getUserDiagnosis(Diagnosis diagnosis) {
+        /* 查询用户信息 */
+        User user = new User();
+        user.setId(diagnosis.getUserId());
+        Map<String, Object> userMap = userService.getOne(user);
+        if (userMap == null || !userMap.containsKey("id")) {
+            /* 用户信息不存在 */
+            return null;
+        }
+        diagnosis.setSex(userMap.get("sex") != null ? Integer.parseInt(userMap.get("sex").toString()) : null);
+        diagnosis.setName(userMap.get("name") != null ? userMap.get("name").toString() : null);
+
+        /* 查询家庭信息 */
+        ChildrenFamily childrenFamily = new ChildrenFamily();
+        childrenFamily.setUserId(diagnosis.getUserId());
+        Map<String, Object> childrenFamilyMap = childrenFamilyService.getOne(childrenFamily);
+        if (childrenFamilyMap != null && childrenFamilyMap.containsKey("id")) {
+            diagnosis.setFatherHeight(new Double(childrenFamilyMap.get("fatherHeight").toString()));
+            diagnosis.setMotherHeight(new Double(childrenFamilyMap.get("motherHeight").toString()));
+            diagnosis.setChildrenFamily(childrenFamilyMap);
+        }
+
+        /* 查询出生信息 */
+        ChildrenMaternity childrenMaternity = new ChildrenMaternity();
+        childrenMaternity.setUserId(diagnosis.getUserId());
+        Map<String, Object> childrenMaternityMap = childrenMaternityService.getOne(childrenMaternity);
+        if (childrenMaternityMap != null) {
+            diagnosis.setChildrenMaternity(childrenMaternityMap);
+            if (childrenMaternityMap.get("birthGestational") != null) {
+                diagnosis.setBirthGestational(new Double(childrenMaternityMap.get("birthGestational").toString()));
+            }
+            if (childrenMaternityMap.get("birthHeight") != null) {
+                diagnosis.setBirthHeight(new Double(childrenMaternityMap.get("birthHeight").toString()));
+            }
+            if (childrenMaternityMap.get("birthWeight") != null) {
+                diagnosis.setBirthWeight(new Double(childrenMaternityMap.get("birthWeight").toString()));
+            }
+        }
+
+        ChildrenMeasure childrenMeasure = new ChildrenMeasure();
+        Map<String, Object> childrenMeasureMap;
+
+        if (diagnosis.getChildrenMeasureId() != null) {
+            /* 查询记录 */
+            childrenMeasure.setId(diagnosis.getChildrenMeasureId());
+            childrenMeasureMap = childrenMeasureService.getOne(childrenMeasure);
+        } else {
+            /* 查询用户最新记录信息 */
+            childrenMeasure.setUserId(diagnosis.getUserId());
+            childrenMeasureMap = childrenMeasureService.getNewOne(childrenMeasure);
+        }
+
+        if (childrenMeasureMap == null || !childrenMeasureMap.containsKey("id")) {
+            /* 用户测量信息不存在 */
+            return null;
+        }
+
+        /* 查询相应的数据 测量信息 */
+        diagnosis.setChildrenMeasureId((Integer) childrenMeasureMap.get("id"));
+        diagnosis.setMonthAge(Integer.parseInt(childrenMeasureMap.get("monthAge").toString()));
+        diagnosis.setHeight(new Double(childrenMeasureMap.get("currentHeight").toString()));
+        diagnosis.setWeight(new Double(childrenMeasureMap.get("currentWeight").toString()));
+
+        if (childrenMeasureMap.get("headCircumference") != null) {
+            diagnosis.setHeadCircumference(new Double(childrenMeasureMap.get("headCircumference").toString()));
+        }
+
+        if (childrenMeasureMap.get("abdomenCircumference") != null) {
+            diagnosis.setAbdomenCircumference(new Double(childrenMeasureMap.get("abdomenCircumference").toString()));
+        }
+
+        /* 根据月龄查询当前显示数据范围 */
+        Map<String, Integer> monthAgeRange = HeightObesityCalculation.getMonthAgeRange(diagnosis.getMonthAge());
+        diagnosis.setStartMonthAge(monthAgeRange.get("startMonthAge"));
+        diagnosis.setEndMonthAge(monthAgeRange.get("endMonthAge"));
+        diagnosis.setIdealHeight(new Double(childrenMeasureMap.get("idealHeight").toString()));
+
+        return diagnosis;
+    }
+
+}

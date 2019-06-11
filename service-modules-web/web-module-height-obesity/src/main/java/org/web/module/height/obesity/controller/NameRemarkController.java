@@ -1,0 +1,72 @@
+package org.web.module.height.obesity.controller;
+
+import java.util.List;
+import java.util.Map;
+
+import javax.annotation.Resource;
+
+import org.service.core.api.ApiCodeEnum;
+import org.service.core.api.JsonApi;
+import org.service.core.api.MultiLine;
+import org.service.core.auth.control.RequiresAuthentication;
+import org.service.core.auth.level.Level;
+import org.service.core.entity.BaseEntity;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RestController;
+import org.web.module.height.obesity.entity.NameRemark;
+import org.web.module.height.obesity.global.BaseGlobal;
+import org.web.module.height.obesity.service.NameRemarkService;
+
+import com.github.pagehelper.Page;
+import com.github.pagehelper.PageHelper;
+
+@RestController
+public class NameRemarkController {
+	
+	@Resource
+	private NameRemarkService  nameRemarkService;
+
+	/**
+	 * @author: ChenYan
+	 * @date: 2019年2月19日
+	 * @param id
+	 * @param nameRemark
+	 * @param result
+	 * @return
+	 * @description: 查询详情
+	 */
+	@RequiresAuthentication(level = Level.OPERATION, value = { "web-module-height-obesity:name-remark:get-detail" })
+	@GetMapping(value = { "/name/remark/{id}" })
+	public JsonApi getDetail(@PathVariable("id") Integer id, @Validated({ BaseEntity.SelectOne.class }) NameRemark nameRemark, BindingResult result, @RequestHeader(required = true, value = BaseGlobal.TOKEN_FLAG) String token) {
+		nameRemark.setId(id);
+		Map<String, Object> nameRemarkMap = nameRemarkService.getOne(nameRemark);
+		if (nameRemarkMap != null ) {
+			return new JsonApi(ApiCodeEnum.OK, nameRemarkMap);
+		}
+		return new JsonApi(ApiCodeEnum.NOT_FOUND);
+	}
+	
+	
+	/**
+	 * @author: ChenYan
+	 * @date: 2019年2月19日
+	 * @param nameRemark
+	 * @param result
+	 * @return
+	 * @description: 查询列表
+	 */
+	@RequiresAuthentication(level = Level.OPERATION, value = { "web-module-height-obesity:name-remark:get-list" })
+	@GetMapping(value = { "/name/remarks" })
+	public JsonApi getList(@Validated({ BaseEntity.SelectAll.class })  NameRemark nameRemark, BindingResult result, @RequestHeader(required = true, value = BaseGlobal.TOKEN_FLAG) String token) {
+		Page<?> page = PageHelper.startPage(nameRemark.getPage(), nameRemark.getPageSize());
+		List<Map<String, Object>> nameRemarkList = nameRemarkService.getList(nameRemark);
+		if (nameRemarkList != null && !nameRemarkList.isEmpty()) {
+			return new JsonApi(ApiCodeEnum.OK, new MultiLine(page.getTotal(), nameRemarkList));
+		}
+		return new JsonApi(ApiCodeEnum.NOT_FOUND);
+	}
+}

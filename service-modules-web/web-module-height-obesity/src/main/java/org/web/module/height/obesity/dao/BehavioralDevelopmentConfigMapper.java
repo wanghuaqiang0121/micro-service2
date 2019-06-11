@@ -1,0 +1,14 @@
+package org.web.module.height.obesity.dao;
+
+import java.util.List;
+import java.util.Map;
+
+import org.service.core.dao.IBaseMapper;
+import org.web.module.height.obesity.entity.BehavioralDevelopmentConfig;
+
+public interface BehavioralDevelopmentConfigMapper extends IBaseMapper<BehavioralDevelopmentConfig> {
+
+    List<Map<String, Object>> getMotionList(BehavioralDevelopmentConfig record);
+    
+    Map<String, Object> getChildWarningSign(BehavioralDevelopmentConfig behavioralDevelopmentConfig);
+}

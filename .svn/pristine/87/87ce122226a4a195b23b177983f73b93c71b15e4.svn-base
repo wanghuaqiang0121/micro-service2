@@ -1,0 +1,60 @@
+server:
+  port: 6510
+eureka:
+  instance:
+    ip-address: true
+    instance-id: ${spring.cloud.client.ip-address}:${server.port}:${spring.application.name}
+  client:
+    healthcheck:
+      enabled: true
+    service-url:
+      defaultZone: http://192.168.1.200:1001/eureka/
+    register-with-eureka: true
+    fetch-registry: true
+spring:
+  application:
+    name: web-module-height-obesity
+  zipkin:
+    base-url: http://localhost:2100
+  sleuth:
+    sampler:
+      percentage: 0.1
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    joda-date-time-format: yyyy-MM-dd HH:mm:ss
+    time-zone: GMT+8
+  datasource:
+    type: com.zaxxer.hikari.HikariDataSource
+    driverClassName: com.mysql.jdbc.Driver
+    jdbc-url: jdbc:mysql://192.168.1.199:3306/yxt_test_new?useUnicode=true&characterEncoding=utf8&mysqlEncoding=utf8&autoReconnect=true&serverTimezone=GMT%2B8
+    username: yxt_test
+    password: yxt123
+    hikari:
+      minimum-idle: 5
+      maximum-pool-size: 15
+      auto-commit: true
+      idle-timeout: 30000
+      pool-name: HikariCP
+      max-lifetime: 1800000
+      connection-timeout: 30000
+      connection-test-query: SELECT 1
+  redis:
+    database: 10
+    host: 192.168.1.199
+    port: 6379
+    password: yxt315
+    timeout: 5000
+    pool:
+      max-active: 100
+      max-wait: 3000
+      max-idle: 15
+      min-idle: 5
+pagehelper:
+  helperDialect: mysql
+  reasonable: true
+  supportMethodsArguments: true
+  params: count=countSql
+micro:
+  service:
+    organization-user: module-organization-user
+management.endpoints.web.exposure.include: "*"

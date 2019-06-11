@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.service.task.delay.dao.SmsMapper">
+	<!-- 批量新增机构短信表 -->
+	<insert id="batchInsert" parameterType="list" useGeneratedKeys="true" keyProperty="id">
+		insert into base_organization_sms ( type,organization_id, organization_user_id, called_number,consume_times, content, status,send_date, create_date)
+		values
+		<foreach collection="list" separator="," item="recipient">
+			(#{recipient.type},#{recipient.organizationId}, #{recipient.organizationUserId}, #{recipient.calledNumber},
+			#{recipient.consumeTimes}, #{recipient.content}, #{recipient.status},#{recipient.sendDate}, #{recipient.createDate})
+		</foreach>
+	</insert>
+	<update id="lock" parameterType="list">
+		update base_organization_sms_info
+		<trim prefix="set" suffixOverrides=",">
+			<trim prefix="use_frequency = case" suffix="end,">
+				<foreach collection="list" item="recipient">
+					when organization_id=#{recipient.organizationId} then use_frequency+#{recipient.total}
+				</foreach>
+			</trim>
+		</trim>
+		where organization_id in
+		<foreach collection="list" item="recipient" separator="," open="(" close=")">
+			#{recipient.organizationId}
+		</foreach>
+	</update>
+	<update id="update" parameterType="org.service.task.delay.entity.sms.Sms">
+		UPDATE base_organization_sms
+		SET
+		<choose>
+			<when test="status == 'Success'">
+				status=2,
+			</when>
+			<otherwise>
+				status=3,
+			</otherwise>
+		</choose>
+		message=#{message}
+		WHERE id in
+		<foreach collection="recipients" open="(" separator="," close=")" item="recipient">
+			#{recipient.id}
+		</foreach>
+	</update>
+	<update id="restore" parameterType="list">
+		update base_organization_sms_info
+		<trim prefix="set" suffixOverrides=",">
+			<trim prefix="use_frequency = case" suffix="end,">
+				<foreach collection="list" item="recipient">
+					when organization_id=#{recipient.organizationId} then use_frequency-#{recipient.total}
+				</foreach>
+			</trim>
+		</trim>
+		where organization_id in
+		<foreach collection="list" item="recipient" separator="," open="(" close=")">
+			#{recipient.organizationId}
+		</foreach>
+	</update>
+</mapper>

@@ -1,0 +1,369 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.web.module.bone.age.dao.RemoteBoneAgeOrderMapper">
+  
+  <delete id="delete" parameterType="org.web.module.bone.age.domain.RemoteBoneAgeOrder">
+    delete from base_remote_bone_age_order
+    where id = #{id}
+  </delete>
+  
+  <insert id="insert" parameterType="org.web.module.bone.age.domain.RemoteBoneAgeOrder" useGeneratedKeys="true" keyProperty="id">
+    insert into base_remote_bone_age_order (base_bone_age_order_id, status, 
+      reminder, create_time, end_time, 
+      launch_organization_team_id, launch_organization_id, 
+      launch_organization_user_id, receive_organization_team_id, 
+      receive_organization_id, receive_organization_user_id
+      )
+    values (#{baseBoneAgeOrderId}, #{status}, 
+      #{reminder}, #{createTime}, #{endTime}, 
+      #{launchOrganizationTeamId}, #{launchOrganizationId}, 
+      #{launchOrganizationUserId}, #{receiveOrganizationTeamId}, 
+      #{receiveOrganizationId}, #{receiveOrganizationUserId}
+      )
+  </insert>
+  
+  
+  <update id="update" parameterType="org.web.module.bone.age.domain.RemoteBoneAgeOrder">
+	UPDATE base_remote_bone_age_order SET id= #{id}
+	<if test="baseBoneAgeOrderId!=null">
+		,base_bone_age_order_id = #{baseBoneAgeOrderId}
+	</if>
+	<if test="status!=null">
+	,status = #{status}
+	</if>
+	<if test="reminder!=null">
+	,reminder = #{reminder}
+	</if>
+	<if test="createTime!=null">
+	,create_time = #{createTime}
+	</if>
+	<if test="endTime!=null">
+	,end_time = #{endTime}
+	</if>
+	<if test="launchOrganizationTeamId!=null">
+		,launch_organization_team_id = #{launchOrganizationTeamId}
+	</if>
+	<if test="launchOrganizationUserId!=null">
+	,launch_organization_user_id = #{launchOrganizationUserId}
+	</if>
+	<if test="receiveOrganizationId!=null">
+		,receive_organization_id = #{receiveOrganizationId}
+	</if>
+	<if test="receiveOrganizationUserId!=null">
+		,receive_organization_user_id = #{receiveOrganizationUserId}
+	</if>
+	WHERE id= #{id}
+  </update>
+  
+  <!--查询详情  -->
+  <select id="getOne" parameterType="org.web.module.bone.age.domain.RemoteBoneAgeOrder"  resultType="map">
+	SELECT
+		brbao.id,
+		brbao.base_bone_age_order_id boneAgeOrderId,
+		bbao.user_id userId,
+		bu.`name` userName,
+		ROUND((DATEDIFF(bbao.create_date,bu.birthday))/365,2) age,
+		bbao.sex,
+		bu.phone,
+		bu.id_card idCard,
+		bbao.height,
+		bbao.weight,
+		bbao.x_ray_no xRayNo,
+		brbao.`status`,
+		brbao.create_time createTime,
+		brbao.end_time endTime,
+		brbao.reminder,
+		brbao.receive_organization_id  receiveOrganizationId,
+		brbao.receive_organization_user_id receiveOrganizationUserId
+	FROM
+		base_remote_bone_age_order brbao
+	LEFT JOIN base_bone_age_order bbao ON brbao.base_bone_age_order_id = bbao.id
+	LEFT JOIN base_user bu ON bbao.user_id = bu.id
+<where>
+		<if test="id!=null">
+		brbao.id= #{id}
+		</if>
+		<if test="baseBoneAgeOrderId!=null">
+		and 	brbao.base_bone_age_order_id=#{baseBoneAgeOrderId}
+		</if>
+		</where>
+  </select>
+  
+  <!--远程阅片列表  -->
+  <select id="getList"  parameterType="org.web.module.bone.age.domain.RemoteBoneAgeOrder" resultType="map">
+	SELECT
+		brbao.id,
+		brbao.base_bone_age_order_id boneAgeOrderId,
+		bbao.user_id userId,
+		bu.`name` userName,
+		bbao.sex,
+	    ROUND((DATEDIFF(bbao.create_date,bu.birthday))/365,2) age,
+		bu.phone,
+		bu.id_card idCard,
+		bbao.height,
+		bbao.weight,
+		bbao.x_ray_no xRayNo,
+		brbao.`status`,
+	    brbao.create_time createTime,
+		brbao.end_time endTime,
+		brbao.reminder,
+			brbao.launch_organization_id,
+	bo.`name` launchOrganizationName,
+	brbao.launch_organization_user_id,
+	bou.`name` launchOrganizationUserName,
+	brbao.receive_organization_id receiveOrganizationId,
+	boo.`name` receiveOrganizationName,
+	brbao.receive_organization_user_id receiveOrganizationUserId,
+	bouu.`name` receiveOrganizationUserName
+	FROM
+		base_remote_bone_age_order brbao
+	LEFT JOIN base_bone_age_order bbao ON brbao.base_bone_age_order_id = bbao.id
+	LEFT JOIN base_user bu ON bbao.user_id = bu.id
+	LEFT JOIN base_organization bo ON brbao.launch_organization_id = bo.id
+	LEFT JOIN base_organization boo ON brbao.receive_organization_id = boo.id
+	LEFT JOIN base_organization_user bou ON brbao.launch_organization_user_id = bou.id
+	LEFT JOIN base_organization_user bouu ON brbao.receive_organization_user_id = bouu.id
+	LEFT JOIN base_user_user_group buug ON bu.id=buug.user_id
+   LEFT JOIN base_user_group bug on  bug.id=buug.user_group_id
+	<where>
+		<if test="launchOrganizationUserId!=null">
+			brbao.launch_organization_user_id=#{launchOrganizationUserId}
+		</if>
+		and	<![CDATA[  brbao.`status` <> 5 ]]>
+			
+			<if test="searchbox!=null and searchbox!=''">
+		AND 	 (bu.`name` like CONCAT(CONCAT('%', #{searchbox}), '%')  OR  bu.id_card like CONCAT(CONCAT('%', #{searchbox}), '%') OR  bu.phone like CONCAT(CONCAT('%', #{searchbox}), '%') OR  bug.phone like CONCAT(CONCAT('%', #{searchbox}), '%') )
+			</if>
+		   <if test="createTime!=null">
+		   and    brbao.create_time &gt; #{createTime} AND brbao.create_time &lt; date_add(#{createTime}, interval 1 day)
+		   </if>
+		    <if test="status!=null">
+   			and  brbao.`status`=#{status}
+          </if>
+          <if test="sex!=null">
+          and bbao.sex=#{sex}
+          </if>
+          <if test="receiveOrganizationUserId!=null">
+           and  brbao.receive_organization_user_id=#{receiveOrganizationUserId}
+          </if>
+	</where>
+	ORDER BY brbao.reminder DESC ,brbao.create_time DESC
+  </select>
+  
+  <!-- 接收人的远程阅片列表状态为未完成的 -->
+  <select id="getIncompleteRemoteBoneAgeOrder"  parameterType="org.web.module.bone.age.domain.RemoteBoneAgeOrder" resultType="map">
+  SELECT
+		brbao.id,
+		brbao.base_bone_age_order_id boneAgeOrderId,
+		bbao.user_id userId,
+		bu.`name` userName,
+		bbao.sex,
+	    ROUND((DATEDIFF(bbao.create_date,bu.birthday))/365,2) age,
+		bu.phone,
+		bu.id_card idCard,
+		bbao.height,
+		bbao.weight,
+		bbao.x_ray_no xRayNo,
+		brbao.`status`,
+	    brbao.create_time createTime,
+		brbao.end_time endTime,
+		brbao.reminder,
+		brbao.launch_organization_id,
+	bo.`name` launchOrganizationName,
+	brbao.launch_organization_user_id,
+	bou.`name` launchOrganizationUserName,
+	brbao.receive_organization_id receiveOrganizationId,
+	boo.`name` receiveOrganizationName,
+	brbao.receive_organization_user_id receiveOrganizationUserId,
+	bouu.`name` receiveOrganizationUserName
+	FROM
+		base_remote_bone_age_order brbao
+	LEFT JOIN base_bone_age_order bbao ON brbao.base_bone_age_order_id = bbao.id
+	LEFT JOIN base_user bu ON bbao.user_id = bu.id
+	LEFT JOIN base_organization bo ON brbao.launch_organization_id = bo.id
+	LEFT JOIN base_organization boo ON brbao.receive_organization_id = boo.id
+	LEFT JOIN base_organization_user bou ON brbao.launch_organization_user_id = bou.id
+	LEFT JOIN base_organization_user bouu ON brbao.receive_organization_user_id = bouu.id
+	LEFT JOIN base_user_user_group buug ON bu.id=buug.user_id
+   LEFT JOIN base_user_group bug on  bug.id=buug.user_group_id
+	<where>
+			brbao.`status`  &lt;=3
+          <if test="searchbox!=null and searchbox!=''">
+		AND	 (bu.`name` like CONCAT(CONCAT('%', #{searchbox}), '%')  OR  bu.id_card like CONCAT(CONCAT('%', #{searchbox}), '%') OR  bu.phone like CONCAT(CONCAT('%', #{searchbox}), '%')  OR bug.phone like CONCAT(CONCAT('%', #{searchbox}), '%') )
+			</if>
+		   <if test="createTime!=null">
+		   and    brbao.create_time &gt; #{createTime} AND bbaobrbao.create_time &lt; date_add(#{createTime}, interval 1 day)
+		   </if>
+		    <if test="status!=null">
+   			and  brbao.`status`=#{status}
+          </if>
+          <if test="sex!=null">
+         AND  bbao.sex=#{sex}
+          </if>
+           <if test="receiveOrganizationUserId!=null">
+           and  brbao.receive_organization_user_id=#{receiveOrganizationUserId}
+          </if>
+          <if test="launchOrganizationId!=null">
+          AND brbao.launch_organization_id=#{launchOrganizationId}
+          </if>
+          <if test="receiveOrganizationTeamId!=null">
+          AND brbao.receive_organization_team_id=#{receiveOrganizationTeamId}
+          </if>
+          <if test="receiveOrganizationId!=null">
+          and brbao.receive_organization_id=#{receiveOrganizationId}
+          </if>
+          </where>
+          	ORDER BY brbao.reminder DESC ,brbao.create_time DESC
+  </select>
+  
+  <!--指定医生阅片使用次数  状态为已完成 -->
+  <select id="getRemoteBoneAgeOrderTimes"  parameterType="org.web.module.bone.age.domain.RemoteBoneAgeOrder" resultType="map">
+	SELECT
+		COUNT(
+			brbao.launch_organization_id
+		)  doctorTimes
+	FROM
+		base_remote_bone_age_order brbao
+	WHERE
+		brbao.launch_organization_id = #{launchOrganizationId}
+	AND brbao.`status` = #{status}
+  </select>
+  
+  
+  <!-- 指定医生阅片列表（统计） -->
+  <select id="getRemoteBoneAgeOrderList"  parameterType="org.web.module.bone.age.domain.RemoteBoneAgeOrder" resultType="map">
+SELECT
+	brbao.id,
+	brbao.create_time createTime,
+	brbao.end_time endTime,
+	brbao.launch_organization_id launchOrganizationId,
+	brbao.launch_organization_user_id launchOrganizationUserId,
+	bou.`name` launchOrganizationUser,
+	brbao.receive_organization_user_id receiveOrganizationUserId,
+	bouu.`name` receiveOrganizationUser,
+	brfdp.price
+FROM
+	base_remote_bone_age_order brbao
+LEFT JOIN base_bone_age_order bbao ON brbao.base_bone_age_order_id = bbao.id
+LEFT JOIN base_read_film_doctor_price brfdp ON brbao.receive_organization_user_id = brfdp.doctor_id and brfdp.organization_id=brbao.receive_organization_id
+LEFT JOIN base_organization_user bou ON brbao.launch_organization_user_id = bou.id
+LEFT JOIN base_organization_user bouu ON brbao.receive_organization_user_id = bouu.id
+<where>
+            <if test="status!=null">
+            brbao.`status` =#{status}
+            </if>
+            <if test="launchOrganizationId">
+             and brbao.launch_organization_id=#{launchOrganizationId}
+            </if>
+     	 <if test="createTime != null ">
+			AND brbao.create_time &gt;= #{createTime}
+		</if>
+		<if test="endTime != null">
+			AND brbao.create_time &lt;= #{endTime}
+		</if>
+		<if test="launchOrganizationUserId!=null">
+		 and brbao.launch_organization_user_id=#{launchOrganizationUserId}
+		</if>
+</where>
+GROUP BY brbao.id
+  </select>
+  
+  <select id="getRepeat"  parameterType="org.web.module.bone.age.domain.RemoteBoneAgeOrder" resultType="map">
+	SELECT
+		brbao.id,
+		brbao.base_bone_age_order_id,
+		brbao.launch_organization_user_id,
+		brbao.receive_organization_user_id
+	FROM
+		base_remote_bone_age_order brbao
+	WHERE
+		brbao.base_bone_age_order_id =#{baseBoneAgeOrderId}
+		AND brbao.launch_organization_user_id=#{launchOrganizationUserId}
+		AND  brbao.receive_organization_user_id=#{receiveOrganizationUserId}
+  </select>
+  
+  <!--指定医生阅片医生列表  -->
+  <select id="getDoctors" parameterType="org.web.module.bone.age.domain.RemoteBoneAgeOrder" resultType="map">
+  SELECT
+	brbao.id,
+	brbao.launch_organization_user_id launchOrganizationUserId,
+	bou.`name` launchOrganizationUser,
+	bou.phone,
+	bou.photo,
+	bou.account,
+	bou.certificate_number certificateNumber,
+	bou.remark
+FROM
+	base_remote_bone_age_order brbao
+LEFT JOIN base_bone_age_order bbao ON brbao.base_bone_age_order_id = bbao.id
+LEFT JOIN base_organization_user bou ON brbao.launch_organization_user_id = bou.id
+WHERE  brbao.launch_organization_id =#{launchOrganizationId} AND brbao.status =#{status}
+<if test="name!=null and name!=''">
+ and bou.`name`   like CONCAT(CONCAT('%', #{name}), '%') 
+</if>
+GROUP BY
+	brbao.launch_organization_user_id
+  </select>
+  
+  
+  <!--接收人的阅片历史  -->
+  <select id="getListByReceiveOrganizationUserId"  parameterType="org.web.module.bone.age.domain.RemoteBoneAgeOrder" resultType="map">
+	SELECT
+		brbao.id,
+		brbao.base_bone_age_order_id boneAgeOrderId,
+		bbao.user_id userId,
+		bu.`name` userName,
+		bbao.sex,
+	    ROUND((DATEDIFF(bbao.create_date,bu.birthday))/365,2) age,
+		bu.phone,
+		bu.id_card idCard,
+		bbao.height,
+		bbao.weight,
+		bbao.x_ray_no xRayNo,
+		brbao.`status`,
+	    brbao.create_time createTime,
+		brbao.end_time endTime,
+		brbao.reminder,
+		brbao.launch_organization_id,
+	bo.`name` launchOrganizationName,
+	brbao.launch_organization_user_id,
+	bou.`name` launchOrganizationUserName,
+	brbao.receive_organization_id receiveOrganizationId,
+	boo.`name` receiveOrganizationName,
+	brbao.receive_organization_user_id receiveOrganizationUserId,
+	bouu.`name` receiveOrganizationUserName
+	FROM
+		base_remote_bone_age_order brbao
+	LEFT JOIN base_bone_age_order bbao ON brbao.base_bone_age_order_id = bbao.id
+	LEFT JOIN base_user bu ON bbao.user_id = bu.id
+		LEFT JOIN base_organization bo ON brbao.launch_organization_id = bo.id
+	LEFT JOIN base_organization boo ON brbao.receive_organization_id = boo.id
+	LEFT JOIN base_organization_user bou ON brbao.launch_organization_user_id = bou.id
+	LEFT JOIN base_organization_user bouu ON brbao.receive_organization_user_id = bouu.id
+	LEFT JOIN base_user_user_group buug ON bu.id=buug.user_id
+   LEFT JOIN base_user_group bug on  bug.id=buug.user_group_id
+	<where>
+	         brbao.receive_organization_user_id=#{receiveOrganizationUserId} and 	  brbao.`status`=4
+		<!-- 	<![CDATA[  brbao.`status` <> 5 ]]> -->
+			<if test="searchbox!=null and searchbox!=''">
+		and	 (bu.`name` like CONCAT(CONCAT('%', #{searchbox}), '%')  OR  bu.id_card like CONCAT(CONCAT('%', #{searchbox}), '%') OR  bu.phone like CONCAT(CONCAT('%', #{searchbox}), '%')   OR bug.phone like CONCAT(CONCAT('%', #{searchbox}), '%') )
+			</if>
+		   <if test="createTime!=null">
+		   and    brbao.create_time &gt; #{createTime} AND brbao.create_time &lt; date_add(#{createTime}, interval 1 day)
+		   </if>
+          <if test="sex!=null">
+          and bbao.sex=#{sex}
+          </if>
+            <if test="receiveOrganizationTeamId!=null">
+          AND brbao.receive_organization_team_id=#{receiveOrganizationTeamId}
+          </if>
+          <if test="receiveOrganizationId!=null">
+          and brbao.receive_organization_id=#{receiveOrganizationId}
+          </if>
+	</where>
+	ORDER BY brbao.reminder DESC ,brbao.create_time DESC
+  </select>
+  
+  
+  
+</mapper>

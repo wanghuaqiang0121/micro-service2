@@ -1,0 +1,41 @@
+package org.web.module.height.obesity.service;
+
+import java.util.List;
+import java.util.Map;
+
+import javax.annotation.Resource;
+
+import org.springframework.stereotype.Service;
+import org.web.module.height.obesity.dao.BehavioralDevelopmentConfigMapper;
+import org.web.module.height.obesity.entity.BehavioralDevelopmentConfig;
+
+@Service
+public class BehavioralDevelopmentConfigService {
+
+	@Resource
+	private BehavioralDevelopmentConfigMapper behavioralDevelopmentConfigMapper;
+
+	public int insert(BehavioralDevelopmentConfig behavioralDevelopmentConfig) {
+		return behavioralDevelopmentConfigMapper.insert(behavioralDevelopmentConfig);
+	}
+
+	public int update(BehavioralDevelopmentConfig behavioralDevelopmentConfig) {
+		return behavioralDevelopmentConfigMapper.update(behavioralDevelopmentConfig);
+	}
+
+	public int delete(BehavioralDevelopmentConfig behavioralDevelopmentConfig) {
+		return behavioralDevelopmentConfigMapper.delete(behavioralDevelopmentConfig);
+	}
+
+	public Map<String, Object> getOne(BehavioralDevelopmentConfig behavioralDevelopmentConfig) {
+		return behavioralDevelopmentConfigMapper.getOne(behavioralDevelopmentConfig);
+	}
+
+	public List<Map<String, Object>> getList(BehavioralDevelopmentConfig behavioralDevelopmentConfig) {
+		return behavioralDevelopmentConfigMapper.getList(behavioralDevelopmentConfig);
+	}
+
+	public List<Map<String, Object>> getMotionList(BehavioralDevelopmentConfig behavioralDevelopmentConfig) {
+		return behavioralDevelopmentConfigMapper.getMotionList(behavioralDevelopmentConfig);
+	}
+}

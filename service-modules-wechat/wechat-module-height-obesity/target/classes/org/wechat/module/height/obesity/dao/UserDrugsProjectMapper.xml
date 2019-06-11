@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.wechat.module.height.obesity.dao.UserDrugsProjectMapper">
+ 
+  <select id="getList" parameterType="org.wechat.module.height.obesity.entity.UserDrugsProject" resultType="map">
+  select 
+    a.id, 
+    a.user_id userId, 
+    a.children_measure_id childrenMeasureId, 
+    base_drugs_config_id baseDrugsConfigId, 
+    using_frequency_code usingFrequencyCode,
+    using_frequency_value usingFrequencyValue, 
+    using_way_code usingWayCode,
+    using_way_value usingWayValue,
+    using_method_code usingMethodCode,
+    using_method_value usingMethodValue,
+    a.create_date_time createDateTime,
+    b.name
+    from base_user_drugs_project as a
+    inner join base_drugs_config as b on a.base_drugs_config_id=b.id
+    <where>
+      <if test="childrenMeasureId!=null">children_measure_id=#{childrenMeasureId}</if>
+    </where>
+  </select>
+  
+</mapper>

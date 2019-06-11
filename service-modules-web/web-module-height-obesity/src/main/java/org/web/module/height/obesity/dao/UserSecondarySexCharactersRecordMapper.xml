@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.web.module.height.obesity.dao.UserSecondarySexCharactersRecordMapper">
+  <delete id="delete" parameterType="org.web.module.height.obesity.entity.UserSecondarySexCharactersRecord">
+    delete from base_user_secondary_sex_characters_record
+    where id = #{id}
+  </delete>
+  
+  <delete id="deleteByChildrenMeasureId" parameterType="org.web.module.height.obesity.entity.UserSecondarySexCharactersRecord">
+    delete from base_user_secondary_sex_characters_record
+    where children_measure_id = #{childrenMeasureId}
+  </delete>
+  
+  <insert id="insert" parameterType="org.web.module.height.obesity.entity.UserSecondarySexCharactersRecord">
+    insert into base_user_secondary_sex_characters_record (id, user_id, children_measure_id, 
+      secondary_sex_characters_config_id, organization_user_id, examination_date,
+      create_date_time)
+    values (#{id}, #{userId}, #{childrenMeasureId}, 
+      #{secondarySexCharactersConfigId}, #{organizationUserId}, #{examinationDate},
+      #{createDateTime})
+  </insert>
+  
+  <!-- 修改用户第二性征发育记录 -->
+  <update id="update" parameterType="org.web.module.height.obesity.entity.UserSecondarySexCharactersRecord">
+    UPDATE base_user_secondary_sex_characters_record
+    <set>
+    	<if test="userId != null">user_id = #{userId}, </if>
+    	<if test="childrenMeasureId != null">children_measure_id = #{childrenMeasureId},</if>
+    	<if test="secondarySexCharactersConfigId != null">secondary_sex_characters_config_id = #{secondarySexCharactersConfigId},</if>
+    	<if test="organizationUserId != null"> organization_user_id = #{organizationUserId},</if>
+    	<if test="createDateTime != null"> create_date_time = #{createDateTime}</if>
+    	<if test="examinationDate != null">examination_date = #{examinationDate}</if>
+    </set>
+    <where>
+    	<if test="id != null">
+    		id = #{id}
+    	</if>
+    	<if test="childrenMeasureId != null">
+    		AND children_measure_id = #{childrenMeasureId}
+    	</if>
+    </where> 
+  </update>
+  
+  <!-- 第二性征发育记录详情 -->
+  <select id="getOne" parameterType="org.web.module.height.obesity.entity.UserSecondarySexCharactersRecord" resultType="map">
+    SELECT 
+    	busscr.id, 
+    	busscr.user_id userId, 
+    	busscr.children_measure_id childrenMeasureId, 
+    	busscr.secondary_sex_characters_config_id secondarySexCharactersConfigId, 
+    	busscr.organization_user_id organizationUserId, 
+    	busscr.create_date_time createDateTime,
+    	busscr.examination_date examinationDate,
+    	bsscc.sex,
+    	bsscc.phase,
+    	bsscc.phase_name phaseName,
+    	bsscc.picture,
+    	bsscc.testicular_diameter testicularDiameter,
+    	bsscc.testicular_volume testicularVolume,
+    	bsscc.penile_length penileLength,
+    	bsscc.pubic_hair pubicHair,
+    	bsscc.breast
+    FROM base_user_secondary_sex_characters_record busscr
+    LEFT JOIN base_secondary_sex_characters_config bsscc ON bsscc.id = busscr.secondary_sex_characters_config_id
+    <where>
+    	<if test="id !=null">
+    		busscr.id = #{id}
+    	</if>
+    	<if test="childrenMeasureId != null">
+    		AND busscr.children_measure_id =#{childrenMeasureId}
+    	</if>
+    </where>
+  </select>  
+  
+  <!-- 第二性征发育记录列表 -->
+  <select id="getList" parameterType="org.web.module.height.obesity.entity.UserSecondarySexCharactersRecord" resultType="map">
+    SELECT 
+    	busscr.id, 
+    	busscr.user_id userId, 
+    	busscr.children_measure_id childrenMeasureId, 
+    	busscr.secondary_sex_characters_config_id secondarySexCharactersConfigId, 
+    	busscr.organization_user_id organizationUserId, 
+    	busscr.create_date_time createDateTime,
+    	busscr.examination_date examinationDate,
+    	bsscc.sex,
+    	bsscc.phase,
+    	bsscc.phase_name phaseName,
+    	bsscc.picture,
+    	bsscc.testicular_diameter testicularDiameter,
+    	bsscc.testicular_volume testicularVolume,
+    	bsscc.penile_length penileLength,
+    	bsscc.pubic_hair pubicHair,
+    	bsscc.breast
+    FROM base_user_secondary_sex_characters_record busscr
+    LEFT JOIN base_secondary_sex_characters_config bsscc ON bsscc.id = busscr.secondary_sex_characters_config_id
+    <where>
+    	<if test="userId!=null">busscr.user_id=#{userId}</if>
+    	<if test="childrenMeasureId!=null">and busscr.children_measure_id=#{childrenMeasureId}</if>
+    </where>
+  </select>
+</mapper>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.wechat.module.service.dao.contract.UserSignLogMapper">
+  <!--新增用户签约日志  -->
+  <insert id="insert" parameterType="org.wechat.module.service.domain.contract.UserSignLog">
+    INSERT INTO base_user_sign_log 
+    ( log_type, user_sign_id, status, `explain`, record, create_date, content)
+    VALUES 
+    ( #{type}, #{userSignId},#{status}, #{explain},#{record}, #{createDate}, #{content})
+  </insert>
+  
+  
+  
+</mapper>

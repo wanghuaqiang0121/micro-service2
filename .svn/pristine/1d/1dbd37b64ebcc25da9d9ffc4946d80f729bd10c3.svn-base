@@ -1,0 +1,255 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.web.module.bone.age.dao.MedicalImagingDataMapper">
+
+  <delete id="delete"  parameterType="org.web.module.bone.age.domain.MedicalImagingData">
+	delete from base_medical_imaging_data
+	where id = #{id}
+  </delete>
+  
+  <insert id="insert" parameterType="org.web.module.bone.age.domain.MedicalImagingData" useGeneratedKeys="true" keyProperty="id">
+    insert into base_medical_imaging_data (user_id, height, 
+      weight, sex, menarche_type, 
+      menarche_age, left_wrist_img, left_wrist_number, 
+      left_wrist_date, pelvis_img, pelvis_number, 
+      pelvis_date, bilateral_sternoclavicular_img, 
+      bilateral_sternoclavicular_number, bilateral_sternoclavicular_date, 
+      ct_tomography, ct_tomography_number, ct_tomography_date, 
+      advisory_img, advisory_status, advisory_reason, 
+      entrus_img, judicialexpertise_status, medical_imaging_status, 
+      bone_age_status, organization_user_id, judicial_bone_age_organization_id, 
+      judicial_bone_age_organization_team_id, create_time,supplementary_materials_img,medical_imaging_reason,entrus_img_status,supplementary_materials_status,current_age,
+      left_knee_joint_img,left_knee_joint_img_number,left_knee_joint_date,left_knee_joint_lateral_img,left_knee_joint_lateral_number,left_knee_joint_lateral_date,organization_id
+      )
+    values (#{userId}, #{height}, 
+      #{weight}, #{sex}, #{menarcheType}, 
+      #{menarcheAge}, #{leftWristImg}, #{leftWristNumber}, 
+      #{leftWristDate}, #{pelvisImg}, #{pelvisNumber}, 
+      #{pelvisDate}, #{bilateralSternoclavicularImg}, 
+      #{bilateralSternoclavicularNumber}, #{bilateralSternoclavicularDate}, 
+      #{ctTomography}, #{ctTomographyNumber}, #{ctTomographyDate}, 
+      #{advisoryImg}, #{advisoryStatus}, #{advisoryReason}, 
+      #{entrusImg}, #{judicialexpertiseStatus}, #{medicalImagingStatus}, 
+      #{boneAgeStatus}, #{organizationUserId}, #{judicialBoneAgeOrganizationId}, 
+      #{judicialBoneAgeOrganizationTeamId}, #{createTime},#{supplementaryMaterialsImg},#{medicalImagingReason},#{entrusImgStatus},#{supplementaryMaterialsStatus},#{currentAge},
+      #{leftKneeJointImg},#{leftKneeJointNumber},#{leftKneeJointDate},#{leftKneeJointLateralImg},#{leftKneeJointLateraNumber},#{leftKneeJointLateraDate},#{organizationId}
+      )
+  </insert>
+  
+  <update id="update"  parameterType="org.web.module.bone.age.domain.MedicalImagingData">
+    update base_medical_imaging_data
+    <set>
+    <if test="userId!=null"> user_id = #{userId},</if>
+	<if test="height!=null"> height = #{height},</if>
+	<if test="weight!=null"> weight = #{weight},</if>
+	<if test="sex!=null"> sex = #{sex},</if>
+	<if test="menarcheType!=null and menarcheType!=''"> menarche_type = #{menarcheType},</if>
+	<if test="menarcheAge!=null">menarche_age = #{menarcheAge},</if>
+	<if test="leftWristImg!=null"> left_wrist_img = #{leftWristImg},</if>
+	<if test="leftWristNumber!=null"> left_wrist_number = #{leftWristNumber},</if>
+	<if test="leftWristDate!=null "> left_wrist_date = #{leftWristDate},</if>
+	<if test="pelvisImg!=null and pelvisImg!=''"> pelvis_img = #{pelvisImg},</if>
+	<if test="pelvisNumber!=null and pelvisNumber!=''"> pelvis_number = #{pelvisNumber},</if>
+	<if test="pelvisDate!=null "> pelvis_date = #{pelvisDate},</if>
+	<if test="bilateralSternoclavicularImg!=null and bilateralSternoclavicularImg!=''"> bilateral_sternoclavicular_img = #{bilateralSternoclavicularImg},</if>
+	<if test="bilateralSternoclavicularNumber!=null and bilateralSternoclavicularNumber!=''"> bilateral_sternoclavicular_number = #{bilateralSternoclavicularNumber},</if>
+	<if test="bilateralSternoclavicularDate!=null "> bilateral_sternoclavicular_date = #{bilateralSternoclavicularDate},</if>
+	<if test="ctTomography!=null and ctTomography!=''"> ct_tomography = #{ctTomography},</if>
+	<if test="ctTomographyNumber!=null and ctTomographyNumber!=''"> ct_tomography_number = #{ctTomographyNumber},</if>
+	<if test="ctTomographyDate!=null "> ct_tomography_date = #{ctTomographyDate},</if>
+	<if test="advisoryImg!=null and advisoryImg!=''"> advisory_img = #{advisoryImg},</if>
+	<if test="advisoryStatus!=null"> advisory_status = #{advisoryStatus},</if>
+	<if test="advisoryReason!=null and advisoryReason!=''">advisory_reason = #{advisoryReason},</if>
+	<if test="entrusImg!=null and entrusImg!=''"> entrus_img = #{entrusImg},</if>
+	<if test="judicialexpertiseStatus!=null"> judicialexpertise_status = #{judicialexpertiseStatus}, </if>
+	<if test="medicalImagingStatus!=null">medical_imaging_status = #{medicalImagingStatus},</if>
+	<if test="boneAgeStatus!=null"> bone_age_status = #{boneAgeStatus},</if>
+	<if test="organizationUserId!=null">organization_user_id = #{organizationUserId},</if>
+	<if test="judicialBoneAgeOrganizationId!=null"> judicial_bone_age_organization_id = #{judicialBoneAgeOrganizationId},</if>
+	<if test="judicialBoneAgeOrganizationTeamId!=null"> judicial_bone_age_organization_team_id = #{judicialBoneAgeOrganizationTeamId},</if>
+	<if test="supplementaryMaterialsImg!=null and  supplementaryMaterialsImg!=''"> supplementary_materials_img = #{supplementaryMaterialsImg},</if>
+	<if test="medicalImagingReason!=null and  medicalImagingReason!=''"> medical_imaging_reason = #{medicalImagingReason},</if>
+	<if test="entrusImgStatus!=null"> entrus_img_status = #{entrusImgStatus},</if>
+	<if test="supplementaryMaterialsStatus!=null"> supplementary_materials_status = #{supplementaryMaterialsStatus},</if>
+	<if test="currentAge!=null"> current_age = #{currentAge},</if>
+	<if test="leftKneeJointImg!=null and leftKneeJointImg!=''"> left_knee_joint_img = #{leftKneeJointImg},</if>
+	<if test="leftKneeJointNumber!=null and leftKneeJointNumber!=''"> left_knee_joint_img_number = #{leftKneeJointNumber},</if>
+	<if test="leftKneeJointDate!=null "> left_knee_joint_date = #{leftKneeJointDate},</if>
+	<if test="leftKneeJointLateralImg!=null and leftKneeJointLateralImg!=''"> left_knee_joint_lateral_img = #{leftKneeJointLateralImg},</if>
+	<if test="leftKneeJointLateraNumber!=null and leftKneeJointLateraNumber!=''"> left_knee_joint_lateral_number = #{leftKneeJointLateraNumber},</if>
+	<if test="leftKneeJointLateraDate!=null "> left_knee_joint_lateral_date = #{leftKneeJointLateraDate},</if>
+	<if test="organizationId!=null "> organization_id = #{organizationId}</if>
+     </set>
+    where id = #{id}
+  </update>
+  
+  <select id="getOne" parameterType="org.web.module.bone.age.domain.MedicalImagingData" resultType="map">
+	SELECT
+		bmid.id,
+		bmid.user_id userId,
+		bu.`name`,
+		bmid.height,
+		bmid.weight,
+		bmid.sex,
+		bu.id_card idCard,
+		bu.birthday,
+		bu.phone,
+		bu.province,
+		bu.city,
+		bu.area,
+		bu.street,
+		bu.address,
+		bmid.current_age age,
+		bmid.menarche_type menarcheType,
+		bct.`value` menarcheName,
+		bmid.menarche_age menarcheAge,
+		bmid.left_wrist_img leftWristImg,
+		bmid.left_wrist_number leftWristNumber,
+		bmid.left_wrist_date leftWristDate,
+		bmid.pelvis_img pelvisImg,
+		bmid.pelvis_number pelvisNumber,
+		bmid.pelvis_date pelvisDate,
+		bmid.bilateral_sternoclavicular_img bilateralSternoclavicularImg,
+		bmid.bilateral_sternoclavicular_number bilateralSternoclavicularNumber,
+		bmid.bilateral_sternoclavicular_date bilateralSternoclavicularDate,
+		bmid.ct_tomography ctTomography,
+		bmid.ct_tomography_number ctTomographyNumber,
+		bmid.ct_tomography_date ctTomographyDate,
+		bmid.advisory_img advisoryImg,
+		bmid.advisory_status advisoryStatus,
+		bmid.advisory_reason advisoryReason,
+		bmid.entrus_img entrusImg,
+		bmid.judicialexpertise_status judicialexpertiseStatus,
+		bmid.medical_imaging_status medicalImagingStatus,
+		bmid.bone_age_status boneAgeStatus,
+		bmid.organization_user_id organizationUserId,
+		bmid.judicial_bone_age_organization_id judicialBoneAgeOrganizationId,
+		bmid.judicial_bone_age_organization_team_id judicialBoneAgeOrganizationTeamId,
+		bmid.supplementary_materials_img supplementaryMaterialsImg,
+		bmid.medical_imaging_reason  medicalImagingReason,
+		bmid.entrus_img_status  entrusImgStatus,
+		bmid.supplementary_materials_status supplementaryMaterialsStatus,
+		bmid.left_knee_joint_img leftKneeJointImg,
+		bmid.left_knee_joint_img_number leftKneeJointNumber,
+		bmid.left_knee_joint_date leftKneeJointDate,
+		bmid.left_knee_joint_lateral_img leftKneeJointLateralImg,
+		bmid.left_knee_joint_lateral_number leftKneeJointLateraNumber,
+		bmid.left_knee_joint_lateral_date leftKneeJointLateraDate,
+		bmid.create_time createTime
+	FROM
+		base_medical_imaging_data bmid
+	LEFT JOIN base_code_table bct ON bct.`code` = bmid.menarche_type
+	AND bct.type = 'cclx'
+	LEFT JOIN base_user bu ON bmid.user_id = bu.id
+	WHERE
+		bmid.id = #{id}
+  </select>
+  
+  <!--通过用户id查询用户的影像资料  骨龄报告(送检)状态1.未完成 （不新增）2.已完成 （新增）-->
+  <select id="getUser"  parameterType="org.web.module.bone.age.domain.MedicalImagingData" resultType="map">
+  select 	
+   id,
+	user_id userId,
+	height,
+	weight,
+	sex,
+	current_age age,
+	menarche_type menarcheType,
+	menarche_age menarcheAge,
+	left_wrist_img leftWristImg,
+	left_wrist_number leftWristNumber,
+	left_wrist_date leftWristDate,
+	pelvis_img pelvisImg,
+	pelvis_number pelvisNumber,
+	pelvis_date pelvisDate,
+	bilateral_sternoclavicular_img bilateralSternoclavicularImg,
+	bilateral_sternoclavicular_number bilateralSternoclavicularNumber,
+	bilateral_sternoclavicular_date bilateralSternoclavicularDate,
+	ct_tomography ctTomography,
+	ct_tomography_number ctTomographyNumber,
+	ct_tomography_date ctTomographyDate,
+	advisory_img advisoryImg,
+	advisory_status advisoryStatus,
+	advisory_reason advisoryReason,
+	entrus_img entrusImg,
+	judicialexpertise_status judicialexpertiseStatus,
+	medical_imaging_status medicalImagingStatus,
+	bone_age_status boneAgeStatus,
+	organization_user_id organizationUserId,
+	judicial_bone_age_organization_id judicialBoneAgeOrganizationId,
+	judicial_bone_age_organization_team_id judicialBoneAgeOrganizationTeamId,
+	supplementary_materials_img supplementaryMaterialsImg,
+	medical_imaging_reason  medicalImagingReason,
+	entrus_img_status  entrusImgStatus,
+	supplementary_materials_status supplementaryMaterialsStatus,
+	create_time createTime
+ FROM
+	base_medical_imaging_data
+WHERE
+	user_id=#{userId}
+  </select>
+  
+  <select id="getList"  parameterType="org.web.module.bone.age.domain.MedicalImagingData" resultType="map">
+	SELECT
+	    bmid.id,
+	    bmid.user_id userId,
+		bu.`name`,
+		bmid.height,
+		bmid.weight,
+		bmid.sex,
+		bu.id_card idCard,
+		bu.phone,
+		bmid.judicialexpertise_status judicialexpertiseStatus,
+		bmid.advisory_img advisoryImg,
+		bmid.advisory_status advisoryStatus,
+		bmid.medical_imaging_status medicalImagingStatus,
+		bmid.supplementary_materials_img supplementaryMaterialsImg,
+		bmid.medical_imaging_reason  medicalImagingReason,
+		bmid.entrus_img_status  entrusImgStatus,
+		bmid.supplementary_materials_status supplementaryMaterialsStatus,
+		bmid.bone_age_status boneAgeStatus,
+		bmid.current_age age,
+		bmid.entrus_img entrusImg
+	FROM
+		base_medical_imaging_data bmid
+	INNER JOIN base_user bu ON bmid.user_id = bu.id
+	LEFT JOIN base_user_organization_team buor ON bmid.user_id=buor.user_id
+	WHERE buor.organization_team_id in (SELECT bot.id FROM base_organization_team bot WHERE bot.organization_id=#{organizationId})
+	<if test="idCard!=null and idCard!=''">
+		and bu.id_card =#{idCard}
+	</if>
+	<if test="judicialexpertiseStatus!=null">
+		and bmid.judicialexpertise_status =#{judicialexpertiseStatus}
+	</if>
+	<if test="advisoryStatus!=null">
+		and bmid.advisory_status =#{advisoryStatus}
+		</if>
+	<if test="medicalImagingStatus!=null">
+		and bmid.medical_imaging_status=#{medicalImagingStatus}
+	</if>
+	<if test="judicialBoneAgeOrganizationId!=null">
+		and bmid.judicial_bone_age_organization_id=#{judicialBoneAgeOrganizationId}
+	</if>
+	<if test="judicialBoneAgeOrganizationTeamId!=null">
+		and bmid.judicial_bone_age_organization_team_id=#{judicialBoneAgeOrganizationTeamId}
+	</if>
+	<if test="entrusImgStatus!=null">
+		and bmid.entrus_img_status=#{entrusImgStatus}
+	</if>
+  </select>
+  
+ <!--  机构详情 -->
+  <select id="getOrganiztionOne"  parameterType="org.web.module.bone.age.domain.MedicalImagingData" resultType="map">
+	SELECT
+		bo.id,
+		bo.`code`,
+		bo.pid,
+		bo.`name`,
+		bo.judicial_bone_age_organization_id judicialBoneAgeOrganizationId,
+		bo.judicial_bone_age_organization_team_id judicialBoneAgeOrganizationTeamId
+	FROM
+		base_organization bo
+	WHERE
+		bo.id =#{id}
+  </select>
+</mapper>

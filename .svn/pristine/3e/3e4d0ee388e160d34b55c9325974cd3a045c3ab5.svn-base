@@ -1,0 +1,58 @@
+package org.web.module.height.obesity.controller;
+
+import java.util.List;
+import java.util.Map;
+
+import javax.annotation.Resource;
+
+import org.service.core.api.ApiCodeEnum;
+import org.service.core.api.JsonApi;
+import org.service.core.api.MultiLine;
+import org.service.core.auth.control.RequiresAuthentication;
+import org.service.core.auth.level.Level;
+import org.service.core.entity.BaseEntity;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
+import org.web.module.height.obesity.entity.ExaminationCodeTable;
+import org.web.module.height.obesity.service.ExaminationCodeTableService;
+
+import com.github.pagehelper.Page;
+import com.github.pagehelper.PageHelper;
+
+/**
+ * Copyright © 2018 四川易迅通健康医疗技术发展有限公司. All rights reserved.
+ *
+ * @author: WangHuaQiang
+ * @date: 2018年12月27日
+ * @description: 检查检验码表
+ */
+@RestController
+public class ExaminationCodeTableWebController {
+	
+	@Resource
+	private ExaminationCodeTableService examinationCodeTableService;
+	
+	/** 
+	 * @author: WangHuaQiang
+	 * @date: 2018年12月27日
+	 * @param examinationCodeTable
+	 * @param result
+	 * @return
+	 * @description: 查询检查检验列表
+	 */
+	@RequiresAuthentication(value = { "web-module-height-obesity:examination-code-table:get-list" },level = Level.OPERATION)
+	@GetMapping(value = { "/examination/code/table" })
+	public JsonApi getList(@Validated(BaseEntity.SelectAll.class) ExaminationCodeTable examinationCodeTable,
+			BindingResult result) {
+		Page<?> page = PageHelper.startPage(examinationCodeTable.getPage(), examinationCodeTable.getPageSize());
+		List<Map<String, Object>> codeTableList = examinationCodeTableService.getList(examinationCodeTable);
+		if (codeTableList != null && !codeTableList.isEmpty()) {
+			return new JsonApi(ApiCodeEnum.OK, new MultiLine(page.getTotal(), codeTableList));
+		}
+		return new JsonApi(ApiCodeEnum.NOT_FOUND);
+	}
+	
+	
+}

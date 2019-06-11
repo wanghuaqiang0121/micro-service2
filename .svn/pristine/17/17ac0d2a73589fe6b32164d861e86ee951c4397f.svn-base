@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.wechat.module.height.obesity.dao.WhoStandardHeadCircumferenceSdMapper">
+  <delete id="delete" parameterType="org.wechat.module.height.obesity.entity.WhoStandardHeadCircumferenceSd">
+    delete from who_standard_head_circumference_sd
+    where id = #{id}
+  </delete>
+  <insert id="insert" parameterType="org.wechat.module.height.obesity.entity.WhoStandardHeadCircumferenceSd">
+    insert into who_standard_head_circumference_sd (id, month_age, sex, 
+      sd, standard_value)
+    values (#{id}, #{monthAge}, #{sex}, 
+      #{sd}, #{standardValue})
+  </insert>
+  <update id="update" parameterType="org.wechat.module.height.obesity.entity.WhoStandardHeadCircumferenceSd">
+    update who_standard_head_circumference_sd
+    set month_age = #{monthAge},
+      sex = #{sex},
+      sd = #{sd},
+      standard_value = #{standardValue}
+    where id = #{id}
+  </update>
+  <select id="getOne" parameterType="org.wechat.module.height.obesity.entity.WhoStandardHeadCircumferenceSd" resultType="map">
+    select id, month_age, sex, sd, standard_value
+    from who_standard_head_circumference_sd
+    where id = #{id}
+  </select>
+  <select id="getList" parameterType="org.wechat.module.height.obesity.entity.WhoStandardHeadCircumferenceSd" resultType="map">
+    select id, month_age, sex, sd, standard_value
+    from who_standard_head_circumference_sd
+  </select>
+</mapper>

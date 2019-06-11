@@ -1,0 +1,64 @@
+server:
+  port: 6020
+spring:
+  application:
+    name: service-task-delay
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    joda-date-time-format: yyyy-MM-dd HH:mm:ss
+    time-zone: GMT+8
+  datasource:
+    type: com.alibaba.druid.pool.DruidDataSource
+    driverClassName: com.mysql.jdbc.Driver
+    url: jdbc:mysql://192.168.1.108:3306/yxt?useUnicode=true&characterEncoding=utf8&mysqlEncoding=utf8&autoReconnect=true&serverTimezone=GMT%2B8
+    username: yxt
+    password: Scyxt2018
+    initialSize: 5
+    minIdle: 5
+    maxActive: 20
+    maxWait: 60000
+    timeBetweenEvictionRunsMillis: 60000
+    minEvictableIdleTimeMillis: 300000
+    validationQuery: SELECT 1 FROM DUAL
+    testWhileIdle: true
+    testOnBorrow: false
+    testOnReturn: false
+    poolPreparedStatements: true
+    maxPoolPreparedStatementPerConnectionSize: 20
+    filters: stat,wall,log4j
+    connectionProperties: druid.stat.mergeSql=true;druid.stat.slowSqlMillis=5000
+  redis:
+    database: 1
+    host: 192.168.1.21
+    port: 6379
+    password: Scyxt2018
+    timeout: 5000
+    pool:
+      max-active: 100
+      max-wait: 3000
+      max-idle: 15
+      min-idle: 5
+eureka:
+  client:
+    healthcheck:
+      enabled: true
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: http://localhost:1200/eureka/
+  instance:
+    prefer-ip-address: true
+    instance-id: ${spring.cloud.client.ip-address}:${server.port}:${spring.application.name}
+remote:
+  maxTotalConnect: 1000
+  maxConnectPerRoute: 200
+  connectTimeout: 2000
+  readTimeout: 20000
+sms:
+  url: http://dc.28inter.com/sms.aspx
+  userid: 1036
+  account: yxtjkgh
+  password: nmmd520yxt
+wechat:
+  push:
+    url: http://yzgweixin.99kst.com/message/sendmessage

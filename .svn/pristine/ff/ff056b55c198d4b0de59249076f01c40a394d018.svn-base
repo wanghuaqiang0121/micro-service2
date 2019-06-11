@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.web.module.height.obesity.dao.UserExaminationRecordMapper">
+
+	<delete id="delete" parameterType="org.web.module.height.obesity.entity.UserExaminationRecord">
+		DELETE
+		FROM
+		base_user_examination_record
+		WHERE
+		id = #{id}
+	</delete>
+
+	<!-- 添加用户检查检验记录 -->
+	<insert id="insert" parameterType="org.web.module.height.obesity.entity.UserExaminationRecord" keyProperty="id" useGeneratedKeys="true">
+     INSERT INTO base_user_examination_record 
+     	(
+     		user_examination_master_record_id,
+     		user_id,
+     		examination_code,
+     		examination_name,
+     		examination_date,
+     		picture,
+     		unit,
+     		examination_result,
+     		diagnostic_opinion,
+     		is_view,
+     		create_date_time
+      )
+    VALUES
+     	(
+     		#{userExaminationMasterRecordId},
+     		#{userId},
+     		#{examinationCode},
+     		#{examinationName},
+     		#{examinationDate},
+     		#{picture},
+     		#{unit},
+     		#{examinationResult},
+     		#{diagnosticOpinion},
+     		#{isView},
+     		#{createDateTime}
+      )
+	</insert>
+
+	<!-- 循环添加用户检查检验记录 -->
+	<insert id="beatchInsert" parameterType="list" keyProperty="id" useGeneratedKeys="true">
+     INSERT INTO base_user_examination_record 
+     	(
+     		user_examination_master_record_id,
+     		user_id,
+     		examination_code,
+     		examination_name,
+     		examination_date,
+     		picture,
+     		unit,
+     		examination_result,
+     		diagnostic_opinion,
+     		is_view,
+     		create_date_time
+      )
+    VALUES
+		<foreach collection="list" separator="," item="userExaminationRecord">
+    	(
+     		#{userExaminationRecord.userExaminationMasterRecordId},
+     		#{userExaminationRecord.userId},
+     		#{userExaminationRecord.examinationCode},
+     		#{userExaminationRecord.examinationName},
+     		#{userExaminationRecord.examinationDate},
+     		#{userExaminationRecord.picture},
+     		#{userExaminationRecord.unit},
+     		#{userExaminationRecord.examinationResult},
+     		#{userExaminationRecord.diagnosticOpinion},
+     		#{userExaminationRecord.isView},
+     		#{userExaminationRecord.createDateTime}
+      )
+		</foreach>
+	</insert>
+
+	<!-- 修改用户检查检验记录(子项) -->
+	<update id="update" parameterType="org.web.module.height.obesity.entity.UserExaminationRecord">
+    UPDATE base_user_examination_record SET id=#{id}
+		<if test="userExaminationMasterRecordId != null">
+    		,user_examination_master_record_id =#{userExaminationMasterRecordId}
+		</if>
+		<if test="userId != null">
+     		,user_id =#{userId}
+		</if>
+		<if test="examinationCode != null and examinationCode !=''">
+     		,examination_code = #{examinationCode}
+		</if>
+		<if test="examinationName != null and examinationName!=''">
+     		,examination_name = #{examinationName}
+		</if>
+		<if test="examinationDate!= null">
+     		,examination_date = #{examinationDate}
+		</if>
+		<if test="picture !=null and picture !=''">
+     		,picture = #{picture}
+		</if>
+		<if test="unit!=null and unit != ''">
+			 ,unit=#{unit}
+		</if>
+		 <if test="examinationResult!=null and examinationResult!=''"  >
+	        ,examination_result = #{examinationResult}
+	   </if>
+		<if test="diagnosticOpinion!= null and diagnosticOpinion != ''">
+	    	,diagnostic_opinion =#{diagnosticOpinion}
+		</if>
+		<if test="isView != null">
+	    	,is_view = #{isView}
+		</if>
+    WHERE 
+    	id = #{id}
+	</update>
+
+	<select id="getOne" parameterType="org.web.module.height.obesity.entity.UserExaminationRecord" resultType="map">
+	SELECT
+		id,
+		user_examination_master_record_id userExaminationMasterRecordId,
+		user_id userId,
+		examination_code examinationCode,
+		examination_name examinationName,
+		examination_date examinationDate,
+		picture,
+		unit,
+		examination_result examinationResult,
+		diagnostic_opinion diagnosticOpinion,
+		is_view isView,
+		create_date_time createDateTime
+		FROM
+		base_user_examination_record
+		WHERE
+		id = #{id}
+	</select>
+
+	<!-- 查询用户身高管理记录对应某项检查记录 -->
+	<select id="getUserExaminationByCode" parameterType="org.web.module.height.obesity.entity.UserExaminationRecord" resultType="map">
+		SELECT
+		buer.id,
+		buer.user_examination_master_record_id userExaminationMasterRecordId,
+		buer.user_id userId,
+		buer.examination_code examinationCode,
+		buer.examination_name examinationName,
+		buer.examination_date examinationDate,
+		buer.picture,
+		buer.unit,
+		buer.examination_result examinationResult,
+		buer.diagnostic_opinion diagnosticOpinion,
+		buer.is_view isView,
+		buer.create_date_time createDateTime 
+		FROM
+			base_user_examination_record buer
+		INNER JOIN
+			base_user_examination_master_record as buemr ON buer.user_examination_master_record_id=buemr.id 
+		WHERE buer.user_id=#{userId} AND buemr.children_measure_id=#{childrenMeasureId} AND buer.examination_code=#{examinationCode}
+
+		ORDER BY buer.create_date_time
+		DESC
+		limit 1
+	</select>
+
+	<select id="getList" parameterType="org.web.module.height.obesity.entity.UserExaminationRecord" resultType="map">
+		SELECT
+		id,
+		type,
+		user_id userId,
+		children_measure_id childrenMeasureId,
+		examination_code examinationCode,
+		examination_name examinationName,
+		examination_type examinationType,
+		examination_date examinationDate,
+		picture,
+		unit,
+		examination_result examinationResult,
+		diagnostic_opinion
+		diagnosticOpinion,
+		is_view isView,
+		organization_user_id
+		organizationUserId,
+		create_date_time createDateTime,
+		base_children_measure_id baseChildrenMeasureId,
+		base_examination_code_table_id baseExaminationCodeTableId
+		FROM
+		base_user_examination_record
+		<where>
+			<if test="userId!=null">user_id=#{userId}</if>
+			<if test="childrenMeasureId!=null">AND children_measure_id=#{childrenMeasureId}</if>
+			<if test="examinationCode!=null">AND examination_code=#{examinationCode}</if>
+		</where>
+	</select>
+
+</mapper>

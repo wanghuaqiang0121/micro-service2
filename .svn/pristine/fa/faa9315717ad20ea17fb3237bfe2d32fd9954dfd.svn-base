@@ -1,0 +1,32 @@
+package org.wechat.module.height.obesity.service;
+
+import org.springframework.stereotype.Service;
+import org.wechat.module.height.obesity.dao.UserMapper;
+import org.wechat.module.height.obesity.entity.User;
+
+import javax.annotation.Resource;
+import java.util.List;
+import java.util.Map;
+
+/**
+ * Copyright © 2018 四川易迅通健康医疗技术发展有限公司. All rights reserved.
+ *
+ * @author: XiePeng
+ * @date: 2019年1月17日
+ * @description: UserService
+ */
+@Service
+public class UserService {
+	@Resource
+	private UserMapper mapper;
+
+	public List<Map<String, Object>> getList(User user) {
+		return mapper.getList(user);
+	}
+	public Map<String,Object> getOne(User user){
+		return mapper.getOne(user);
+	}
+	public Map<String,Object> getNewOne(User user){
+		return mapper.getNewOne(user);
+	}
+}

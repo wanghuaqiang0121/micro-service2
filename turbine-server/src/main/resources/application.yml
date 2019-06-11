@@ -1,0 +1,22 @@
+server:
+  port: 3000
+spring:
+  application:
+    name: turbine-server
+turbine:
+  aggregator:
+    cluster-config: zuul
+  app-config: zuul-server
+  cluster-name-expression: metadata['cluster']
+  combine-host: true
+  instance-url-suffix:
+    default: actuator/hystrix.stream
+eureka:
+  instance:
+    prefer-ip-address: true
+    instance-id: ${spring.cloud.client.ip-address}:${server.port}:${spring.application.name}
+  client:
+    healthcheck:
+      enabled: true
+    service-url:
+      defaultZone: http://localhost:1000/eureka/

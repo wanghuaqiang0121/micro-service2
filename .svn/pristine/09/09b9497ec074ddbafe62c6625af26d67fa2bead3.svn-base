@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.web.module.height.obesity.dao.UserChoiceRecordMapper">
+
+<!-- 删除用户选择项记录 -->
+  <delete id="delete" parameterType="org.web.module.height.obesity.entity.UserChoiceRecord">
+	DELETE
+	FROM
+		base_user_choice_record
+	<where>
+	organization_user_id IS NOT NULL
+		<if test="id !=null">
+			id = #{id}
+		</if>
+		<if test="childrenMeasureId  != null">
+			and children_measure_id = #{childrenMeasureId}
+		</if>
+	</where>
+  </delete>
+  
+<!-- 删除问题code为5的用户选择项记录 -->
+  <delete id="deleteCodeRqFive" parameterType="org.web.module.height.obesity.entity.UserChoiceRecord">
+	DELETE
+	FROM
+		base_user_choice_record 
+	where
+		children_measure_id = #{childrenMeasureId} 
+		and choice_question_id in( SELECT id FROM base_choice_question WHERE code = #{code})
+  </delete>
+  
+  <insert id="insert" parameterType="org.web.module.height.obesity.entity.UserChoiceRecord" keyProperty="id"  useGeneratedKeys="true">
+    INSERT INTO base_user_choice_record 
+    	( user_id, children_measure_id, choice_question_id, choice_item_id, organization_user_id,create_date_time)
+    VALUES 
+    	(#{userId}, #{childrenMeasureId}, #{choiceQuestionId}, #{choiceItemId}, #{organizationUserId},  #{createDateTime})
+  </insert>
+  
+  <!-- 批量添加用户选择项记录 -->
+  <insert id="beatchInsert" parameterType="list" keyProperty="id"  useGeneratedKeys="true">
+    INSERT INTO base_user_choice_record 
+    	(   user_id,
+    		children_measure_id, 
+    		choice_question_id, 
+    		choice_item_id, 
+    		organization_user_id,
+    		create_date_time
+    	)
+    VALUES 
+    <foreach collection="list"  separator="," item="userChoiceRecords">
+    	(
+    		#{userChoiceRecords.userId}, 
+    		#{userChoiceRecords.childrenMeasureId}, 
+    		#{userChoiceRecords.choiceQuestionId}, 
+    		#{userChoiceRecords.choiceItemId}, 
+    		#{userChoiceRecords.organizationUserId},  
+    		#{userChoiceRecords.createDateTime}
+    	)
+    </foreach>   
+  </insert>
+  
+  <update id="update" parameterType="org.web.module.height.obesity.entity.UserChoiceRecord">
+    UPDATE base_user_choice_record  SET id=#{id}
+	    <if test="userId!=null">
+	     ,user_id = #{userId}
+	    </if>
+	     <if test="childrenMeasureId!=null">
+	     , children_measure_id = #{childrenMeasureId}
+	    </if>
+	     <if test="choiceQuestionId!=null">
+	      ,choice_question_id = #{choiceQuestionId}
+	    </if>
+	     <if test="choiceItemId!=null">
+	       ,choice_item_id = #{choiceItemId}
+	    </if>
+	     <if test="organizationUserId!=null">
+	     ,organization_user_id = #{organizationUserId}
+	    </if>
+    WHERE 
+    	id = #{id}
+  </update>
+  
+  <select id="getOne" parameterType="org.web.module.height.obesity.entity.UserChoiceRecord" resultType="map">
+	SELECT
+		id,
+		user_id userId,
+		children_measure_id childrenMeasureId,
+		choice_question_id choiceQuestionId,
+		choice_item_id choiceItemId,
+		organization_user_id organizationUserId,
+		create_date_time createDateTime
+	FROM
+		base_user_choice_record
+	WHERE
+		id = #{id} 
+  </select>
+  
+  <!-- 用户选择项记录列表 -->
+  <select id="getList" parameterType="org.web.module.height.obesity.entity.UserChoiceRecord" resultType="map">
+	SELECT
+		id,
+		user_id userId,
+		children_measure_id childrenMeasureId,
+		choice_question_id choiceQuestionId,
+		choice_item_id choiceItemId,
+		organization_user_id organizationUserId,
+		create_date_time createDateTime
+	FROM
+		base_user_choice_record
+	<where>
+		<if test="childrenMeasureId != null">
+			children_measure_id = #{childrenMeasureId}
+		</if>
+	</where>
+  </select>
+</mapper>

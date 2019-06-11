@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.web.module.height.obesity.dao.StandardEerAmdrRniMapper">
+  <select id="getList" parameterType="org.web.module.height.obesity.entity.StandardEerAmdrRni" resultType="map">
+    select 
+      id,
+      sex, 
+      start_month_age startMonthAge, 
+      end_month_age endMonthAge, 
+      eer, 
+      carbohydrate, 
+      sugar, 
+      fat, 
+      saturated_fatty_acid saturatedFattyAcid, 
+    protein
+    from standard_eer_amdr_rni
+    <where>
+      <if test="sex!=null">sex=#{sex}</if>
+      <if test="startMonthAge!=null">AND #{startMonthAge}&gt;=start_month_age</if>
+      <if test="endMonthAge!=null">AND #{endMonthAge}&lt;=end_month_age</if>
+    </where>
+  </select>
+  <select id="getOne" parameterType="org.web.module.height.obesity.entity.StandardEerAmdrRni" resultType="map">
+    select 
+      id,
+      sex, 
+      start_month_age startMonthAge, 
+      end_month_age endMonthAge, 
+      eer, 
+      carbohydrate, 
+      sugar, 
+      fat, 
+      saturated_fatty_acid saturatedFattyAcid, 
+    protein
+    from standard_eer_amdr_rni
+    <where>
+      <if test="id!=null">id=#{id}</if>
+    </where>
+
+  </select>
+</mapper>

@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.web.module.bone.age.dao.AiReadFilmMapper">
+
+	<delete id="delete" parameterType="org.web.module.bone.age.domain.AiReadFilm">
+		DELETE
+		FROM
+		base_ai_read_film
+		WHERE
+		id = #{id}
+	</delete>
+
+	<insert id="insert" parameterType="org.web.module.bone.age.domain.AiReadFilm"
+		useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO base_ai_read_film (status,base_bone_age_order_id, algorithm,
+		radius_level, ulna_level, metacarpal_1_level, metacarpal_3_level,
+		metacarpal_5_level, near_phalanges_1_level,
+		near_phalanges_3_level, near_phalanges_5_level, in_phalanges_3_level, in_phalanges_5_level,
+		far_phalanges_1_level, far_phalanges_3_level, far_phalanges_5_level,
+		head_bone_level, hamate_level, pyramidal_bone_level, moon_bone_level,
+		scaphoid_level, most_of_the_horns_level,
+		small_polyhorns_level,organization_id,create_time,diagnosis_id)
+		VALUES (#{status},#{baseBoneAgeOrderId}, #{algorithm}, #{radiusLevel}, #{ulnaLevel},
+		#{metacarpal1Level}, #{metacarpal3Level}, #{metacarpal5Level},
+		#{nearPhalanges1Level},
+		#{nearPhalanges3Level}, #{nearPhalanges5Level}, #{inPhalanges3Level}, #{inPhalanges5Level},
+		#{farPhalanges1Level}, #{farPhalanges3Level}, #{farPhalanges5Level},
+		#{headBoneLevel}, #{hamateLevel}, #{pyramidalBoneLevel},
+		#{moonBoneLevel}, #{scaphoidLevel}, #{mostOfTheHornsLevel},
+		#{smallPolyhornsLevel},#{organizationId},#{createTime},#{diagnosisId})
+	</insert>
+
+	<update id="update" parameterType="org.web.module.bone.age.domain.AiReadFilm">
+		update base_ai_read_film
+		<set>
+			<if test="status!= null ">status = #{status},</if>
+			<if test="algorithm!= null and  algorithm!=''">algorithm = #{algorithm},</if>
+			<if test="radiusLevel!= null and  radiusLevel!=''">radius_level = #{radiusLevel},</if>
+			<if test="ulnaLevel!= null and  ulnaLevel!=''">ulna_level = #{ulnaLevel},</if>
+			<if test="metacarpal1Level!= null and  metacarpal1Level!=''">metacarpal_1_level = #{metacarpal1Level},</if>
+			<if test="metacarpal3Level!= null and  metacarpal3Level!=''">metacarpal_3_level = #{metacarpal3Level},</if>
+			<if test="metacarpal5Level!= null and  metacarpal5Level!=''">metacarpal_5_level = #{metacarpal5Level},</if>
+			<if test="nearPhalanges1Level!= null and  nearPhalanges1Level!=''">near_phalanges_1_level = #{nearPhalanges1Level},</if>
+			<if test="nearPhalanges3Level!= null and  nearPhalanges3Level!=''">near_phalanges_3_level = #{nearPhalanges3Level},</if>
+			<if test="nearPhalanges5Level!= null and  nearPhalanges5Level!=''">near_phalanges_5_level = #{nearPhalanges5Level},</if>
+			<if test="inPhalanges3Level!= null and  inPhalanges3Level!=''">in_phalanges_3_level = #{inPhalanges3Level},</if>
+			<if test="inPhalanges5Level!= null and  inPhalanges5Level!=''">in_phalanges_5_level = #{inPhalanges5Level},</if>
+			<if test="farPhalanges1Level!= null and  farPhalanges1Level!=''">far_phalanges_1_level = #{farPhalanges1Level},</if>
+			<if test="farPhalanges3Level!= null and  farPhalanges3Level!=''">far_phalanges_3_level = #{farPhalanges3Level},</if>
+			<if test="farPhalanges5Level!= null and  farPhalanges5Level!=''">far_phalanges_5_level = #{farPhalanges5Level},</if>
+			<if test="headBoneLevel!= null and  headBoneLevel!=''">head_bone_level = #{headBoneLevel},</if>
+			<if test="hamateLevel!= null and  hamateLevel!=''">hamate_level = #{hamateLevel},</if>
+			<if test="pyramidalBoneLevel!= null and  pyramidalBoneLevel!=''">pyramidal_bone_level = #{pyramidalBoneLevel},</if>
+			<if test="moonBoneLevel!= null and  moonBoneLevel!=''">moon_bone_level = #{moonBoneLevel},</if>
+			<if test="scaphoidLevel!= null and  scaphoidLevel!=''">scaphoid_level = #{scaphoidLevel},</if>
+			<if test="mostOfTheHornsLevel!= null and  mostOfTheHornsLevel!=''">most_of_the_horns_level = #{mostOfTheHornsLevel},</if>
+			<if test="smallPolyhornsLevel!= null and  smallPolyhornsLevel!=''">small_polyhorns_level = #{smallPolyhornsLevel}</if>
+		</set>
+			where id = #{id}
+	</update>
+
+	<select id="getOne" parameterType="org.web.module.bone.age.domain.AiReadFilm"
+		resultType="map">
+		SELECT
+		id,
+		organization_id organizationId,
+		base_bone_age_order_id baseBoneAgeOrderId,
+		`algorithm`,
+		radius_level radiusLevel,
+		ulna_level ulnaLevel,
+		metacarpal_1_level metacarpal1Level,
+		metacarpal_3_level metacarpal3Level,
+		metacarpal_5_level metacarpal5Level,
+		near_phalanges_1_level nearPhalanges1Level,
+		near_phalanges_3_level nearPhalanges3Level,
+		near_phalanges_5_level nearPhalanges5Level,
+		in_phalanges_3_level inPhalanges3Level,
+		in_phalanges_5_level inPhalanges5Level,
+		far_phalanges_1_level farPhalanges1Level,
+		far_phalanges_3_level farPhalanges3Level,
+		far_phalanges_5_level farPhalanges5Level,
+		head_bone_level headBoneLevel,
+		hamate_level hamateLevel,
+		pyramidal_bone_level pyramidalBoneLevel,
+		moon_bone_level moonBoneLevel,
+		scaphoid_level scaphoidLevel,
+		most_of_the_horns_level mostOfTheHornsLevel,
+		small_polyhorns_level smallPolyhornsLevel,
+		create_time createTime,
+		`status`,
+		diagnosis_id diagnosisId
+		FROM
+		base_ai_read_film
+		WHERE
+		base_bone_age_order_id = #{baseBoneAgeOrderId}
+		ORDER BY create_time DESC LIMIT 1
+	</select>
+
+	<select id="getList" parameterType="org.web.module.bone.age.domain.AiReadFilm"  resultType="map">
+	SELECT
+		bsrf.id,
+		bsrf.create_time createTime,
+		bou.`name`,
+		bou.id organiztionUserId
+	FROM
+		base_ai_read_film bsrf
+	LEFT JOIN base_bone_age_order bbao ON bbao.id = bsrf.base_bone_age_order_id
+	LEFT JOIN base_organization_user bou ON bbao.organization_user_id = bou.id
+		<where>
+		<if test="status!=null"></if>
+				bsrf.`status` =#{status}
+		<if test="organizationId!=null">
+			 and   bsrf.organization_id=#{organizationId}
+		</if>
+			<if test="organizationUserId!=null">
+				and bou.id=#{organizationUserId}
+			</if>
+			<if test="createTime != null ">
+				AND bsrf.create_time &gt;= #{createTime}
+			</if>
+			<if test="endTime != null">
+				AND bsrf.create_time &lt;= #{endTime}
+			</if>
+		</where>
+	</select>
+
+	<!-- 人工智能使用次数 -->
+	<select id="getAiReadFilmTimes"  parameterType="org.web.module.bone.age.domain.AiReadFilm"  resultType="map">
+		SELECT
+			COUNT(barf.organization_id) aiTimes
+		FROM
+			base_ai_read_film barf
+		WHERE
+			barf.organization_id = #{organizationId}  and barf.`status`=#{status}
+	</select>
+	
+	<!-- 人工智能阅片医生列表 -->
+	<select id="getDoctors"  parameterType="org.web.module.bone.age.domain.AiReadFilm"  resultType="map">
+	SELECT
+		bsrf.id,
+		bou.`name`,
+		bou.id organiztionUserId,
+		bou.phone,
+		bou.photo,
+		bou.account,
+		bou.certificate_number certificateNumber,
+		bou.remark
+	FROM
+		base_ai_read_film bsrf
+	LEFT JOIN base_bone_age_order bbao ON bbao.id = bsrf.base_bone_age_order_id
+	LEFT JOIN base_organization_user bou ON bbao.organization_user_id = bou.id
+	WHERE bsrf.organization_id= #{organizationId}  AND bsrf.`status`= #{status}
+	<if test="name!=null and name!=''">
+	 and bou.`name`   like CONCAT(CONCAT('%', #{name}), '%') 
+</if>
+	GROUP BY bou.id
+	</select>
+</mapper>

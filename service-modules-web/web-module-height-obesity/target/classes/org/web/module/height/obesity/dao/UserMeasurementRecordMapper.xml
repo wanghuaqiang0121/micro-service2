@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.web.module.height.obesity.dao.UserMeasurementRecordMapper">
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from base_user_measurement_record
+    where id = #{id}
+  </delete>
+  <insert id="insert" parameterType="org.web.module.height.obesity.entity.UserMeasurementRecord">
+    insert into base_user_measurement_record (id, user_id, type,
+      measurement_value, evaluation, is_history, 
+      measurement_date, create_date_time)
+    values (#{id}, #{userId}, #{type}, 
+      #{measurementValue}, #{evaluation}, #{isHistory}, 
+      #{measurementDate}, #{createDateTime})
+  </insert>
+  <update id="updateByPrimaryKey" parameterType="org.web.module.height.obesity.entity.UserMeasurementRecord">
+    update base_user_measurement_record
+    set user_id = #{userId},
+      type = #{type},
+      measurement_value = #{measurementValue},
+      evaluation = #{evaluation},
+      is_history = #{isHistory},
+      measurement_date = #{measurementDate},
+      create_date_time = #{createDateTime}
+    where id = #{id}
+  </update>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultType="Map">
+    select id, user_id, type, measurement_value, evaluation, is_history, measurement_date, 
+    create_date_time
+    from base_user_measurement_record
+    where id = #{id}
+  </select>
+  <select id="selectAll" resultType="Map">
+    select id, user_id, type, measurement_value, evaluation, is_history, measurement_date, 
+    create_date_time
+    from base_user_measurement_record
+  </select>
+</mapper>

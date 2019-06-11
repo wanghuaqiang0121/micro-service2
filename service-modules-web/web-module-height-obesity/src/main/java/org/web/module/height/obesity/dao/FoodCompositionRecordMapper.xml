@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.web.module.height.obesity.dao.FoodCompositionRecordMapper">
+
+  <delete id="delete" parameterType="org.web.module.height.obesity.entity.FoodCompositionRecord">
+	DELETE
+	FROM
+		base_food_composition_record
+	WHERE
+		id = #{id}  
+  </delete>
+  
+  <insert id="insert" parameterType="org.web.module.height.obesity.entity.FoodCompositionRecord"  keyProperty="id"  useGeneratedKeys="true">
+    INSERT INTO base_food_composition_record 
+    	 (food_id, code_type, code_name, code_unit, value)
+    VALUES 
+   		 (#{foodId}, #{codeType}, #{codeName}, #{codeUnit}, #{value})
+  </insert>
+  
+  <update id="update" parameterType="org.web.module.height.obesity.entity.FoodCompositionRecord">
+    UPDATE base_food_composition_record SET id=#{id}
+	    <if test="foodId!=null"></if>
+	     , food_id = #{foodId}
+	      <if test="codeType!=null and codeType!=''">
+	     , code_type = #{codeType}
+	      </if>
+	        <if test="codeName!=null and codeName!=''">
+	     , code_name = #{codeName}
+	        </if>
+	        <if test="codeUnit!=null and codeUnit!=''">
+	     , code_unit = #{codeUnit}
+	        </if>
+	        <if test="value!=null ">
+	     , value = #{value}
+	        </if>
+    WHERE
+    	 id = #{id}
+  </update>
+  
+  <select id="getOne" parameterType="org.web.module.height.obesity.entity.FoodCompositionRecord" resultType="map">
+	SELECT
+		id,
+		food_id foodId,
+		code_type codeType,
+		code_name codeName,
+		code_unit codeUnit,
+		`value`
+	FROM
+		base_food_composition_record
+	WHERE
+		id = #{id}
+  </select>
+  
+  <select id="getList" parameterType="org.web.module.height.obesity.entity.FoodCompositionRecord" resultType="map">
+	 SELECT
+			id,
+			food_id foodId,
+			code_type codeType,
+			code_name codeName,
+			code_unit codeUnit,
+			`value`
+		FROM
+			base_food_composition_record
+  </select>
+</mapper>

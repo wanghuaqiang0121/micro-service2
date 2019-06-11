@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.web.module.height.obesity.dao.UserFoodCompositionRecordMapper">
+  <delete id="delete" parameterType="org.web.module.height.obesity.entity.UserFoodCompositionRecord">
+    delete from user_food_composition_record
+    where id = #{id}
+  </delete>
+  <insert id="insert" parameterType="org.web.module.height.obesity.entity.UserFoodCompositionRecord">
+    insert into user_food_composition_record (id, food_composition_id, user_id, 
+      code, name, create_date_time
+      )
+    values (#{id}, #{foodCompositionId}, #{userId}, 
+      #{code}, #{name}, #{createDateTime}
+      )
+  </insert>
+  <update id="update" parameterType="org.web.module.height.obesity.entity.UserFoodCompositionRecord">
+    update user_food_composition_record
+    set food_composition_id = #{foodCompositionId},
+      user_id = #{userId},
+      code = #{code},
+      name = #{name},
+      create_date_time = #{createDateTime}
+    where id = #{id}
+  </update>
+  <select id="getOne"  parameterType="org.web.module.height.obesity.entity.UserFoodCompositionRecord"  resultType="map">
+    select id, food_composition_id, user_id, code, name, create_date_time
+    from user_food_composition_record
+    where id = #{id}
+  </select>
+  <select id="getList"  parameterType="org.web.module.height.obesity.entity.UserFoodCompositionRecord"  resultType="map">>
+    select id, food_composition_id, user_id, code, name, create_date_time
+    from user_food_composition_record
+  </select>
+</mapper>

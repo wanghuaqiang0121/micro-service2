@@ -1,0 +1,30 @@
+package org.web.module.bone.age.global;
+
+/**
+ * Copyright © 2018 四川易迅通健康医疗技术发展有限公司. All rights reserved.
+ *
+ * @author: LiuGangQiang
+ * @date: 2018年8月31日
+ * @description: 全局通用静态变量
+ */
+public class BaseGlobal {
+
+	public static final String CACHE_USER = "cache_user";
+	
+	public static final String TOKEN_FLAG = "token";
+	
+	public static final String BONE_AGE = "bone_age:data_cache";
+	
+	public static final String TW3_STANDARD_PERCENTILE = "tw3_standard_percentile";
+	
+	public static final String PERMISSION_CODE = "code";
+	
+	public static final String ORGANIZATION_TEAM_ID = "organizationTeamId";
+
+	public static final String ORGANIZATION_ID = "organizationId";
+
+	public static final String MODULE_ID = "moduleId";
+	
+	public static final String CACHE_ORGANIZATION_USER = "organization_user:login_cache";
+
+}

@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.web.module.height.obesity.dao.UserExaminationMasterRecordMapper">
+
+<!-- 新增数据 -->
+ <insert id="insert" parameterType="org.web.module.height.obesity.entity.UserExaminationMasterRecord" keyProperty="id"  useGeneratedKeys="true">
+     INSERT INTO base_user_examination_master_record 
+     	( children_measure_id,user_id, type,examination_code, examination_name,  examination_date,organization_user_id, create_date_time
+      )
+    VALUES
+    	 (   #{childrenMeasureId}, #{userId},#{type}, #{examinationCode}, #{examinationName},   #{examinationDate}, #{organizationUserId}, #{createDateTime}
+      )
+  </insert>
+  
+  <resultMap type="map" id="examinationRecord">
+		<result column="id" property="id" />
+		<collection property="examinationRecords" column="id" javaType="list" select="getExaminationRecords" />
+	</resultMap>
+  
+  <!--查询详情  -->
+  <select id="getOne" parameterType="org.web.module.height.obesity.entity.UserExaminationMasterRecord"  resultMap="examinationRecord">
+  	SELECT
+		buemr.id,
+		buemr.examination_code code,
+		buemr.examination_name name
+	FROM
+		base_user_examination_master_record buemr
+		WHERE buemr.user_id=#{userId} and buemr.id=#{id}
+  </select>
+  
+  <select id="getExaminationRecords"  parameterType="int" resultType="map">
+ SELECT
+		buer.id,
+		buer.examination_code examinationCode,
+		buer.examination_name examinationName,
+		buer.examination_result examinationResult,
+		buer.picture,
+		buer.unit,
+		buer.diagnostic_opinion diagnosticOpinion,
+		buer.examination_date examinationDate
+	FROM
+		base_user_examination_record buer
+	INNER JOIN base_user_examination_master_record buemr ON buemr.id = buer.user_examination_master_record_id
+	WHERE
+		buemr.id =#{id} 
+  </select>
+  
+  
+  <!-- <resultMap type="map" id="userExaminationRecord">
+		<result column="id" property="id" />
+		<collection property="userExaminationRecords" column="id" javaType="list" select="getUserExaminationRecords" />
+	</resultMap> -->
+  
+  <!--查询列表  -->
+  <select id="getList" parameterType="org.web.module.height.obesity.entity.UserExaminationMasterRecord"  resultType="map">
+	SELECT
+		buer.id,
+		buer.examination_code examinationCode,
+		buer.examination_name examinationName,
+		buer.examination_result examinationResult,
+		buer.picture,
+		buer.unit,
+		buer.diagnostic_opinion diagnosticOpinion,
+		buer.examination_date examinationDate,
+		buemr.examination_name `name`,
+		buemr.examination_code `code`,
+		buemr.type,
+		bect.type codeType,
+		bect.reference_start referenceStart,
+		bect.reference_end referenceEnd
+	FROM
+		base_user_examination_master_record buemr
+	INNER JOIN base_user_examination_record buer ON buemr.id = buer.user_examination_master_record_id
+	INNER JOIN base_examination_code_table bect ON buer.examination_code = bect.`code`
+		<where>
+			<if test="userId != null">
+				buemr.user_id=#{userId}
+			</if>
+			<if test="childrenMeasureId !=null">
+				and buemr.children_measure_id =#{childrenMeasureId}
+			</if>
+			<if test="type != null">
+				and buemr.type =#{type}
+			</if>
+			<if test="codeType!=null and codeType!=''">
+			and bect.type=#{codeType}
+			</if>			
+		</where>
+		GROUP BY buer.id 
+		ORDER BY buemr.id DESC
+  </select>
+  
+  <!--查询子项详细信息  -->
+ <select id="getUserExaminationRecords"  parameterType="int" resultType="map">
+	 SELECT
+		buer.id,
+		buer.examination_code examinationCode,
+		buer.examination_name examinationName,
+		buer.examination_result examinationResult,
+		buer.picture,
+		buer.unit,
+		buer.diagnostic_opinion diagnosticOpinion,
+		buer.examination_date examinationDate
+	FROM
+		base_user_examination_record buer
+	INNER JOIN base_user_examination_master_record buemr ON buemr.id = buer.user_examination_master_record_id
+	WHERE
+		buemr.id =#{id}
+ </select>
+</mapper>

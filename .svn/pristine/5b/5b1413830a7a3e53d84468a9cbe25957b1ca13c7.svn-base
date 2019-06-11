@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.wechat.module.height.obesity.dao.UserSecondarySexCharactersRecordMapper">
+  <delete id="delete" parameterType="org.wechat.module.height.obesity.entity.UserSecondarySexCharactersRecord">
+    delete from base_user_secondary_sex_characters_record
+    where id = #{id}
+  </delete>
+  <insert id="insert" parameterType="org.wechat.module.height.obesity.entity.UserSecondarySexCharactersRecord">
+    insert into base_user_secondary_sex_characters_record (id, user_id, children_measure_id, 
+      secondary_sex_characters_config_id, organization_user_id, 
+      create_date_time)
+    values (#{id}, #{userId}, #{childrenMeasureId}, 
+      #{secondarySexCharactersConfigId}, #{organizationUserId}, 
+      #{createDateTime})
+  </insert>
+  <update id="update" parameterType="org.wechat.module.height.obesity.entity.UserSecondarySexCharactersRecord">
+    update base_user_secondary_sex_characters_record
+    set user_id = #{userId},
+      children_measure_id = #{childrenMeasureId},
+      secondary_sex_characters_config_id = #{secondarySexCharactersConfigId},
+      organization_user_id = #{organizationUserId},
+      create_date_time = #{createDateTime}
+    where id = #{id}
+  </update>
+  <select id="getOne" parameterType="org.wechat.module.height.obesity.entity.UserSecondarySexCharactersRecord" resultType="map">
+    select id, user_id, children_measure_id, secondary_sex_characters_config_id, organization_user_id, 
+    create_date_time
+    from base_user_secondary_sex_characters_record
+    where id = #{id}
+  </select>
+  <select id="getList" parameterType="org.wechat.module.height.obesity.entity.UserSecondarySexCharactersRecord" resultType="map">
+    select id, user_id, children_measure_id, secondary_sex_characters_config_id, organization_user_id, 
+    create_date_time
+    from base_user_secondary_sex_characters_record
+  </select>
+</mapper>

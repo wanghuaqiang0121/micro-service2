@@ -1,0 +1,28 @@
+server:
+  port: 5020
+spring:
+  application:
+    name: mongodb-file-server
+  servlet:
+    multipart:
+      max-file-size: 20480KB
+      max-request-size: 20480KB
+  data:
+    mongodb:
+      uri: mongodb://yxt:Scyxt2018@192.168.1.21:27017/yxt
+eureka:
+  client:
+    healthcheck:
+      enabled: true
+    service-url:
+      defaultZone: http://localhost:1200/eureka/
+    register-with-eureka: true
+    fetch-registry: true
+  instance:
+    prefer-ip-address: true
+    instance-id: ${spring.cloud.client.ip-address}:${server.port}:${spring.application.name}      
+file:
+  account: admin
+  password: come564
+  private:
+    key: MIICdgIBADANBgkqhkiG9w0BAQEFAASCAmAwggJcAgEAAoGBAK0RLGH2OSuCXMpCBVQkyMvL3WXduntfzZiRwOOg0km2ppnUrhnLcI9Xf71bwuORsQGC1MO6W+BeioK5Cd7t35bXxHMjj0Z11erwiwihzL6zEqJ/gDiCZLo8j8tmyrTibHMU5I3/GEnJdWMI83W05H4MrBUTBUgm52juNvkveSG5AgMBAAECgYEAnX3uTKtbtTtpo2lXHg5naAX6UPPo+tLg7sFcrgiwtQHxNDX1xWV75gWzKiex/5OaZ4yegAs8Br8h/vnSgLspZsM3UefA5J+WLJlEUb24wTQyfXQSr2UFu/e0NOUQ+1IFvhDIeyUdmA2xjnPlraKw/SjWPuiqgnHVayQ3ToxWAwECQQDrNuQP5aQtxi8gUw5XAlgEAESJVCWKTNzje9oECllbgDjLn0xW0f7HgmTRo1TtQgCDivG0INozUCf5UOKxqiHhAkEAvFxcsyWT+hJv5yvFEtpfsQ1JRg8lHV97Cy+BuVTeF396G+nogh2NXkp9lu1/RNXikZ5GJhnPetOQOS+mOiOq2QJAL1qLq4+l7/k4P5+5AVdddODA64zfSeqThdDHYYzb1IoJ5SSa79ezHWNo/LOPQ3zIMbNlWchLZY07nvvjx7TiwQJAcwoN67P1rnN4OL24vQz2CJJOwCUby9a2tVwsZF56zesjTs0LHfyijIX+MiGW6xmeKMV7nmWBHEj9+o8pfLSv8QJAe7SY3oQA39EbTiDHfLWaheBYEYhuhS/A+hBzdA0/7V7PSvef00Z4ycpzC/5nQjSM7wTxjEs77A8kyGnCRsqldQ==

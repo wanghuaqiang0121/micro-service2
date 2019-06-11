@@ -1,0 +1,20 @@
+package org.wechat.module.height.obesity.dao;
+
+import java.util.List;
+import java.util.Map;
+
+import org.service.core.dao.IBaseMapper;
+import org.wechat.module.height.obesity.entity.Diagnosis;
+import org.wechat.module.height.obesity.entity.ChildrenMeasure;
+
+public interface ChildrenMeasureMapper extends IBaseMapper<ChildrenMeasure> {
+    Map<String, Object> getDetail(ChildrenMeasure childrenMeasure);
+
+    Map<String, Object> getNewOne(ChildrenMeasure record);
+
+    List<Map<String, Object>> getListByMonthAge(ChildrenMeasure record);
+
+    Map<String, Object> getForecastHeight(Diagnosis diagnosis);
+    
+
+}

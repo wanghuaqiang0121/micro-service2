@@ -1,0 +1,215 @@
+package org.wechat.module.height.obesity.entity;
+
+import java.math.BigDecimal;
+import java.util.Map;
+
+import javax.validation.constraints.NotNull;
+
+import org.service.core.entity.BaseEntity.SelectAll;
+
+public class Diagnosis {
+	public interface GetGeneticHeight {
+
+	}
+
+	public interface GetExpectHeight {
+
+	}
+	private Integer userId;
+	public String name;
+	private Integer sex;
+	@NotNull(message = "{heightValue.is.null}", groups = { GetGeneticHeight.class, GetExpectHeight.class })
+	private BigDecimal standardValue;
+	private Double height;
+	private Double weight;
+	private Integer monthAge;
+	@NotNull(message = "{fatherHeight.not.null.valid}", groups = { GetGeneticHeight.class })
+	private Double fatherHeight;
+	@NotNull(message = "{motherHeight.not.null.valid}", groups = { GetGeneticHeight.class })
+	private Double motherHeight;
+	@NotNull(message = "{idealHeight.not.null.valid}", groups = { GetExpectHeight.class })
+	private Double idealHeight;
+	private Integer startMonthAge;
+	private Integer endMonthAge;
+	private Integer childrenMeasureId;
+	/* 出生孕周 */
+	private Double birthGestational;
+	private Double birthHeight;
+	private Double birthWeight;
+
+	private Double abdomenCircumference;
+	private Double headCircumference;
+
+	public BigDecimal getStandardValue() {
+		return standardValue;
+	}
+
+	public void setStandardValue(BigDecimal standardValue) {
+		this.standardValue = standardValue;
+	}
+
+	public Double getAbdomenCircumference() {
+		return abdomenCircumference;
+	}
+
+	/**
+	 * @return the headCircumference
+	 */
+	public Double getHeadCircumference() {
+		return headCircumference;
+	}
+
+	/**
+	 * @param headCircumference the headCircumference to set
+	 */
+	public void setHeadCircumference(Double headCircumference) {
+		this.headCircumference = headCircumference;
+	}
+
+	public void setAbdomenCircumference(Double abdomenCircumference) {
+		this.abdomenCircumference = abdomenCircumference;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	/* 用户出生信息 */
+	private Map<String, Object> childrenMaternity;
+
+	/* 用户家族信息 */
+	private Map<String, Object> childrenFamily;
+
+	public Map<String, Object> getChildrenFamily() {
+		return childrenFamily;
+	}
+
+	public void setChildrenFamily(Map<String, Object> childrenFamily) {
+		this.childrenFamily = childrenFamily;
+	}
+
+	public Map<String, Object> getChildrenMaternity() {
+		return childrenMaternity;
+	}
+
+	public void setChildrenMaternity(Map<String, Object> childrenMaternity) {
+		this.childrenMaternity = childrenMaternity;
+	}
+
+	public Double getBirthWeight() {
+		return birthWeight;
+	}
+
+	public void setBirthWeight(Double birthWeight) {
+		this.birthWeight = birthWeight;
+	}
+
+	public Double getBirthHeight() {
+		return birthHeight;
+	}
+
+	public void setBirthHeight(Double birthHeight) {
+		this.birthHeight = birthHeight;
+	}
+
+	public Double getBirthGestational() {
+		return birthGestational;
+	}
+
+	public void setBirthGestational(Double birthGestational) {
+		this.birthGestational = birthGestational;
+	}
+
+	public Integer getChildrenMeasureId() {
+		return childrenMeasureId;
+	}
+
+	public void setChildrenMeasureId(Integer childrenMeasureId) {
+		this.childrenMeasureId = childrenMeasureId;
+	}
+
+	public Integer getStartMonthAge() {
+		return startMonthAge;
+	}
+
+	public void setStartMonthAge(Integer startMonthAge) {
+		this.startMonthAge = startMonthAge;
+	}
+
+	public Integer getEndMonthAge() {
+		return endMonthAge;
+	}
+
+	public void setEndMonthAge(Integer endMonthAge) {
+		this.endMonthAge = endMonthAge;
+	}
+
+	public Integer getUserId() {
+		return userId;
+	}
+
+	public Double getIdealHeight() {
+		return idealHeight;
+	}
+
+	public void setIdealHeight(Double idealHeight) {
+		this.idealHeight = idealHeight;
+	}
+
+	public void setUserId(Integer userId) {
+		this.userId = userId;
+	}
+
+	public Integer getSex() {
+		return sex;
+	}
+
+	public void setSex(Integer sex) {
+		this.sex = sex;
+	}
+
+	public Double getHeight() {
+		return height;
+	}
+
+	public void setHeight(Double height) {
+		this.height = height;
+	}
+
+	public Double getWeight() {
+		return weight;
+	}
+
+	public void setWeight(Double weight) {
+		this.weight = weight;
+	}
+
+	public Integer getMonthAge() {
+		return monthAge;
+	}
+
+	public void setMonthAge(Integer monthAge) {
+		this.monthAge = monthAge;
+	}
+
+	public Double getFatherHeight() {
+		return fatherHeight;
+	}
+
+	public void setFatherHeight(Double fatherHeight) {
+		this.fatherHeight = fatherHeight;
+	}
+
+	public Double getMotherHeight() {
+		return motherHeight;
+	}
+
+	public void setMotherHeight(Double motherHeight) {
+		this.motherHeight = motherHeight;
+	}
+
+}

@@ -1,0 +1,123 @@
+server:
+  port: 4000
+spring:
+  application:
+    name: zuul-server
+  zipkin:
+    base-url: http://localhost:2000
+  sleuth:
+    sampler:
+      percentage: 1.0
+eureka:
+  client:
+    healthcheck:
+      enabled: true
+    service-url:
+      defaultZone: http://localhost:1000/eureka/
+    register-with-eureka: true
+    fetch-registry: true
+  instance:
+    prefer-ip-address: true
+    instance-id: ${spring.cloud.client.ip-address}:${server.port}:${spring.application.name}
+    metadata-map:
+      cluster: zuul
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+      cors:
+        allowed-origins: '*'
+        allowed-methods: '*'
+hystrix:
+  command:
+    default:
+      execution:
+        timeout:
+          enabled: true
+        isolation:
+          thread:
+            timeoutInMilliseconds: 30000
+ribbon:
+  ReadTimeout: 10000
+  ConnectTimeout: 5000
+  MaxAutoRetries: 0
+  MaxAutoRetriesNextServer: 1
+zuul:
+  host:
+    socket-timeout-millis: 10000
+    connect-timeout-millis: 5000
+  ignored-services: '*'
+  routes:
+    api-bone-age:
+      service-id: service-bone-age
+      path: /api-bone-age/**
+    api-common:
+      service-id: service-common
+      path: /api-common/**
+    api-medical:
+      service-id: service-medical
+      path: /api-medical/**
+    api-organization-configure:
+      service-id: service-organization-configure
+      path: /api-organization-configure/**
+    api-organization-permission:
+      service-id: service-organization-permission
+      path: /api-organization-permission/**
+    api-organization-team:
+      service-id: service-organization-team
+      path: /api-organization-team/**
+    api-organization-user:
+      service-id: service-organization-user
+      path: /api-organization-user/**
+    api-platform-configuration:
+      service-id: service-platform-configuration
+      path: /api-platform-configuration/**
+    api-sign:
+      service-id: service-sign
+      path: /api-sign/**
+    api-team-permission:
+      service-id: service-team-permission
+      path: /api-team-permission/**
+    api-user:
+      service-id: service-user
+      path: /api-user/**
+    api-work-order:
+      service-id: service-work-order
+      path: /api-work-order/**
+service-bone-age:
+  ribbon:
+    NFLoadBalancerRuleClassName: com.netflix.loadbalancer.WeightedResponseTimeRule
+service-common:
+  ribbon:
+    NFLoadBalancerRuleClassName: com.netflix.loadbalancer.WeightedResponseTimeRule
+service-medical:
+  ribbon:
+    NFLoadBalancerRuleClassName: com.netflix.loadbalancer.WeightedResponseTimeRule
+service-organization-configure:
+  ribbon:
+    NFLoadBalancerRuleClassName: com.netflix.loadbalancer.WeightedResponseTimeRule
+service-organization-permission:
+  ribbon:
+    NFLoadBalancerRuleClassName: com.netflix.loadbalancer.WeightedResponseTimeRule
+service-organization-team:
+  ribbon:
+    NFLoadBalancerRuleClassName: com.netflix.loadbalancer.WeightedResponseTimeRule
+service-organization-user:
+  ribbon:
+    NFLoadBalancerRuleClassName: com.netflix.loadbalancer.WeightedResponseTimeRule
+service-platform-configuration:
+  ribbon:
+    NFLoadBalancerRuleClassName: com.netflix.loadbalancer.WeightedResponseTimeRule
+service-sign:
+  ribbon:
+    NFLoadBalancerRuleClassName: com.netflix.loadbalancer.WeightedResponseTimeRule
+service-team-permission:
+  ribbon:
+    NFLoadBalancerRuleClassName: com.netflix.loadbalancer.WeightedResponseTimeRule
+service-user:
+  ribbon:
+    NFLoadBalancerRuleClassName: com.netflix.loadbalancer.WeightedResponseTimeRule
+service-work-order:
+  ribbon:
+    NFLoadBalancerRuleClassName: com.netflix.loadbalancer.WeightedResponseTimeRule

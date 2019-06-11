@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.wechat.module.height.obesity.dao.WhoStandardWeightSdMapper">
+  <delete id="delete" parameterType="org.wechat.module.height.obesity.entity.WhoStandardWeightSd">
+    delete from who_standard_weight_sd
+    where id = #{id}
+  </delete>
+  <insert id="insert" parameterType="org.wechat.module.height.obesity.entity.WhoStandardWeightSd">
+    insert into who_standard_weight_sd (id, month_age, sex, 
+      sd, standard_value)
+    values (#{id}, #{monthAge}, #{sex}, 
+      #{sd}, #{standardValue})
+  </insert>
+  <update id="update" parameterType="org.wechat.module.height.obesity.entity.WhoStandardWeightSd">
+    update who_standard_weight_sd
+    set month_age = #{monthAge},
+      sex = #{sex},
+      sd = #{sd},
+      standard_value = #{standardValue}
+    where id = #{id}
+  </update>
+  <select id="getOne" parameterType="org.wechat.module.height.obesity.entity.WhoStandardWeightSd" resultType="map">
+    select id, month_age, sex, sd, standard_value
+    from who_standard_weight_sd
+    where id = #{id}
+  </select>
+  <select id="getList" parameterType="org.wechat.module.height.obesity.entity.WhoStandardWeightSd" resultType="map">
+		SELECT id, month_age monthAge, sex, sd, standard_value standardValue
+		FROM
+		who_standard_weight_sd
+    <where>
+      <if test="sex!=null">sex=#{sex}</if>
+      <if test="sd!=null">AND sd=#{sd}</if>
+      <if test="startMonthAge!=null">AND month_age &gt;= #{startMonthAge}</if>
+      <if test="endMonthAge!=null">AND month_age &lt;=#{endMonthAge}</if>
+    </where>
+  </select>
+  <select id="getWeightSd" parameterType="org.wechat.module.height.obesity.entity.WhoStandardWeightSd" resultType="map">
+		select
+		id,
+		month_age monthAge,
+		sex,
+		sd,
+		standard_value standardValue
+		from
+		who_standard_weight_sd
+    <where>
+      <if test="monthAge!=null">month_age=#{monthAge}</if>
+      <if test="sex!=null">AND sex=#{sex}</if>
+    </where>
+		ORDER BY ABS(standard_value-#{standardValue})
+		limit 1
+  </select>
+</mapper>

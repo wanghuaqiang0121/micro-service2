@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.web.module.base.dao.data.base.ServicePackageTypeMapper">
+
+	<!-- 新增服务包类型 -->
+	<insert id="insert" parameterType="org.web.module.base.domain.data.base.ServicePackageType" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO base_service_package_type(name,create_date,code,remark)
+		VALUES (#{name},#{createDate},#{code},#{remark})
+	</insert>
+
+	<!-- 服务包类型列表 -->
+	<select id="getList" parameterType="org.web.module.base.domain.data.base.ServicePackageType" resultType="map">
+		SELECT
+			id,
+			`name`,
+			create_date AS createDate,
+			`code`,
+			remark 
+		FROM
+			base_service_package_type
+		<where>
+			<if test="name != null and name != ''">
+				`name` like CONCAT(CONCAT('%', #{name}), '%')
+			</if>
+			<if test="code != null and code != ''">
+				and `code` like CONCAT(CONCAT('%', #{code}), '%')
+			</if>
+		</where>
+	</select>
+
+	<!-- 机构服务包详情 -->
+	<select id="getOne" parameterType="org.web.module.base.domain.data.base.ServicePackageType" resultType="map">
+		SELECT
+			id,
+			`name`,
+			create_date AS createDate,
+			`code`,
+			remark 
+		FROM
+			base_service_package_type 
+		WHERE
+			id = #{id}
+	</select>
+
+	<!-- 查询重复 -->
+	<select id="getRepeat" parameterType="org.web.module.base.domain.data.base.ServicePackageType" resultType="map">
+		SELECT
+			id,
+			`code`,
+			create_date AS createDate
+		FROM
+			base_service_package_type 
+		WHERE
+			`code` = #{code}
+	</select>
+
+	<!-- 修改机构服务包 -->
+	<update id="update" parameterType="org.web.module.base.domain.data.base.ServicePackageType">
+		UPDATE base_service_package_type SET id=#{id}
+		<if test="name !=null and name != ''">
+			,name = #{name}
+		</if>
+		<if test="code !=null and code != ''">
+			,code = #{code}
+		</if>
+		<if test="remark!=null and remark!=''">
+			,remark = #{remark}
+		</if>
+		where id=#{id}
+	</update>
+
+</mapper>

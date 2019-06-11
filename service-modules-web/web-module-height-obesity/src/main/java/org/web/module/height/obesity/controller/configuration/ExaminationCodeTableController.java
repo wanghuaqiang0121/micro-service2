@@ -1,0 +1,167 @@
+package org.web.module.height.obesity.controller.configuration;
+
+import java.util.List;
+import java.util.Map;
+
+import javax.annotation.Resource;
+
+import org.service.core.api.ApiCodeEnum;
+import org.service.core.api.JsonApi;
+import org.service.core.api.MultiLine;
+import org.service.core.auth.control.RequiresAuthentication;
+import org.service.core.auth.level.Level;
+import org.service.core.entity.BaseEntity;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RestController;
+import org.web.module.height.obesity.entity.ExaminationCodeTable;
+import org.web.module.height.obesity.global.BaseGlobal;
+import org.web.module.height.obesity.message.Prompt;
+import org.web.module.height.obesity.service.ExaminationCodeTableService;
+
+import com.github.pagehelper.Page;
+import com.github.pagehelper.PageHelper;
+
+/**
+ * Copyright © 2018 四川易迅通健康医疗技术发展有限公司. All rights reserved.
+ *
+ * @author: ChenYan
+ * @date: 2018年12月20日
+ * @description: 检查检验
+ */
+@RestController
+public class ExaminationCodeTableController {
+	
+	@Resource
+	private  ExaminationCodeTableService  examinationCodeTableService;
+	
+	
+	/**
+	 * @author: ChenYan
+	 * @date: 2018年12月20日
+	 * @param examinationCodeTable
+	 * @param result
+	 * @return
+	 * @description: 新增检查检验
+	 */
+	@RequiresAuthentication(level = Level.OPERATION, value = { "web-module-height-obesity:examination-code-table:insert" })
+	@PostMapping(value = { "/examination/code/table" })
+	public JsonApi insert(@Validated({ BaseEntity.Insert.class }) @RequestBody ExaminationCodeTable examinationCodeTable, BindingResult result, @RequestHeader(required = true, value = BaseGlobal.TOKEN_FLAG) String token) {
+		/*根据code查询数据重复*/
+		Map<String, Object> examinationCodeTableMap=examinationCodeTableService.getRepeat(examinationCodeTable);
+		if (examinationCodeTableMap!=null) {
+			return new JsonApi(ApiCodeEnum.CONFLICT);
+		}
+		/*新增*/
+		if (examinationCodeTableService.insert(examinationCodeTable) > 0) {
+			return new JsonApi(ApiCodeEnum.OK);
+		}
+		return new JsonApi(ApiCodeEnum.FAIL);
+	}
+	
+	
+	/**
+	 * @author: ChenYan
+	 * @date: 2018年12月24日
+	 * @param id
+	 * @param examinationCodeTable
+	 * @param result
+	 * @return
+	 * @description: 修改检查检验
+	 */
+	@RequiresAuthentication(level = Level.OPERATION, value = { "web-module-height-obesity:examination-code-table:update" })
+	@PutMapping(value = { "/examination/code/table/{id}" })
+	public JsonApi update(@PathVariable("id") Integer id, @Validated({ BaseEntity.Update.class }) @RequestBody ExaminationCodeTable examinationCodeTable, BindingResult result, @RequestHeader(required = true, value = BaseGlobal.TOKEN_FLAG) String token) {
+		examinationCodeTable.setId(id);
+		/* 检查数据是否存在 */
+		Map<String, Object> examinationCodeTableMap = examinationCodeTableService.getOne(examinationCodeTable);
+		if (examinationCodeTableMap == null ) {
+			return new JsonApi(ApiCodeEnum.NOT_FOUND);
+		}
+		/*数据是否重复*/
+		Map<String, Object> examinationCodeTableMapRepeatMap = examinationCodeTableService.getRepeat(examinationCodeTable);
+			if (examinationCodeTableMapRepeatMap!=null) {
+				int organizationRepeatId = (Integer) examinationCodeTableMapRepeatMap.get("id");
+				if (id.intValue() != organizationRepeatId) {
+					return new JsonApi(ApiCodeEnum.CONFLICT).setMsg(Prompt.bundle("examination.code.table.code.is.conflict"));
+					}
+				}
+			/*新增*/
+		if (examinationCodeTableService.update(examinationCodeTable) > 0) {
+			return new JsonApi(ApiCodeEnum.OK);
+		}
+		return new JsonApi(ApiCodeEnum.FAIL);
+	}
+	
+	/**
+	 * @author: ChenYan
+	 * @date: 2018年12月24日
+	 * @param id
+	 * @param examinationCodeTable
+	 * @param result
+	 * @return
+	 * @description: 查询检查检验详情
+	 */
+	@RequiresAuthentication(level = Level.OPERATION, value = { "web-module-height-obesity:examination-code-table:get-detail" })
+	@GetMapping(value = { "/examination/code/table/{id}" })
+	public JsonApi getDetail(@PathVariable("id") Integer id, @Validated({ BaseEntity.SelectOne.class })  ExaminationCodeTable examinationCodeTable, BindingResult result, @RequestHeader(required = true, value = BaseGlobal.TOKEN_FLAG) String token) {
+		examinationCodeTable.setId(id);
+		/* 检查数据是否存在 */
+		Map<String, Object> examinationCodeTableMap = examinationCodeTableService.getOne(examinationCodeTable);
+		if (examinationCodeTableMap != null ) {
+			return new JsonApi(ApiCodeEnum.OK,examinationCodeTableMap);
+		}
+		return new JsonApi(ApiCodeEnum.FAIL);
+	}
+	
+	
+	/**
+	 * @author: ChenYan
+	 * @date: 2018年12月24日
+	 * @param id
+	 * @param examinationCodeTable
+	 * @param result
+	 * @return
+	 * @description: 删除
+	 */
+	@RequiresAuthentication(level = Level.OPERATION, value = { "web-module-height-obesity:examination-code-table:delete" })
+	@DeleteMapping(value = { "/examination/code/table/{id}" })
+	public JsonApi delete(@PathVariable("id") Integer id, @Validated({ BaseEntity.Delete.class })  ExaminationCodeTable examinationCodeTable, BindingResult result, @RequestHeader(required = true, value = BaseGlobal.TOKEN_FLAG) String token) {
+		examinationCodeTable.setId(id);
+		/* 检查数据是否存在 */
+		Map<String, Object> examinationCodeTableMap = examinationCodeTableService.getOne(examinationCodeTable);
+		if (examinationCodeTableMap == null ) {
+			return new JsonApi(ApiCodeEnum.NOT_FOUND);
+		}
+		if (examinationCodeTableService.delete(examinationCodeTable) > 0) {
+			return new JsonApi(ApiCodeEnum.OK);
+		}
+		return new JsonApi(ApiCodeEnum.FAIL);
+	}
+
+	/**
+	 * @author: ChenYan
+	 * @date: 2018年12月24日
+	 * @param examinationCodeTable
+	 * @param result
+	 * @return
+	 * @description: 查询列表
+	 */
+	@RequiresAuthentication(level = Level.OPERATION, value = { "web-module-height-obesity:examination-code-table:get-list" })
+	@GetMapping(value = { "/examination/code/tables" })
+	public JsonApi getList(@Validated({ BaseEntity.SelectAll.class })  ExaminationCodeTable examinationCodeTable, BindingResult result, @RequestHeader(required = true, value = BaseGlobal.TOKEN_FLAG) String token) {
+		Page<?> page = PageHelper.startPage(examinationCodeTable.getPage(), examinationCodeTable.getPageSize());
+		List<Map<String, Object>> examinationCodeTableList = examinationCodeTableService.getList(examinationCodeTable);
+		if (examinationCodeTableList != null && !examinationCodeTableList.isEmpty()) {
+			return new JsonApi(ApiCodeEnum.OK, new MultiLine(page.getTotal(), examinationCodeTableList));
+		}
+		return new JsonApi(ApiCodeEnum.NOT_FOUND);
+	}
+}

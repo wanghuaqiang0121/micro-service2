@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.web.module.bone.age.dao.BaseAgeOrderMapper">
+  <resultMap id="BaseResultMap" type="org.web.module.bone.age.domain.BaseAgeOrder">
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="diagnosis_id" jdbcType="INTEGER" property="diagnosisId" />
+    <result column="conclusion" jdbcType="VARCHAR" property="conclusion" />
+    <result column="description" jdbcType="VARCHAR" property="description" />
+    <result column="base_medical_imaging_data_id" jdbcType="INTEGER" property="baseMedicalImagingDataId" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="check_point" jdbcType="INTEGER" property="checkPoint" />
+    <result column="x_ray" jdbcType="VARCHAR" property="xRay" />
+    <result column="x_ray_no" jdbcType="VARCHAR" property="xRayNo" />
+    <result column="algorithm" jdbcType="INTEGER" property="algorithm" />
+    <result column="radius_level" jdbcType="VARCHAR" property="radiusLevel" />
+    <result column="ulna_level" jdbcType="VARCHAR" property="ulnaLevel" />
+    <result column="metacarpal_1_level" jdbcType="VARCHAR" property="metacarpal1Level" />
+    <result column="metacarpal_3_level" jdbcType="VARCHAR" property="metacarpal3Level" />
+    <result column="metacarpal_5_level" jdbcType="VARCHAR" property="metacarpal5Level" />
+    <result column="near_phalanges_1_level" jdbcType="VARCHAR" property="nearPhalanges1Level" />
+    <result column="near_phalanges_3_level" jdbcType="VARCHAR" property="nearPhalanges3Level" />
+    <result column="near_phalanges_5_level" jdbcType="VARCHAR" property="nearPhalanges5Level" />
+    <result column="in_phalanges_3_level" jdbcType="VARCHAR" property="inPhalanges3Level" />
+    <result column="in_phalanges_5_level" jdbcType="VARCHAR" property="inPhalanges5Level" />
+    <result column="far_phalanges_1_level" jdbcType="VARCHAR" property="farPhalanges1Level" />
+    <result column="far_phalanges_3_levelbase_age_ordercol" jdbcType="VARCHAR" property="farPhalanges3LevelbaseAgeOrdercol" />
+    <result column="far_phalanges_5_level" jdbcType="VARCHAR" property="farPhalanges5Level" />
+    <result column="head_bone_level" jdbcType="VARCHAR" property="headBoneLevel" />
+    <result column="hamate_level" jdbcType="VARCHAR" property="hamateLevel" />
+    <result column="pyramidal_bone_level" jdbcType="VARCHAR" property="pyramidalBoneLevel" />
+    <result column="moon_bone_level" jdbcType="VARCHAR" property="moonBoneLevel" />
+    <result column="scaphoid_level" jdbcType="VARCHAR" property="scaphoidLevel" />
+    <result column="most_of_the_horns_level" jdbcType="VARCHAR" property="mostOfTheHornsLevel" />
+    <result column="small_polyhorns_level" jdbcType="VARCHAR" property="smallPolyhornsLevel" />
+    <result column="bone_score" jdbcType="REAL" property="boneScore" />
+    <result column="explain" jdbcType="VARCHAR" property="explain" />
+    <result column="advise" jdbcType="VARCHAR" property="advise" />
+    <result column="conclusions" jdbcType="VARCHAR" property="conclusions" />
+    <result column="base64_bone_plot" jdbcType="LONGVARCHAR" property="base64BonePlot" />
+  </resultMap>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from base_age_order
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="org.web.module.bone.age.domain.BaseAgeOrder">
+    insert into base_age_order (id, diagnosis_id, conclusion, 
+      description, base_medical_imaging_data_id, 
+      create_time, check_point, x_ray, 
+      x_ray_no, algorithm, radius_level, 
+      ulna_level, metacarpal_1_level, metacarpal_3_level, 
+      metacarpal_5_level, near_phalanges_1_level, 
+      near_phalanges_3_level, near_phalanges_5_level, 
+      in_phalanges_3_level, in_phalanges_5_level, far_phalanges_1_level, 
+      far_phalanges_3_levelbase_age_ordercol, far_phalanges_5_level, 
+      head_bone_level, hamate_level, pyramidal_bone_level, 
+      moon_bone_level, scaphoid_level, most_of_the_horns_level, 
+      small_polyhorns_level, bone_score, explain, 
+      advise, conclusions, base64_bone_plot
+      )
+    values (#{id,jdbcType=INTEGER}, #{diagnosisId,jdbcType=INTEGER}, #{conclusion,jdbcType=VARCHAR}, 
+      #{description,jdbcType=VARCHAR}, #{baseMedicalImagingDataId,jdbcType=INTEGER}, 
+      #{createTime,jdbcType=TIMESTAMP}, #{checkPoint,jdbcType=INTEGER}, #{xRay,jdbcType=VARCHAR}, 
+      #{xRayNo,jdbcType=VARCHAR}, #{algorithm,jdbcType=INTEGER}, #{radiusLevel,jdbcType=VARCHAR}, 
+      #{ulnaLevel,jdbcType=VARCHAR}, #{metacarpal1Level,jdbcType=VARCHAR}, #{metacarpal3Level,jdbcType=VARCHAR}, 
+      #{metacarpal5Level,jdbcType=VARCHAR}, #{nearPhalanges1Level,jdbcType=VARCHAR}, 
+      #{nearPhalanges3Level,jdbcType=VARCHAR}, #{nearPhalanges5Level,jdbcType=VARCHAR}, 
+      #{inPhalanges3Level,jdbcType=VARCHAR}, #{inPhalanges5Level,jdbcType=VARCHAR}, #{farPhalanges1Level,jdbcType=VARCHAR}, 
+      #{farPhalanges3LevelbaseAgeOrdercol,jdbcType=VARCHAR}, #{farPhalanges5Level,jdbcType=VARCHAR}, 
+      #{headBoneLevel,jdbcType=VARCHAR}, #{hamateLevel,jdbcType=VARCHAR}, #{pyramidalBoneLevel,jdbcType=VARCHAR}, 
+      #{moonBoneLevel,jdbcType=VARCHAR}, #{scaphoidLevel,jdbcType=VARCHAR}, #{mostOfTheHornsLevel,jdbcType=VARCHAR}, 
+      #{smallPolyhornsLevel,jdbcType=VARCHAR}, #{boneScore,jdbcType=REAL}, #{explain,jdbcType=VARCHAR}, 
+      #{advise,jdbcType=VARCHAR}, #{conclusions,jdbcType=VARCHAR}, #{base64BonePlot,jdbcType=LONGVARCHAR}
+      )
+  </insert>
+  <update id="updateByPrimaryKey" parameterType="org.web.module.bone.age.domain.BaseAgeOrder">
+    update base_age_order
+    set diagnosis_id = #{diagnosisId,jdbcType=INTEGER},
+      conclusion = #{conclusion,jdbcType=VARCHAR},
+      description = #{description,jdbcType=VARCHAR},
+      base_medical_imaging_data_id = #{baseMedicalImagingDataId,jdbcType=INTEGER},
+      create_time = #{createTime,jdbcType=TIMESTAMP},
+      check_point = #{checkPoint,jdbcType=INTEGER},
+      x_ray = #{xRay,jdbcType=VARCHAR},
+      x_ray_no = #{xRayNo,jdbcType=VARCHAR},
+      algorithm = #{algorithm,jdbcType=INTEGER},
+      radius_level = #{radiusLevel,jdbcType=VARCHAR},
+      ulna_level = #{ulnaLevel,jdbcType=VARCHAR},
+      metacarpal_1_level = #{metacarpal1Level,jdbcType=VARCHAR},
+      metacarpal_3_level = #{metacarpal3Level,jdbcType=VARCHAR},
+      metacarpal_5_level = #{metacarpal5Level,jdbcType=VARCHAR},
+      near_phalanges_1_level = #{nearPhalanges1Level,jdbcType=VARCHAR},
+      near_phalanges_3_level = #{nearPhalanges3Level,jdbcType=VARCHAR},
+      near_phalanges_5_level = #{nearPhalanges5Level,jdbcType=VARCHAR},
+      in_phalanges_3_level = #{inPhalanges3Level,jdbcType=VARCHAR},
+      in_phalanges_5_level = #{inPhalanges5Level,jdbcType=VARCHAR},
+      far_phalanges_1_level = #{farPhalanges1Level,jdbcType=VARCHAR},
+      far_phalanges_3_levelbase_age_ordercol = #{farPhalanges3LevelbaseAgeOrdercol,jdbcType=VARCHAR},
+      far_phalanges_5_level = #{farPhalanges5Level,jdbcType=VARCHAR},
+      head_bone_level = #{headBoneLevel,jdbcType=VARCHAR},
+      hamate_level = #{hamateLevel,jdbcType=VARCHAR},
+      pyramidal_bone_level = #{pyramidalBoneLevel,jdbcType=VARCHAR},
+      moon_bone_level = #{moonBoneLevel,jdbcType=VARCHAR},
+      scaphoid_level = #{scaphoidLevel,jdbcType=VARCHAR},
+      most_of_the_horns_level = #{mostOfTheHornsLevel,jdbcType=VARCHAR},
+      small_polyhorns_level = #{smallPolyhornsLevel,jdbcType=VARCHAR},
+      bone_score = #{boneScore,jdbcType=REAL},
+      explain = #{explain,jdbcType=VARCHAR},
+      advise = #{advise,jdbcType=VARCHAR},
+      conclusions = #{conclusions,jdbcType=VARCHAR},
+      base64_bone_plot = #{base64BonePlot,jdbcType=LONGVARCHAR}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    select id, diagnosis_id, conclusion, description, base_medical_imaging_data_id, create_time, 
+    check_point, x_ray, x_ray_no, algorithm, radius_level, ulna_level, metacarpal_1_level, 
+    metacarpal_3_level, metacarpal_5_level, near_phalanges_1_level, near_phalanges_3_level, 
+    near_phalanges_5_level, in_phalanges_3_level, in_phalanges_5_level, far_phalanges_1_level, 
+    far_phalanges_3_levelbase_age_ordercol, far_phalanges_5_level, head_bone_level, hamate_level, 
+    pyramidal_bone_level, moon_bone_level, scaphoid_level, most_of_the_horns_level, small_polyhorns_level, 
+    bone_score, explain, advise, conclusions, base64_bone_plot
+    from base_age_order
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <select id="selectAll" resultMap="BaseResultMap">
+    select id, diagnosis_id, conclusion, description, base_medical_imaging_data_id, create_time, 
+    check_point, x_ray, x_ray_no, algorithm, radius_level, ulna_level, metacarpal_1_level, 
+    metacarpal_3_level, metacarpal_5_level, near_phalanges_1_level, near_phalanges_3_level, 
+    near_phalanges_5_level, in_phalanges_3_level, in_phalanges_5_level, far_phalanges_1_level, 
+    far_phalanges_3_levelbase_age_ordercol, far_phalanges_5_level, head_bone_level, hamate_level, 
+    pyramidal_bone_level, moon_bone_level, scaphoid_level, most_of_the_horns_level, small_polyhorns_level, 
+    bone_score, explain, advise, conclusions, base64_bone_plot
+    from base_age_order
+  </select>
+</mapper>

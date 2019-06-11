@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.web.module.bone.age.dao.ReadFilmRechargeRecordMapper">
+
+<insert id="insert" parameterType="org.web.module.bone.age.domain.ReadFilmRechargeRecord" useGeneratedKeys="true" keyProperty="id">
+INSERT INTO base_read_film_recharge_record (organization_id,recharge_money,invoice_number,status,remark,remaining_sum,create_time,lock_money) 
+	VALUES (#{organizationId},#{organizationName},#{rechargeMoney},#{invoiceNumber},#{status},#{remark},#{remainingSum},#{createTime},#{lockMoney})
+</insert>
+
+<select id="getNewOne" parameterType="org.web.module.bone.age.domain.ReadFilmRechargeRecord" resultType="map">
+SELECT
+	brfrr.id,
+	brfrr.organization_id organizationId,
+	brfrr.organization_name organizationName,
+	brfrr.invoice_number invoiceNumber,
+	brfrr.recharge_money rechargeMoney,
+	brfrr.`status`,
+	brfrr.remark,
+	brfrr.create_time createTime,
+	brfrr.remaining_sum remainingSum,
+	brfrr.lock_money lockMoney,
+	brfrr.create_time createTime
+FROM
+	base_read_film_recharge_record brfrr
+WHERE brfrr.organization_id=#{organizationId}
+ORDER BY brfrr.create_time DESC 
+LIMIT 1
+</select>
+
+<select id="getOne" parameterType="org.web.module.bone.age.domain.ReadFilmRechargeRecord" resultType="map">
+SELECT
+	brfrr.id,
+	brfrr.organization_id organizationId,
+	brfrr.invoice_number invoiceNumber,
+	brfrr.recharge_money rechargeMoney,
+	brfrr.`status`,
+	brfrr.remark,
+	brfrr.create_time createTime,
+	brfrr.remaining_sum remainingSum,
+	brfrr.lock_money lockMoney,
+	bo.`name` organizationName
+FROM
+	base_read_film_recharge_record brfrr
+LEFT JOIN base_organization bo ON brfrr.organization_id = bo.id
+WHERE brfrr.id=#{id}
+</select>
+
+<select id="getList" parameterType="org.web.module.bone.age.domain.ReadFilmRechargeRecord" resultType="map">
+SELECT
+	brfrr.id,
+	brfrr.organization_id organizationId,
+	brfrr.invoice_number invoiceNumber,
+	brfrr.recharge_money rechargeMoney,
+	brfrr.`status`,
+	brfrr.remark,
+	brfrr.create_time createTime,
+	brfrr.remaining_sum remainingSum,
+	brfrr.lock_money lockMoney,
+	bo.`name` organizationName
+FROM
+	base_read_film_recharge_record brfrr
+LEFT JOIN base_organization bo ON brfrr.organization_id = bo.id
+	<where>
+	   <if test="organizationId!=null">
+	   		brfrr.organization_id=#{organizationId}
+	   </if>
+	   <if test="organizationName!=null and organizationName!=''">
+	   	and bo.`name` like CONCAT(CONCAT('%', #{organizationName}), '%')
+	   </if>
+	</where>
+	ORDER BY brfrr.create_time DESC
+</select>
+
+<select id="getRepeat" parameterType="org.web.module.bone.age.domain.ReadFilmRechargeRecord" resultType="map">
+SELECT
+	brfrr.id,
+	brfrr.organization_id organizationId,
+	brfrr.invoice_number invoiceNumber,
+	brfrr.recharge_money rechargeMoney,
+	brfrr.`status`,
+	brfrr.create_time createTime,
+	brfrr.remark
+FROM
+	base_read_film_recharge_record brfrr
+WHERE invoice_number=#{invoiceNumber}
+</select>
+
+<!-- 扣费 -->
+<update id="deductionFee" parameterType="org.web.module.bone.age.domain.ReadFilmRechargeRecord">
+update base_read_film_recharge_record SET
+	lock_money=lock_money-#{price} WHERE id = #{id}
+</update>
+
+<!-- 锁定金额 -->
+<update id="lockMoney" parameterType="org.web.module.bone.age.domain.ReadFilmRechargeRecord">
+update base_read_film_recharge_record SET id=#{id}
+	<if test="remainingSum!=null">
+	,remaining_sum=remaining_sum-#{price}
+	</if>
+	<if test="lockMoney!=null">
+	,lock_money=lock_money+#{price}
+	</if>
+	  WHERE id = #{id}
+</update>
+
+<update id="update" parameterType="org.web.module.bone.age.domain.ReadFilmRechargeRecord">
+update base_read_film_recharge_record SET id=#{id}
+	<if test="status!=null">
+	,status=#{status}
+	</if>
+	<if test="remark!=null and remark!=''">
+	,remark=#{remark}
+	</if>
+	<if test="remainingSum!=null">
+	,remaining_sum=#{remainingSum}
+	</if>
+	<if test="lockMoney!=null">
+	,lock_money=#{lockMoney}
+	</if>
+	  WHERE id = #{id}
+</update>
+
+<select id="getOrganizationList"  parameterType="org.web.module.bone.age.domain.ReadFilmRechargeRecord" resultType="map">
+SELECT
+	id,
+	`name`,
+	`code`
+FROM
+	base_organization
+<where>
+   <if test="organizationName!=null and organizationName!=''">
+   `name` like CONCAT(CONCAT('%', #{organizationName}), '%')
+   </if>
+</where>
+</select>
+
+<!-- 获取剩余余额 -->
+<select id="getLastRechargeRecord" parameterType="org.web.module.bone.age.domain.ReadFilmRechargeRecord" resultType="map">
+SELECT
+	brfrr.id,	
+	brfrr.remaining_sum remainingSum
+FROM
+	base_read_film_recharge_record brfrr
+WHERE 	brfrr.organization_id=#{organizationId}
+	ORDER BY brfrr.create_time DESC
+LIMIT 1
+</select>
+</mapper>

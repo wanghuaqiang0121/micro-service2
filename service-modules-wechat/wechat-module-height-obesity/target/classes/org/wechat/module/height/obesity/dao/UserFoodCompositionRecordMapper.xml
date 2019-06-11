@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.wechat.module.height.obesity.dao.UserFoodCompositionRecordMapper">
+
+  <delete id="delete" parameterType="org.wechat.module.height.obesity.entity.UserFoodCompositionRecord">
+    delete from base_user_food_composition_record
+    where id = #{id}
+  </delete>
+  
+  <!--新增用户饮食记录  -->
+  <insert id="insert" parameterType="org.wechat.module.height.obesity.entity.UserFoodCompositionRecord" keyProperty="id"  useGeneratedKeys="true">
+   INSERT INTO base_user_food_composition_record ( food_composition_id,value, user_id, 
+      code, name, create_date_time
+      )
+    VALUES ( #{foodCompositionId}, #{value},#{userId}, 
+      #{code}, #{name}, #{createDateTime}
+      )
+  </insert>
+  
+  <update id="update" parameterType="org.wechat.module.height.obesity.entity.UserFoodCompositionRecord">
+    update base_user_food_composition_record
+    set food_composition_id = #{foodCompositionId},
+      user_id = #{userId},
+      code = #{code},
+      name = #{name},
+      create_date_time = #{createDateTime}
+    where id = #{id}
+  </update>
+  
+  <select id="getOne" parameterType="org.wechat.module.height.obesity.entity.UserFoodCompositionRecord"  resultType="map">
+    select id, food_composition_id, user_id, code, name, create_date_time
+    from base_user_food_composition_record
+    where id = #{id}
+  </select>
+  
+  <!-- 饮食记录列表 -->
+  <select id="getList"  parameterType="org.wechat.module.height.obesity.entity.UserFoodCompositionRecord"  resultType="map">
+	SELECT
+		bufcr.id,
+		bufcr.food_composition_id foodCompositionId,
+		bufcr.user_id userId,
+		bufcr.`code`,
+		bufcr.`name`,
+		bufcr.`value`,
+		DATE_FORMAT(bufcr.create_date_time,'%Y-%m-%d') createDateTime,
+		bfc.`name` foodName,
+		bfc.`code` foodCode,
+		bfcr.code_unit codeUnit,
+		bfcr.`value` recordValue,
+		ROUND((bfcr.`value` / 100 * bufcr.`value`),2) result
+	FROM
+		base_user_food_composition_record bufcr
+	INNER JOIN base_food_composition bfc ON bufcr.food_composition_id = bfc.id
+	INNER JOIN base_food_composition_record bfcr ON bfcr.food_composition_code = bfc.`code`
+	AND bfcr.code_unit = 'kcal'  AND bufcr.user_id=#{userId}
+	<where>
+	 	<if test="foodName!=null and foodName!=''">
+	 	 bfc.`name` like CONCAT(CONCAT('%', #{foodName}), '%')
+	 	</if>
+	 	<if test="code!=null and code!=''"  >
+	 	  and  bufcr.`code`=#{code}
+	 	</if>
+	 	<if test="name!=null and name!=''">
+	 	and bufcr.`name`=#{name}
+	 	</if>
+	 	<if test="createDateTime!=null">
+	 	and  DATE_FORMAT(bufcr.create_date_time,'%Y-%m-%d') =DATE_FORMAT(#{createDateTime},'%Y-%m-%d')
+	 	</if>
+	</where>
+  </select>
+  
+  <!-- 饮食历史记录(每天) -->
+  <select id="getUserFoodCompositionRecordEveryDay" parameterType="org.wechat.module.height.obesity.entity.UserFoodCompositionRecord"  resultType="map">
+	 SELECT
+		bufcr.id,
+		DATE_FORMAT(bufcr.create_date_time,'%Y-%m-%d') createDateTime,
+	   SUM(ROUND((bfcr.`value` / 100 * bufcr.`value`),2) ) sumEnergy,
+		bfcr.code_unit codeUnit
+	FROM
+		base_user_food_composition_record bufcr
+	INNER JOIN base_food_composition bfc ON bufcr.food_composition_id = bfc.id  AND bufcr.user_id=#{userId}
+	INNER JOIN base_food_composition_record bfcr ON bfcr.food_composition_code = bfc.`code`
+	AND bfcr.code_unit = 'kcal'
+	GROUP BY DATE_FORMAT(bufcr.create_date_time,'%Y-%m-%d')
+  </select>
+  
+</mapper>

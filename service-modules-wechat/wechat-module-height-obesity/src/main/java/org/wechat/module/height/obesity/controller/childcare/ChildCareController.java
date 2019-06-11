@@ -1,0 +1,298 @@
+package org.wechat.module.height.obesity.controller.childcare;
+
+import com.github.pagehelper.Page;
+import com.github.pagehelper.PageHelper;
+import org.service.core.api.ApiCodeEnum;
+import org.service.core.api.JsonApi;
+import org.service.core.api.MultiLine;
+import org.service.core.auth.control.RequiresAuthentication;
+import org.service.core.entity.BaseEntity;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RestController;
+import org.wechat.module.height.obesity.entity.User;
+import org.wechat.module.height.obesity.global.BaseGlobal;
+import org.wechat.module.height.obesity.message.Prompt;
+import org.wechat.module.height.obesity.service.UserService;
+import org.wechat.module.height.obesity.service.feign.IUserService;
+
+import javax.annotation.Resource;
+import java.util.List;
+import java.util.Map;
+
+/**
+ * Copyright © 2018 四川易迅通健康医疗技术发展有限公司. All rights reserved.
+ *
+ * @author: XiePeng
+ * @date: 2019/3/7
+ * @description:
+ */
+@RestController
+public class ChildCareController {
+    @Resource
+    private IUserService iuserService;
+    @Resource
+    private UserService userService;
+    /**
+     * @author: XiePeng
+     * @date: 2019年3月7日
+     * @param user
+     * @return
+     * @description: 儿童基本信息
+     */
+    @RequiresAuthentication(authc = true, value = {})
+    @GetMapping(value = { "/childcare/user" })
+    public JsonApi getChildUser(@Validated({ BaseEntity.SelectOne.class })User user,
+                                BindingResult result, @RequestHeader(required = true, value = BaseGlobal.TOKEN_FLAG) String token){
+        /* 获取并设置用户ID */
+        Integer userId = null;
+        JsonApi jsonApi = iuserService.getSession(BaseGlobal.CACHE_USER, token, token);
+        if (jsonApi.getCode() == ApiCodeEnum.OK.getValue()) {
+            userId = Integer.parseInt(jsonApi.getData().toString());
+        } else {
+            return new JsonApi(ApiCodeEnum.NOT_FOUND).setMsg(Prompt.bundle("user.id.is.notblank.valid"));
+        }
+        user.setId(userId);
+        Map<String,Object> child=userService.getChildInfo(user);
+        if (child == null) {
+            return new JsonApi(ApiCodeEnum.NOT_FOUND, Prompt.bundle("user.is.null"));
+        }
+        child.put("documentType","居民身份证");
+        /* 查询用户月齡 */
+        Map<String, Object> userMap = userService.getOne(user);
+        if (userMap == null) {
+            return new JsonApi(ApiCodeEnum.NOT_FOUND, Prompt.bundle("user.is.null"));
+        }
+        child.put("monthAge",Integer.parseInt(userMap.get("monthAge").toString()));
+        /*查询儿保证号*/
+        user.setCode(BaseGlobal.CHILD_PROTECTION_NO);
+        user.setType(BaseGlobal.TYPE);
+        Map<String,Object> childProtectionNoMap=userService.getChildProtectionNo(user);
+        if(childProtectionNoMap == null){
+            child.put("childProtectionNo",null);
+        }else {
+            child.put("childProtectionNo",childProtectionNoMap.get("certificateNumber"));
+        }
+        /*查询计免证号*/
+        user.setCode(BaseGlobal.PLAN_IMMUNITY_NO);
+        Map<String,Object> planImmunityNoMap=userService.getChildProtectionNo(user);
+        if(planImmunityNoMap == null){
+            child.put("planImmunityNo",null);
+        }else {
+            child.put("planImmunityNo",planImmunityNoMap.get("certificateNumber"));
+        }
+        /*查询机构及服务包信息*/
+        user.setType(BaseGlobal.JGW);
+        Map<String,Object> serverPackageMap=userService.getServerPackage(user);
+        if(serverPackageMap==null){
+            child.put("servicePackageName",null);
+            child.put("organizationName",null);
+        }else {
+            child.put("servicePackageName",serverPackageMap.get("name"));
+            child.put("organizationName",serverPackageMap.get("organizationName"));
+        }
+        return new JsonApi(ApiCodeEnum.OK,child);
+    }
+    /**
+     * @author: XiePeng
+     * @date: 2019年3月8日
+     * @param user
+     * @return
+     * @description: 用户已选择的高危值
+     */
+    @RequiresAuthentication(authc = true, value = {})
+    @GetMapping(value = { "/childcare/highrisk" })
+    public JsonApi getHighRisk(@Validated({ BaseEntity.SelectAll.class })User user,
+                               BindingResult resul, @RequestHeader(required = false, value = BaseGlobal.TOKEN_FLAG) String token){
+        /* 获取并设置用户ID */
+        Integer userId = null;
+        JsonApi jsonApi = iuserService.getSession(BaseGlobal.CACHE_USER, token, token);
+        if (jsonApi.getCode() == ApiCodeEnum.OK.getValue()) {
+            userId = Integer.parseInt(jsonApi.getData().toString());
+        }else {
+            return new JsonApi(ApiCodeEnum.NOT_FOUND).setMsg(Prompt.bundle("user.id.is.notblank.valid"));
+        }
+        user.setId(userId);
+        Page<?> page = PageHelper.startPage(user.getPage(),user.getPageSize());
+        List<Map<String,Object>> highriskMap=userService.getHighrisk(user);
+        if(highriskMap!=null){
+            return new JsonApi(ApiCodeEnum.OK,new MultiLine(page.getTotal(),highriskMap));
+        }
+        return new JsonApi(ApiCodeEnum.OK,null);
+    }
+    /**
+     * @author: XiePeng
+     * @date: 2019年3月8日
+     * @param user
+     * @return
+     * @description: 用户已选择的过敏源
+     */
+    @RequiresAuthentication(authc = true, value = {})
+    @GetMapping(value = { "/childcare/allergy" })
+    public JsonApi getAllergy(@Validated({ BaseEntity.SelectAll.class })User user,
+                               BindingResult resul, @RequestHeader(required = false, value = BaseGlobal.TOKEN_FLAG) String token){
+        /* 获取并设置用户ID */
+        Integer userId = null;
+        JsonApi jsonApi = iuserService.getSession(BaseGlobal.CACHE_USER, token, token);
+        if (jsonApi.getCode() == ApiCodeEnum.OK.getValue()) {
+            userId = Integer.parseInt(jsonApi.getData().toString());
+        }else {
+            return new JsonApi(ApiCodeEnum.NOT_FOUND).setMsg(Prompt.bundle("user.id.is.notblank.valid"));
+        }
+        user.setId(userId);
+        Page<?> page = PageHelper.startPage(user.getPage(),user.getPageSize());
+        List<Map<String,Object>> allergyMap=userService.getAllergy(user);
+        if(allergyMap!=null){
+            return new JsonApi(ApiCodeEnum.OK,new MultiLine(page.getTotal(),allergyMap));
+        }
+        return new JsonApi(ApiCodeEnum.OK,null);
+    }
+    /**
+     * @author: XiePeng
+     * @date: 2019年3月8日
+     * @param user
+     * @return
+     * @description: WHO标准值
+     */
+    @RequiresAuthentication(authc = true, value = {})
+    @GetMapping(value = { "/childcare/WHO" })
+    public JsonApi getWHO(@Validated({ BaseEntity.SelectAll.class })User user,
+                              BindingResult resul, @RequestHeader(required = false, value = BaseGlobal.TOKEN_FLAG) String token){
+        /* 获取并设置用户ID */
+        Integer userId = null;
+        JsonApi jsonApi = iuserService.getSession(BaseGlobal.CACHE_USER, token, token);
+        if (jsonApi.getCode() == ApiCodeEnum.OK.getValue()) {
+            userId = Integer.parseInt(jsonApi.getData().toString());
+        }else {
+            return new JsonApi(ApiCodeEnum.NOT_FOUND).setMsg(Prompt.bundle("user.id.is.notblank.valid"));
+        }
+        user.setId(userId);
+        /* 查询最新记录月齡、性别 */
+        Map<String, Object> userMap = userService.getOne(user);
+        if (userMap == null) {
+            return new JsonApi(ApiCodeEnum.NOT_FOUND, Prompt.bundle("user.is.null"));
+        }
+        Map<String, Object> recordMap = userService.getNewRecord(user);
+        if(recordMap!=null){
+            user.setMonthAge(Integer.parseInt(recordMap.get("monthAge").toString()));
+        }else{
+            user.setMonthAge(Integer.parseInt(userMap.get("monthAge").toString()));
+        }
+        user.setSex(Integer.parseInt(userMap.get("sex").toString()));
+        Page<?> page = PageHelper.startPage(user.getPage(),user.getPageSize());
+        List<Map<String,Object>> WHOMap=userService.getWHO(user);
+        if(WHOMap!=null){
+            return new JsonApi(ApiCodeEnum.OK,new MultiLine(page.getTotal(),WHOMap));
+        }
+        return new JsonApi(ApiCodeEnum.OK,null);
+    }
+    /**
+     * @author: XiePeng
+     * @date: 2019年3月13日
+     * @param user
+     * @return
+     * @description: 儿童最新生长发育信息
+     */
+    @RequiresAuthentication(authc = true, value = {})
+    @GetMapping(value = { "/childcare/growth" })
+    public JsonApi getGrowth(@Validated({ BaseEntity.SelectAll.class })User user,
+                              BindingResult result, @RequestHeader(required = false, value = BaseGlobal.TOKEN_FLAG) String token){
+        /* 获取并设置用户ID */
+        Integer userId = null;
+        JsonApi jsonApi = iuserService.getSession(BaseGlobal.CACHE_USER, token, token);
+        if (jsonApi.getCode() == ApiCodeEnum.OK.getValue()) {
+            userId = Integer.parseInt(jsonApi.getData().toString());
+        }else {
+            return new JsonApi(ApiCodeEnum.NOT_FOUND).setMsg(Prompt.bundle("user.id.is.notblank.valid"));
+        }
+        user.setId(userId);
+        Map<String,Object> growthMap=userService.getGrowth(user);
+        if(growthMap!=null){
+            return new JsonApi(ApiCodeEnum.OK,growthMap);
+        }
+        return new JsonApi(ApiCodeEnum.OK,null);
+    }
+    /**
+     * @author: XiePeng
+     * @date: 2019年3月13日
+     * @param user
+     * @return
+     * @description: 儿童健康指导模板信息
+     */
+    @RequiresAuthentication(authc = true, value = {})
+    @GetMapping(value = { "/healthGuidance/template" })
+    public JsonApi getChildHealthGuidanceTemplate(@Validated({ BaseEntity.SelectAll.class })User user,
+                          BindingResult resul, @RequestHeader(required = false, value = BaseGlobal.TOKEN_FLAG) String token){
+        /* 获取并设置用户ID */
+        Integer userId = null;
+        JsonApi jsonApi = iuserService.getSession(BaseGlobal.CACHE_USER, token, token);
+        if (jsonApi.getCode() == ApiCodeEnum.OK.getValue()) {
+            userId = Integer.parseInt(jsonApi.getData().toString());
+        }else {
+            return new JsonApi(ApiCodeEnum.NOT_FOUND).setMsg(Prompt.bundle("user.id.is.notblank.valid"));
+        }
+        user.setId(userId);
+        /* 查询最新记录用户月齡*/
+        Map<String, Object> recordMap = userService.getNewRecord(user);
+        if(recordMap!=null){
+            user.setMonthAge(Integer.parseInt(recordMap.get("monthAge").toString()));
+        }else{
+            return new JsonApi(ApiCodeEnum.OK, null);
+        }
+        user.setMonthAge(Integer.parseInt(recordMap.get("monthAge").toString()));
+        Page<?> page = PageHelper.startPage(user.getPage(),user.getPageSize());
+        List<Map<String,Object>> templateMap=userService.getTemplateMap(user);
+        if(templateMap!=null){
+            return new JsonApi(ApiCodeEnum.OK,new MultiLine(page.getTotal(),templateMap));
+        }
+        return new JsonApi(ApiCodeEnum.OK,null);
+    }
+    /**
+     * @author: XiePeng
+     * @date: 2019年3月13日
+     * @param user
+     * @return
+     * @description: 记录身高生长发育图
+     */
+    @RequiresAuthentication(authc = true, value = {})
+    @GetMapping(value = { "/childcare/heightgrowth" })
+    public JsonApi getChildHeightGrowth(User user,
+                             BindingResult result, @RequestHeader(required = true, value = BaseGlobal.TOKEN_FLAG) String token){
+        /* 获取并设置用户ID */
+        Integer userId = null;
+        JsonApi jsonApi = iuserService.getSession(BaseGlobal.CACHE_USER, token, token);
+        if (jsonApi.getCode() == ApiCodeEnum.OK.getValue()) {
+            userId = Integer.parseInt(jsonApi.getData().toString());
+        }else {
+            return new JsonApi(ApiCodeEnum.NOT_FOUND).setMsg(Prompt.bundle("user.id.is.notblank.valid"));
+        }
+        user.setId(userId);
+        user.setHeightOrWeightType(1);
+        return new JsonApi(ApiCodeEnum.OK,userService.getChildHeightGrowth(user));
+    }
+    /**
+     * @author: XiePeng
+     * @date: 2019年3月13日
+     * @param user
+     * @return
+     * @description: 记录体重生长发育图
+     */
+    @RequiresAuthentication(authc = true, value = {})
+    @GetMapping(value = { "/childcare/weightgrowth" })
+    public JsonApi getChildWeightGrowth(User user,
+                                        BindingResult result, @RequestHeader(required = false, value = BaseGlobal.TOKEN_FLAG) String token){
+        /* 获取并设置用户ID */
+        Integer userId = null;
+        JsonApi jsonApi = iuserService.getSession(BaseGlobal.CACHE_USER, token, token);
+        if (jsonApi.getCode() == ApiCodeEnum.OK.getValue()) {
+            userId = Integer.parseInt(jsonApi.getData().toString());
+        }else {
+            return new JsonApi(ApiCodeEnum.NOT_FOUND).setMsg(Prompt.bundle("user.id.is.notblank.valid"));
+        }
+        user.setId(userId);
+        user.setHeightOrWeightType(2);
+        return new JsonApi(ApiCodeEnum.OK,userService.getChildHeightGrowth(user));
+    }
+}

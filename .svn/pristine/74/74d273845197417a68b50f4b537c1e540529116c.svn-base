@@ -1,0 +1,28 @@
+package org.web.module.bone.age.service;
+
+import java.util.List;
+import java.util.Map;
+
+import javax.annotation.Resource;
+
+import org.springframework.stereotype.Service;
+import org.web.module.bone.age.dao.RemoteQuestionMapper;
+import org.web.module.bone.age.domain.RemoteQuestion;
+
+@Service
+public class RemoteQuestionService {
+	@Resource
+	private RemoteQuestionMapper remoteQuestionMapper;
+	
+	public int insert(RemoteQuestion remoteQuestion) {
+		return remoteQuestionMapper.insert(remoteQuestion);
+	}
+
+	public List<Map<String, Object>> getList(RemoteQuestion remoteQuestion) {
+		return remoteQuestionMapper.getList(remoteQuestion);
+	}
+	
+	 public Map<String, Object> getOrganizationUserName(RemoteQuestion remoteQuestion){
+			return remoteQuestionMapper.getOrganizationUserName(remoteQuestion);
+	 }
+}

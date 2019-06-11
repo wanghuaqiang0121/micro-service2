@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.wechat.module.service.dao.bespeak.TeamAppointmentConfigureDetailMapper">
+  <!-- 团队预约配置详情 -->
+  <select id="getOne" parameterType="org.wechat.module.service.domain.bespeak.TeamAppointmentConfigureDetail" resultType="map">
+		SELECT
+			id,
+			team_appointment_configure_id teamAppointmentConfigureId,
+			start_date startDate,
+			end_date endDate,
+			start_no startNo,
+			end_no endNo,
+			create_date createDate
+		FROM
+			base_team_appointment_configure_detail
+		WHERE
+			id = #{id}
+  </select>
+  
+</mapper>

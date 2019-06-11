@@ -1,0 +1,534 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.web.module.height.obesity.dao.ChildrenMeasureMapper">
+
+	<delete id="delete" parameterType="org.web.module.height.obesity.entity.ChildrenMeasure">
+		DELETE
+		FROM
+		base_children_measure
+		WHERE
+		id = #{id}
+	</delete>
+
+	<insert id="insert" parameterType="org.web.module.height.obesity.entity.ChildrenMeasure"  useGeneratedKeys="true"  keyProperty="id">
+		INSERT INTO base_children_measure
+		(create_organization_user_id,service_organization_user_id,status,number,
+		user_id, month_age, current_height, current_weight, ideal_height,
+		head_circumference, chest_circumference, abdomen_circumference,
+		upper_body_length, lower_body_length,
+		body_fat, diastolic_pressure, systolic_pressure, height_percentile, weight_sd,
+		bmi, create_date_time)
+		VALUES
+		(#{createOrganizationUserId},#{serviceOrganizationUserId},#{status}, #{number}, #{userId}, #{monthAge}, #{currentHeight},
+		#{currentWeight}, #{idealHeight}, #{headCircumference},
+		#{chestCircumference}, #{abdomenCircumference}, #{upperBodyLength},
+		#{lowerBodyLength},
+		#{bodyFat}, #{diastolicPressure}, #{systolicPressure}, #{heightPercentile},
+		#{weightSd}, #{bmi}, #{createDateTime})
+	</insert>
+
+	<!-- 新增团队关系 -->
+	<insert id="insertUserTeamRelation" parameterType="org.web.module.height.obesity.entity.ChildrenMeasure">
+		INSERT INTO base_user_organization_team
+		(
+			user_id,
+			organization_team_id,
+			is_height_obesity
+		)
+		VALUES
+		(
+			#{userId},
+			#{organizationTeamId},
+			#{isHeightObesity}
+		)
+	</insert>
+
+
+	<update id="update" parameterType="org.web.module.height.obesity.entity.ChildrenMeasure">
+		UPDATE base_children_measure 
+		<set>
+			<if test="number!=null and number!=''">
+			number = #{number},
+			</if>
+			<if test="userId!=null">
+			user_id = #{userId},
+			</if>
+			<if test="createOrganizationUserId!=null">
+			create_organization_user_id = #{createOrganizationUserId},
+			</if>
+			<if test="serviceOrganizationUserId!=null">
+			service_organization_user_id = #{serviceOrganizationUserId},
+			</if>
+			<if test="status!=null">
+			status = #{status},
+			</if>
+			<if test="monthAge!=null">
+			month_age = #{monthAge},
+			</if>
+			<if test="currentHeight!=null">
+			current_height = #{currentHeight},
+			</if>
+			<if test="currentWeight!=null">
+			current_weight = #{currentWeight},
+			</if>
+			<if test="idealHeight!=null">
+			ideal_height = #{idealHeight},
+			</if>
+			<if test="headCircumference!=null">
+			 head_circumference = #{headCircumference},
+			</if>
+			<if test="chestCircumference!=null">
+				chest_circumference = #{chestCircumference},
+			</if>
+			<if test="abdomenCircumference!=null">
+			abdomen_circumference = #{abdomenCircumference},
+			</if>
+			<if test="upperBodyLength!=null">
+			upper_body_length = #{upperBodyLength},
+			</if>
+			<if test="lowerBodyLength!=null">
+			lower_body_length = #{lowerBodyLength},
+			</if>
+			<if test="bodyFat!=null">
+			body_fat = #{bodyFat},
+			</if>
+			<if test="diastolicPressure!=null">
+			diastolic_pressure = #{diastolicPressure},
+			</if>
+			<if test="systolicPressure!=null">
+			systolic_pressure = #{systolicPressure},
+			</if>
+			<if test="heightPercentile!=null">
+			height_percentile = #{heightPercentile},
+			</if>
+			<if test="weightSd!=null">
+			weight_sd = #{weightSd},
+			</if>
+			<if test="bmi!=null">
+			bmi = #{bmi}
+			</if>
+		</set>
+		<where>
+			<if test="id!=null">id = #{id}</if>
+			<if test="userId!=null"> AND user_id=#{userId}</if>
+		</where>
+	</update>
+
+	<!-- 查询单条测量信息记录 -->
+	<select id="getOne" parameterType="org.web.module.height.obesity.entity.ChildrenMeasure" resultType="map">
+		SELECT
+		bcm.id,
+		bcm.number,
+		bcm.user_id userId,
+		bcm.month_age monthAge,
+		bcm.current_height currentHeight,
+		bcm.current_weight currentWeight,
+		bcm.ideal_height idealHeight,
+		bcm.head_circumference headCircumference,
+		bcm.chest_circumference chestCircumference,
+		bcm.abdomen_circumference
+		abdomenCircumference,
+		bcm.upper_body_length upperBodyLength,
+		bcm.lower_body_length lowerBodyLength,
+		bcm.body_fat bodyFat,
+		bcm.diastolic_pressure diastolicPressure,
+		bcm.systolic_pressure
+		systolicPressure,
+		bcm.height_percentile heightPercentile,
+		bcm.weight_sd
+		weightSd,
+		bcm.bmi,
+		bcm.create_date_time createDateTime,
+		bcf.id
+		childrenFamilyId,
+		bcf.father_height fatherHeight,
+		bcf.father_upper
+		fatherUpper,
+		bcf.father_lower fatherLower,
+		bcf.mother_height motherHeight,
+		bcf.mother_upper motherUpper,
+		bcf.mother_lower
+		motherLower
+		FROM
+		base_children_measure bcm
+		INNER JOIN base_user bu ON bu.id = bcm.user_id
+		LEFT JOIN base_children_family bcf ON bcf.user_id = bu.id WHERE bcm.id=#{id}
+	</select>
+
+	<!-- 查询上一条测量记录 -->
+	<select id="getLastOne" parameterType="org.web.module.height.obesity.entity.ChildrenMeasure" resultType="map">
+		SELECT
+		bcm.id,
+		bcm.number,
+		bcm.user_id userId,
+		bcm.month_age monthAge,
+		bcm.current_height currentHeight,
+		bcm.current_weight currentWeight,
+		bcm.ideal_height idealHeight,
+		bcm.head_circumference headCircumference,
+		bcm.chest_circumference chestCircumference,
+		bcm.abdomen_circumference
+		abdomenCircumference,
+		bcm.upper_body_length upperBodyLength,
+		bcm.lower_body_length lowerBodyLength,
+		bcm.body_fat bodyFat,
+		bcm.diastolic_pressure diastolicPressure,
+		bcm.systolic_pressure
+		systolicPressure,
+		bcm.height_percentile heightPercentile,
+		bcm.weight_sd
+		weightSd,
+		bcm.bmi,
+		bcm.status,
+		bcm.create_date_time createDateTime,
+		bcf.id childrenFamilyId,
+		bcf.father_height fatherHeight,
+		bcf.father_upper fatherUpper,
+		bcf.father_lower fatherLower,
+		bcf.mother_height motherHeight,
+		bcf.mother_upper motherUpper,
+		bcf.mother_lower motherLower
+		FROM
+		base_children_measure bcm
+		INNER JOIN base_user bu ON bu.id = bcm.user_id
+		LEFT JOIN base_children_family bcf ON bcf.user_id = bu.id
+		<where>
+			<if test="userId!=null">bcm.user_id=#{userId}</if>
+			<if test="id!=null">AND bcm.id &lt;#{id}</if>
+			AND bcm.status in (1,2)
+		</where>
+		ORDER BY bcm.create_date_time DESC
+		LIMIT 1,1
+	</select>
+	<!-- 查询最新一条测量记录 -->
+	<select id="getNewOne" parameterType="org.web.module.height.obesity.entity.ChildrenMeasure" resultType="map">
+		SELECT
+		bcm.id,
+		bcm.number,
+		bcm.user_id userId,
+		bcm.month_age monthAge,
+		bcm.current_height currentHeight,
+		bcm.current_weight currentWeight,
+		bcm.ideal_height idealHeight,
+		bcm.head_circumference headCircumference,
+		bcm.chest_circumference chestCircumference,
+		bcm.abdomen_circumference
+		abdomenCircumference,
+		bcm.upper_body_length upperBodyLength,
+		bcm.lower_body_length lowerBodyLength,
+		bcm.body_fat bodyFat,
+		bcm.diastolic_pressure diastolicPressure,
+		bcm.systolic_pressure
+		systolicPressure,
+		bcm.height_percentile heightPercentile,
+		bcm.weight_sd
+		weightSd,
+		bcm.bmi,
+		bcm.status,
+		bcm.create_date_time createDateTime,
+		bcf.id childrenFamilyId,
+		bcf.father_height fatherHeight,
+		bcf.father_upper fatherUpper,
+		bcf.father_lower fatherLower,
+		bcf.mother_height motherHeight,
+		bcf.mother_upper motherUpper,
+		bcf.mother_lower motherLower
+		FROM
+		base_children_measure bcm
+		INNER JOIN base_user bu ON bu.id = bcm.user_id
+		LEFT JOIN base_children_family bcf ON bcf.user_id = bu.id
+
+		<where>
+			<if test="userId!=null">bcm.user_id=#{userId}</if>
+			<if test="id!=null">AND bcm.id &lt;#{id}</if>
+			AND bcm.status in (1,2)
+		</where>
+		ORDER BY bcm.create_date_time DESC
+		LIMIT 1
+	</select>
+
+	<!-- 查询最新一条测量记录 -->
+	<select id="getRecordByMonthAge" parameterType="org.web.module.height.obesity.entity.ChildrenMeasure" resultType="map">
+		SELECT
+		bcm.id,
+		bcm.number,
+		bcm.user_id userId,
+		bcm.month_age monthAge,
+		bcm.current_height currentHeight,
+		bcm.current_weight currentWeight,
+		bcm.ideal_height idealHeight,
+		bcm.head_circumference headCircumference,
+		bcm.chest_circumference chestCircumference,
+		bcm.abdomen_circumference
+		abdomenCircumference,
+		bcm.upper_body_length upperBodyLength,
+		bcm.lower_body_length lowerBodyLength,
+		bcm.body_fat bodyFat,
+		bcm.diastolic_pressure diastolicPressure,
+		bcm.systolic_pressure
+		systolicPressure,
+		bcm.height_percentile heightPercentile,
+		bcm.weight_sd
+		weightSd,
+		bcm.bmi,
+		bcm.status,
+		bcm.create_date_time createDateTime
+		FROM
+		base_children_measure bcm
+		<where>
+			<if test="userId!=null">bcm.user_id=#{userId}</if>
+		</where>
+		ORDER BY abs(#{monthAge}-bcm.month_age) asc
+		LIMIT 1
+	</select>
+
+
+	<select id="getLastList" parameterType="org.web.module.height.obesity.entity.ChildrenMeasure" resultType="map">
+		SELECT
+		bcm.id,
+		bcm.number,
+		bcm.user_id userId,
+		bcm.month_age monthAge,
+		bcm.current_height currentHeight,
+		bcm.current_weight currentWeight,
+		bcm.ideal_height idealHeight,
+		bcm.head_circumference headCircumference,
+		bcm.chest_circumference chestCircumference,
+		bcm.abdomen_circumference
+		abdomenCircumference,
+		bcm.upper_body_length upperBodyLength,
+		bcm.lower_body_length lowerBodyLength,
+		bcm.body_fat bodyFat,
+		bcm.diastolic_pressure diastolicPressure,
+		bcm.systolic_pressure
+		systolicPressure,
+		bcm.height_percentile heightPercentile,
+		bcm.weight_sd
+		weightSd,
+		bcm.bmi,
+		bcm.status,
+		bcm.create_date_time createDateTime
+		FROM
+		base_children_measure bcm
+		WHERE bcm.user_id=#{userId}
+		ORDER BY bcm.create_date_time DESC
+		LIMIT #{num}
+	</select>
+
+	<!-- 儿童历史测量信息 -->
+	<select id="getList" parameterType="org.web.module.height.obesity.entity.ChildrenMeasure" resultType="map">
+		SELECT
+		bcm.id,
+		bcm.number,
+		bcm.user_id userId,
+		bcm.month_age monthAge,
+		bcm.current_height currentHeight,
+		bcm.current_weight currentWeight,
+		bcm.ideal_height idealHeight,
+		bcm.head_circumference headCircumference,
+		bcm.chest_circumference chestCircumference,
+		bcm.abdomen_circumference
+		abdomenCircumference,
+		bcm.upper_body_length upperBodyLength,
+		bcm.lower_body_length lowerBodyLength,
+		bcm.body_fat bodyFat,
+		bcm.diastolic_pressure diastolicPressure,
+		bcm.systolic_pressure
+		systolicPressure,
+		bcm.height_percentile heightPercentile,
+		bcm.weight_sd
+		weightSd,
+		bcm.bmi,
+		bcm.service_organization_user_id
+		serviceOrganizationUserId,
+		bcm.create_date_time createDateTime,
+		bou.name organizationUserName
+		FROM
+		base_children_measure bcm
+		LEFT JOIN base_organization_user bou ON bou.id =
+		bcm.service_organization_user_id
+		WHERE bcm.user_id = #{userId}
+		<if test="createDateTime != null ">
+			AND bcm.create_date_time &gt;= #{createDateTime}
+		</if>
+		<if test="endCreateDateTime != null">
+			AND bcm.create_date_time &lt;= #{endCreateDateTime}
+		</if>
+		ORDER BY bcm.create_date_time DESC
+	</select>
+	
+	<!-- 三天前的儿童历史测量信息 -->
+	<select id="getListThreeDaysAgo" parameterType="org.web.module.height.obesity.entity.ChildrenMeasure" resultType="map">
+		SELECT
+		bcm.id,
+		bcm.number,
+		bcm.user_id userId,
+		bcm.month_age monthAge,
+		bcm.current_height currentHeight,
+		bcm.current_weight currentWeight,
+		bcm.ideal_height idealHeight,
+		bcm.head_circumference headCircumference,
+		bcm.chest_circumference chestCircumference,
+		bcm.abdomen_circumference
+		abdomenCircumference,
+		bcm.upper_body_length upperBodyLength,
+		bcm.lower_body_length lowerBodyLength,
+		bcm.body_fat bodyFat,
+		bcm.diastolic_pressure diastolicPressure,
+		bcm.systolic_pressure
+		systolicPressure,
+		bcm.height_percentile heightPercentile,
+		bcm.weight_sd
+		weightSd,
+		bcm.bmi,
+		bcm.service_organization_user_id
+		serviceOrganizationUserId,
+		bcm.create_date_time createDateTime,
+		bou.name organizationUserName
+		FROM
+		base_children_measure bcm
+		LEFT JOIN base_organization_user bou ON bou.id =
+		bcm.service_organization_user_id
+		WHERE bcm.user_id = #{userId}
+		<if test="createDateTime != null ">
+			AND bcm.create_date_time &lt;= #{createDateTime}
+		</if>
+		ORDER BY bcm.create_date_time DESC
+	</select>
+
+	<!-- 查询用户月龄范围数据 -->
+	<select id="getListByMonthAge" parameterType="org.web.module.height.obesity.entity.ChildrenMeasure" resultType="map">
+		SELECT
+		user_id userId,
+		month_age monthAge,
+		current_height currentHeight,
+		current_weight currentWeight,
+		head_circumference headCircumference,
+		create_date_time createDateTime
+		FROM(
+		SELECT MAX(id) id FROM base_children_measure
+		WHERE user_id=#{userId} AND month_age BETWEEN #{startMonthAge} AND
+		#{endMonthAge}
+		Group BY month_age
+		) b
+		JOIN base_children_measure bcm ON b.id=bcm.id
+	</select>
+	
+
+	<!-- 是否具有用户团队关系 -->
+	<select id="isExistsUserTeamRelation" parameterType="org.web.module.height.obesity.entity.ChildrenMeasure" resultType="map">
+		SELECT
+			user_id userId,
+			organization_team_id organizationTeamId
+		FROM base_user_organization_team
+		WHERE user_id = #{userId} and organization_team_id = #{organizationTeamId}
+		order by id desc
+		limit 0,1
+	</select>
+
+	<update id="updateUserTeamRelation" parameterType="org.web.module.height.obesity.entity.ChildrenMeasure">
+		UPDATE base_user_organization_team SET is_height_obesity=#{isHeightObesity}
+		WHERE user_id = #{userId} and organization_team_id = #{organizationTeamId}
+	</update>
+  
+  <!--儿保同步生长发育数据 -->
+  <select id="getSynchronizationData" parameterType="org.web.module.height.obesity.entity.ChildrenMeasure" resultType="map">
+	SELECT
+		bcf.father_height fatherHeight,
+		bcf.father_weight fatherWeight,
+		bcf.mother_weight motherWeight,
+		bcf.mother_height motherHeight,
+		bcm.birth_height birthHeight,
+		bcm.birth_weight birthWeight
+	FROM
+		base_children_family bcf
+	LEFT JOIN base_user bu ON bcf.user_id = bu.id
+	LEFT JOIN base_children_maternity bcm ON bcm.user_id = bu.id
+	WHERE
+		bcf.user_id = #{userId} 
+		AND DATE_SUB(CURDATE(), INTERVAL 30 DAY) &lt;= date(bcf.create_date_time)
+		ORDER BY
+			bcf.create_date_time DESC
+		LIMIT 1
+  </select>
+  <!-- 儿保同步生长发育数据 -->
+  <select id="getSynchronizationMeasure"  parameterType="org.web.module.height.obesity.entity.ChildrenMeasure" resultType="map">
+  		SELECT
+			bcme.current_height currentHeight,
+			bcme.current_weight currentWeight,
+			bcme.head_circumference headCircumference,
+			bcme.create_date_time createDateTime
+		FROM
+			base_children_measure bcme
+		WHERE
+			bcme.user_id = #{userId}
+		AND DATE_SUB(CURDATE(), INTERVAL 30 DAY) &lt;= date(bcme.create_date_time)
+		ORDER BY
+			bcme.create_date_time DESC
+		LIMIT 1
+  </select>
+  
+  <!-- 生长发育同步儿保信息 -->
+  	<select id="getSynchronizationHealthcare" parameterType="org.web.module.height.obesity.entity.ChildrenMeasure" resultType="map">
+		SELECT
+			bchr.head_circumference headCircumference,
+			bchr.height currentHeight,
+			bchr.weight currentWeight,
+		  bchr.create_date createDate
+		FROM
+			base_child_healthcare_records bchr
+		WHERE  
+			DATE_SUB(CURDATE(), INTERVAL 30 DAY) &lt;= date(bchr.create_date) 
+			AND bchr.user_id= #{userId}
+			ORDER BY
+					bchr.create_date DESC
+				LIMIT 1
+  	</select>
+  
+  <!-- 生长发育同步儿保信息 -->
+  <select id="getSynchronizationInfo" parameterType="org.web.module.height.obesity.entity.ChildrenMeasure" resultType="map">
+	SELECT
+		buci.birth_height birthHeight,
+		buci.birth_weight birthWeight,
+		buci.father_height fatherHeight,
+		buci.father_weight fatherWeight,
+		buci.mother_height motherHeight,
+		buci.mother_weight motherWeight
+	FROM
+		base_user_child_info buci
+	WHERE  
+		DATE_SUB(CURDATE(), INTERVAL 30 DAY) &lt;= date(buci.create_date) 
+		AND buci.user_id= #{userId} 
+		ORDER BY
+				buci.create_date DESC
+			LIMIT 1
+  </select>
+  
+  <!-- 查询理想身高 -->
+  <select id="getForecastHeight" parameterType="org.web.module.height.obesity.entity.Diagnosis" resultType="map">
+	SELECT
+		bbao.forecast_height forecastHeight
+	FROM
+		base_bone_age_order bbao
+	WHERE  
+			DATE_SUB(CURDATE(), INTERVAL 30 DAY) &lt;= date(bbao.create_date) 
+			AND bbao.user_id= #{userId} 
+			ORDER BY
+					bbao.create_date DESC
+				LIMIT 1
+  </select>
+  
+  <!--查询骨龄  -->
+  <select id="getBoneAge" parameterType="org.web.module.height.obesity.entity.ChildrenMeasure" resultType="map">
+	SELECT
+		bbao.bone_age boneAge
+	FROM
+		base_bone_age_order bbao
+	WHERE  
+			DATE_SUB(CURDATE(), INTERVAL 30 DAY)  &lt;= date(bbao.create_date) 
+			AND bbao.user_id= #{userId} 
+			ORDER BY
+					bbao.create_date DESC
+				LIMIT 1
+  </select>
+</mapper>

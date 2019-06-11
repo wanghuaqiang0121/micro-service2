@@ -1,0 +1,335 @@
+package org.wechat.module.height.obesity.entity;
+
+import java.util.Date;
+
+import javax.validation.constraints.NotNull;
+
+import org.service.core.entity.BaseEntity;
+
+/**
+ * 
+ * Copyright © 2018 四川易迅通健康医疗技术发展有限公司. All rights reserved.
+ *
+ * @author: ChenYan
+ * @date: 2018年12月12日
+ * @description: 儿童出生信息表
+ */
+public class ChildrenMaternity extends BaseEntity {
+  
+	private static final long serialVersionUID = 8588635570268101194L;
+
+	private Integer id;
+
+    private Integer userId;
+
+    private Float birthGestational;
+
+    private Float birthHeight;
+
+    private Float birthWeight;
+
+    private Integer gravidity;
+
+    private Integer parity;
+
+    private Integer birthModel;
+
+    private Byte postpartumAsphyxia;
+
+    private Byte aie;
+
+    private Byte encephalopathy;
+ 
+
+    private Byte hyperbilirubinemia;
+    
+    private Byte pneumoniaOfNewborn;
+    private Byte neonatalSepticemia;
+
+    private Byte neonatalConvulsion;
+
+    private Byte persistentHypoglycemia;
+
+    private Byte severeInfectiousDiseases;
+
+    private String severeInfectiousDiseasesContent;
+
+    private Byte hereditaryDisease;
+
+    private String hereditaryDiseaseContent;
+
+    private Byte birthDefect;
+
+    private String birthDefectContent;
+
+    private Float geneticHeight;
+
+    private Date lastUpdateTime;
+
+    private Date createDateTime;
+    
+    private Byte neonatalConvulsions;
+    
+    private Byte hypoglycemia;
+    
+    private Boolean isHighRiskChildren;
+    
+    /** 
+     * @author: WangHuaQiang
+     * @date: 2019年1月30日
+     * @return
+     * @description: 判断是不是高危儿
+     */
+    public Boolean IsHighRiskChildren() {
+		if ((this.birthGestational != null && this.birthGestational < 37) 
+				|| (this.birthWeight != null && this.birthWeight < 2.5) 
+				|| (this.postpartumAsphyxia != null && this.postpartumAsphyxia == 1) 
+				|| (this.aie != null && this.aie == 1) || (this.encephalopathy != null && this.encephalopathy == 1) 
+				|| (this.hyperbilirubinemia != null && this.hyperbilirubinemia == 1) 
+				|| (this.pneumoniaOfNewborn != null && this.pneumoniaOfNewborn == 1) 
+				|| (this.neonatalSepticemia != null && this.neonatalSepticemia == 1) 
+				|| (this.severeInfectiousDiseases != null && this.severeInfectiousDiseases == 1) 
+				|| (this.hereditaryDisease != null && this.hereditaryDisease == 1)
+				|| (this.birthDefect != null && this.birthDefect == 1) ) {
+			return true;
+		}else {
+			return false;
+		}
+	}
+
+    public Byte getPneumoniaOfNewborn() {
+		return pneumoniaOfNewborn;
+	}
+
+	public void setPneumoniaOfNewborn(Byte pneumoniaOfNewborn) {
+		this.pneumoniaOfNewborn = pneumoniaOfNewborn;
+	}
+
+	public Byte getNeonatalSepticemia() {
+		return neonatalSepticemia;
+	}
+
+	public void setNeonatalSepticemia(Byte neonatalSepticemia) {
+		this.neonatalSepticemia = neonatalSepticemia;
+	}
+
+	public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public Integer getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Integer userId) {
+        this.userId = userId;
+    }
+
+    public Float getBirthGestational() {
+        return birthGestational;
+    }
+
+    public void setBirthGestational(Float birthGestational) {
+        this.birthGestational = birthGestational;
+    }
+
+    public Float getBirthHeight() {
+        return birthHeight;
+    }
+
+    public void setBirthHeight(Float birthHeight) {
+        this.birthHeight = birthHeight;
+    }
+
+    public Float getBirthWeight() {
+        return birthWeight;
+    }
+
+    public void setBirthWeight(Float birthWeight) {
+        this.birthWeight = birthWeight;
+    }
+
+    public Integer getGravidity() {
+        return gravidity;
+    }
+
+    public void setGravidity(Integer gravidity) {
+        this.gravidity = gravidity;
+    }
+
+    public Integer getParity() {
+        return parity;
+    }
+
+    public void setParity(Integer parity) {
+        this.parity = parity;
+    }
+
+    public Integer getBirthModel() {
+        return birthModel;
+    }
+
+    public void setBirthModel(Integer birthModel) {
+        this.birthModel = birthModel;
+    }
+
+    public Byte getPostpartumAsphyxia() {
+        return postpartumAsphyxia;
+    }
+
+    public void setPostpartumAsphyxia(Byte postpartumAsphyxia) {
+        this.postpartumAsphyxia = postpartumAsphyxia;
+    }
+
+    public Byte getAie() {
+        return aie;
+    }
+
+    public void setAie(Byte aie) {
+        this.aie = aie;
+    }
+
+    public Byte getEncephalopathy() {
+        return encephalopathy;
+    }
+
+    public void setEncephalopathy(Byte encephalopathy) {
+        this.encephalopathy = encephalopathy;
+    }
+
+    public Byte getHyperbilirubinemia() {
+        return hyperbilirubinemia;
+    }
+
+    public void setHyperbilirubinemia(Byte hyperbilirubinemia) {
+        this.hyperbilirubinemia = hyperbilirubinemia;
+    }
+
+    public Byte getNeonatalConvulsion() {
+        return neonatalConvulsion;
+    }
+
+    public void setNeonatalConvulsion(Byte neonatalConvulsion) {
+        this.neonatalConvulsion = neonatalConvulsion;
+    }
+
+    public Byte getPersistentHypoglycemia() {
+        return persistentHypoglycemia;
+    }
+
+    public void setPersistentHypoglycemia(Byte persistentHypoglycemia) {
+        this.persistentHypoglycemia = persistentHypoglycemia;
+    }
+
+    public Byte getSevereInfectiousDiseases() {
+        return severeInfectiousDiseases;
+    }
+
+    public void setSevereInfectiousDiseases(Byte severeInfectiousDiseases) {
+        this.severeInfectiousDiseases = severeInfectiousDiseases;
+    }
+
+    public String getSevereInfectiousDiseasesContent() {
+        return severeInfectiousDiseasesContent;
+    }
+
+    public void setSevereInfectiousDiseasesContent(String severeInfectiousDiseasesContent) {
+        this.severeInfectiousDiseasesContent = severeInfectiousDiseasesContent;
+    }
+
+    public Byte getHereditaryDisease() {
+        return hereditaryDisease;
+    }
+
+    public void setHereditaryDisease(Byte hereditaryDisease) {
+        this.hereditaryDisease = hereditaryDisease;
+    }
+
+    public String getHereditaryDiseaseContent() {
+        return hereditaryDiseaseContent;
+    }
+
+    public void setHereditaryDiseaseContent(String hereditaryDiseaseContent) {
+        this.hereditaryDiseaseContent = hereditaryDiseaseContent;
+    }
+
+    public Byte getBirthDefect() {
+        return birthDefect;
+    }
+
+    public void setBirthDefect(Byte birthDefect) {
+        this.birthDefect = birthDefect;
+    }
+
+    public String getBirthDefectContent() {
+        return birthDefectContent;
+    }
+
+    public void setBirthDefectContent(String birthDefectContent) {
+        this.birthDefectContent = birthDefectContent;
+    }
+
+    public Float getGeneticHeight() {
+        return geneticHeight;
+    }
+
+    public void setGeneticHeight(Float geneticHeight) {
+        this.geneticHeight = geneticHeight;
+    }
+
+    public Date getLastUpdateTime() {
+        return lastUpdateTime;
+    }
+
+    public void setLastUpdateTime(Date lastUpdateTime) {
+        this.lastUpdateTime = lastUpdateTime;
+    }
+
+    public Date getCreateDateTime() {
+        return createDateTime;
+    }
+
+    public void setCreateDateTime(Date createDateTime) {
+        this.createDateTime = createDateTime;
+    }
+    
+    public Byte getNeonatalConvulsions() {
+		return neonatalConvulsions;
+	}
+
+	public void setNeonatalConvulsions(Byte neonatalConvulsions) {
+		this.neonatalConvulsions = neonatalConvulsions;
+	}
+
+	public Byte getHypoglycemia() {
+		return hypoglycemia;
+	}
+
+	public void setHypoglycemia(Byte hypoglycemia) {
+		this.hypoglycemia = hypoglycemia;
+	}
+
+	public Boolean getIsHighRiskChildren() {
+		return isHighRiskChildren;
+	}
+
+	public void setIsHighRiskChildren(Boolean isHighRiskChildren) {
+		this.isHighRiskChildren = isHighRiskChildren;
+	}
+
+	@Override
+   	@NotNull(message = "{page.empty}", groups = { SelectAll.class})
+   	public Integer getPage() {
+   		return super.getPage();
+   	}
+
+   	@Override
+   	@NotNull(message = "{pageSize.empty}", groups = { SelectAll.class })
+   	public Integer getPageSize() {
+   		return super.getPageSize();
+   	}
+}

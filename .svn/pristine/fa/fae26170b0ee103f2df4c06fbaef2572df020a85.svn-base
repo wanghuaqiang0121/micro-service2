@@ -1,0 +1,112 @@
+package org.web.module.bone.age.domain;
+
+import java.util.Date;
+
+import javax.validation.constraints.NotNull;
+
+import org.service.core.entity.BaseEntity;
+
+/**
+ * Copyright © 2019 四川易迅通健康医疗技术发展有限公司. All rights reserved.
+ *
+ * @author: ChenYan
+ * @date: 2019年3月4日
+ * @description: 机构选择过的阅片医生记录表
+ */
+public class OrganizationChoosedReadFilmDoctor extends BaseEntity {
+    
+	private static final long serialVersionUID = 1L;
+
+	private Integer id;
+	@NotNull(message = "{organization.choosed.read.film.doctor.organization.id.notnull.valid}", groups = { Insert.class })
+    private Integer organizationId;
+	@NotNull(message = "{organization.choosed.read.film.doctor.read.film.doctor.price.id.notnull.valid}", groups = { Insert.class })
+    private Integer readFilmDoctorPriceId;
+
+    private Date createTime;
+    
+    private String doctorName;
+    
+    private Integer baseBoneAgeOrderId;
+    
+    private RemoteBoneAgeOrder remoteBoneAgeOrder;
+    
+    private Double price;
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public Integer getOrganizationId() {
+        return organizationId;
+    }
+
+    public void setOrganizationId(Integer organizationId) {
+        this.organizationId = organizationId;
+    }
+
+    public Integer getReadFilmDoctorPriceId() {
+        return readFilmDoctorPriceId;
+    }
+
+    public void setReadFilmDoctorPriceId(Integer readFilmDoctorPriceId) {
+        this.readFilmDoctorPriceId = readFilmDoctorPriceId;
+    }
+
+    public Date getCreateTime() {
+        return createTime;
+    }
+
+    public void setCreateTime(Date createTime) {
+        this.createTime = createTime;
+    }
+
+	public String getDoctorName() {
+		return doctorName;
+	}
+
+	public void setDoctorName(String doctorName) {
+		this.doctorName = doctorName;
+	}
+	
+	public Integer getBaseBoneAgeOrderId() {
+		return baseBoneAgeOrderId;
+	}
+
+	public void setBaseBoneAgeOrderId(Integer baseBoneAgeOrderId) {
+		this.baseBoneAgeOrderId = baseBoneAgeOrderId;
+	}
+
+	
+	public RemoteBoneAgeOrder getRemoteBoneAgeOrder() {
+		return remoteBoneAgeOrder;
+	}
+
+	public void setRemoteBoneAgeOrder(RemoteBoneAgeOrder remoteBoneAgeOrder) {
+		this.remoteBoneAgeOrder = remoteBoneAgeOrder;
+	}
+
+	public Double getPrice() {
+		return price;
+	}
+
+	public void setPrice(Double price) {
+		this.price = price;
+	}
+
+	@Override
+	@NotNull(message = "{page.empty}", groups = { SelectAll.class })
+	public Integer getPage() {
+		return super.getPage();
+	}
+
+	@Override
+	@NotNull(message = "{pageSize.empty}", groups = { SelectAll.class })
+	public Integer getPageSize() {
+		return super.getPageSize();
+	}
+}

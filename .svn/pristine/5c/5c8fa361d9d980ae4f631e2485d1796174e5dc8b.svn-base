@@ -1,0 +1,488 @@
+package org.web.module.height.obesity.service;
+
+import java.math.BigDecimal;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.annotation.Resource;
+
+import org.springframework.stereotype.Service;
+import org.web.module.height.obesity.dao.ChildrenMeasureMapper;
+import org.web.module.height.obesity.dao.WhoStandardBmiSdMapper;
+import org.web.module.height.obesity.dao.WhoStandardHeightWeightSdMapper;
+import org.web.module.height.obesity.dao.WhoStandardWeightSdMapper;
+import org.web.module.height.obesity.entity.ChildrenMeasure;
+import org.web.module.height.obesity.entity.Diagnosis;
+import org.web.module.height.obesity.entity.WhoStandardBmiSd;
+import org.web.module.height.obesity.entity.WhoStandardHeightWeightSd;
+import org.web.module.height.obesity.global.BaseGlobal;
+import org.web.module.height.obesity.tools.HeightObesityCalculation;
+
+/**
+ * Copyright © 2018 四川易迅通健康医疗技术发展有限公司. All rights reserved.
+ *
+ * @author: ZhangGuangZhi
+ * @date: 2018年12月21日
+ * @description: WeightEvaluationService 体重评价
+ */
+@Service
+public class WeightEvaluationService {
+
+	@Resource
+	private DiagnosisService diagnosisService;
+	@Resource
+	private WhoStandardHeightWeightSdMapper whoStandardHeightWeightSdMapper;
+	@Resource
+	private WhoStandardBmiSdMapper whoStandardBmiSdMapper;
+	@Resource
+	private WhoStandardWeightSdMapper whoStandardWeightSdMapper;
+	@Resource
+	private ChildrenMeasureMapper childrenMeasureMapper;
+
+	/**
+	 * @author: ZhangGuangZhi
+	 * @date: 2018年1月8日
+	 * @param
+	 * @return
+	 * @description: 体重肥胖评价
+	 */
+	public Map<String, Object> getObesityEvaluation(Diagnosis diagnosis) {
+		Map<String, Object> map = new HashMap<>();
+		String evaluation = null;//干预效果
+		String more = null;//更多
+		String weightWarning = null;//预警
+		// 用户月龄
+		double age = HeightObesityCalculation.getAge(diagnosis.getMonthAge());
+		// 用户姓名和称呼
+		String name = diagnosis.name + HeightObesityCalculation.getName(age);
+
+		/* 查询用户出生别体重 */
+		double birthBmi = 0;// BMI出生值
+		Integer birthBmiSd = null;// 出生BMI对应的sd
+		if (diagnosis.getChildrenMaternity() != null && diagnosis.getChildrenMaternity().get("birthHeight") != null
+				&& diagnosis.getChildrenMaternity().get("birthWeight") != null) {
+
+			/* 身高别体重表 */
+			birthBmi = diagnosisService.getBMI(// 根据用户出生身高，体重计算BMI出生值
+					((Float) diagnosis.getChildrenMaternity().get("birthHeight")).doubleValue(),
+					((Float) diagnosis.getChildrenMaternity().get("birthWeight")).doubleValue());
+
+			WhoStandardHeightWeightSd whoStandardHeightWeightSd = new WhoStandardHeightWeightSd();
+			whoStandardHeightWeightSd.setSex(diagnosis.getSex());
+			whoStandardHeightWeightSd.setMonthAgeStart(0);
+			whoStandardHeightWeightSd.setMonthAgeEnd(24);
+			whoStandardHeightWeightSd.setStandardValue(new BigDecimal(birthBmi));
+			whoStandardHeightWeightSd.setHeight(new BigDecimal(diagnosis.getHeight()));
+			// who身高别体重标准表 0-6岁
+			Map<String, Object> whoStandardHeightWeightSdMap = whoStandardHeightWeightSdMapper
+					.getHeightWeightSd(whoStandardHeightWeightSd);
+			if (whoStandardHeightWeightSdMap != null) {
+				birthBmiSd = (Integer) whoStandardHeightWeightSdMap.get("sd");
+				if (birthBmiSd == -3) {
+					if (((BigDecimal) whoStandardHeightWeightSdMap.get("standardValue"))
+							.doubleValue() > ((Float) diagnosis.getChildrenMaternity().get("birthWeight"))
+									.doubleValue()) {
+						birthBmiSd = -2;
+					}
+				}
+			}
+		}
+
+		/* 查询用户上次测量记录别体重 */
+		Integer perBmiSd = null;// 上次BMI对应的sd
+		ChildrenMeasure childrenMeasure = new ChildrenMeasure();
+		childrenMeasure.setUserId(diagnosis.getUserId());
+		childrenMeasure.setId(diagnosis.getChildrenMeasureId());
+		// 查询用户最新一条测量记录
+		Map<String, Object> perChildrenMeasureMap = childrenMeasureMapper.getNewOne(childrenMeasure);
+		if (perChildrenMeasureMap != null) {
+			// 上次BMI
+			double perBmi = diagnosisService.getBMI(((Float) perChildrenMeasureMap.get("currentHeight")).doubleValue(),
+					((Float) perChildrenMeasureMap.get("currentWeight")).doubleValue());
+
+			/* 查询用户上次记录所在SD */
+			if (((Integer) perChildrenMeasureMap.get("monthAge")).intValue() <= 60) {// 上次测量年龄小于5岁 who身高别体重标准表 0-6岁
+				/* 身高别体重表 */
+				WhoStandardHeightWeightSd whoStandardHeightWeightSd = new WhoStandardHeightWeightSd();
+				whoStandardHeightWeightSd.setSex(diagnosis.getSex());
+				if (diagnosis.getMonthAge() >= 0 && diagnosis.getMonthAge() <= 24) {
+					whoStandardHeightWeightSd.setMonthAgeStart(0);
+					whoStandardHeightWeightSd.setMonthAgeEnd(24);
+				} else if (diagnosis.getMonthAge() >= 25 && diagnosis.getMonthAge() <= 60) {
+					whoStandardHeightWeightSd.setMonthAgeStart(25);
+					whoStandardHeightWeightSd.setMonthAgeEnd(72);
+				}
+				whoStandardHeightWeightSd.setStandardValue(new BigDecimal(perBmi));
+				// who身高别体重标准表 0-6岁
+				Map<String, Object> whoStandardHeightWeightSdMap = whoStandardHeightWeightSdMapper
+						.getHeightWeightSd(whoStandardHeightWeightSd);
+				if (whoStandardHeightWeightSdMap != null) {
+					perBmiSd = (Integer) whoStandardHeightWeightSdMap.get("sd");
+					if (perBmi == -3) {
+						if (((BigDecimal) whoStandardHeightWeightSdMap.get("standardValue"))
+								.doubleValue() > ((Float) perChildrenMeasureMap.get("currentWeight")).doubleValue()) {
+							perBmi = -2;
+						}
+					}
+				}
+
+			} else {// 上次测量年龄大于5岁  whoBMI标准表
+				/* bmi表 */
+				WhoStandardBmiSd whoStandardBmiSd = new WhoStandardBmiSd();
+				whoStandardBmiSd.setSex(diagnosis.getSex());
+				whoStandardBmiSd.setMonthAge(diagnosis.getMonthAge());
+				whoStandardBmiSd.setStandardValue(new BigDecimal(perBmi));
+
+				Map<String, Object> whoStandardBmiSdMap = whoStandardBmiSdMapper.getBmiSd(whoStandardBmiSd);
+				if (whoStandardBmiSdMap != null) {
+					perBmiSd = (Integer) whoStandardBmiSdMap.get("sd");
+					if (perBmi == -3) {
+						if (((BigDecimal) whoStandardBmiSdMap.get("standardValue"))
+								.doubleValue() > ((Float) perChildrenMeasureMap.get("currentWeight")).doubleValue()) {
+							perBmi = -2;
+						}
+					}
+				}
+			}
+		}
+
+		/* 查询用户当前别体重 */
+		double bmi = diagnosisService.getBMI(diagnosis.getHeight(), diagnosis.getWeight());// 用户当前bmi
+		Integer bmiSd = null;// 用户当前身高体重的bmi对应的sd
+		double bmiStand = 0; // bmi标准值
+
+		/* 查询用户现所在bmi sd */
+		if (diagnosis.getEndMonthAge() <= 60) {// 用户当前小于5岁
+			/* 身高别体重表 */
+			WhoStandardHeightWeightSd whoStandardHeightWeightSd = new WhoStandardHeightWeightSd();
+			whoStandardHeightWeightSd.setSex(diagnosis.getSex());
+			if (diagnosis.getMonthAge() >= 0 && diagnosis.getMonthAge() <= 24) {
+				whoStandardHeightWeightSd.setMonthAgeStart(0);
+				whoStandardHeightWeightSd.setMonthAgeEnd(24);
+			} else if (diagnosis.getMonthAge() >= 25 && diagnosis.getMonthAge() <= 60) {
+				whoStandardHeightWeightSd.setMonthAgeStart(25);
+				whoStandardHeightWeightSd.setMonthAgeEnd(72);
+			}
+			whoStandardHeightWeightSd.setStandardValue(new BigDecimal(bmi));
+			whoStandardHeightWeightSd.setHeight(new BigDecimal(diagnosis.getHeight()));
+
+			Map<String, Object> whoStandardHeightWeightSdMap = whoStandardHeightWeightSdMapper
+					.getHeightWeightSd(whoStandardHeightWeightSd);
+			if (whoStandardHeightWeightSdMap != null) {
+				bmiSd = (Integer) whoStandardHeightWeightSdMap.get("sd");
+				bmiStand = ((BigDecimal) whoStandardHeightWeightSdMap.get("standardValue")).doubleValue();
+				if (bmiSd == -3) {
+					if (bmiStand > diagnosis.getWeight()) {
+						bmiSd = -2;
+					}
+				}
+			}
+
+		} else { // 用户当前大于5岁
+			/* whoBMI标准表 */
+			WhoStandardBmiSd whoStandardBmiSd = new WhoStandardBmiSd();
+			whoStandardBmiSd.setSex(diagnosis.getSex());
+			whoStandardBmiSd.setMonthAge(diagnosis.getMonthAge());
+			whoStandardBmiSd.setStandardValue(new BigDecimal(bmi));
+
+			Map<String, Object> whoStandardBmiSdMap = whoStandardBmiSdMapper.getBmiSd(whoStandardBmiSd);
+			if (whoStandardBmiSdMap != null) {
+				bmiSd = (Integer) whoStandardBmiSdMap.get("sd");
+				bmiStand = ((BigDecimal) whoStandardBmiSdMap.get("standardValue")).doubleValue();
+
+				if (bmiSd == -3) {
+					if (bmiStand > diagnosis.getWeight()) {
+						bmiSd = -2;
+					}
+				}
+			}
+		}
+		
+		/* 1 :  0-2岁的小于胎龄儿(出生时体重小于2.5kg,或早产儿出生体重小于孕周的正常体重)与出生时或上次体重/身高相比 */
+		if (diagnosis.getEndMonthAge() <= 24 && diagnosis.getWeight() < 2.5 && bmiSd != null) {
+			if (bmiSd >= -2 && bmiSd < -1) {// 1.1:  M-2SD≤当前体重<M-1SD（正常偏低）
+				evaluation = String.format(BaseGlobal.WEIGHT_OBESITY_EVALUATION_ONE, name, age , "-2SD", name);
+			}else if (bmiSd >= -1 && bmiSd < 1 ){// 1.2：  M-1SD≤当前体重<M+1SD
+				evaluation = String.format(BaseGlobal.WEIGHT_OBESITY_EVALUATION_TWO, name, age , "-1SD", name);
+			}else if (bmiSd >= 1 && bmiSd < 2) {// 1.3： M+1SD≤当前体重<M+2SD（超重体型）
+				evaluation = String.format(BaseGlobal.WEIGHT_OBESITY_EVALUATION_ONE, name, age , "+1SD", name);
+				weightWarning = "孩子体型超重";
+			}else if ( (bmiSd >= -3 && bmiSd < -2) && 
+						( (birthBmiSd >=3 && birthBmiSd <-2) || (perBmiSd >=3 && perBmiSd <-2) )) {
+				// 1.4： M-3SD≤当前体重<M-2SD 且 [ M-3SD≤出生时||(上一次)体重<M-2SD ]  (中度消瘦)
+				evaluation = String.format(BaseGlobal.WEIGHT_OBESITY_EVALUATION_THREE, name, age , name);
+				weightWarning = "孩子体型中度消瘦";
+			}else if( bmiSd < -3 && ( perBmiSd < -3 || birthBmiSd < -3 )){// 1.5 :当前体重<M-3SD&& ( 出生时体重<M-3SD || 上一次体重<M-3SD  )(重度消瘦)
+				evaluation = String.format(BaseGlobal.WEIGHT_OBESITY_EVALUATION_FOUR, name, age , name);
+				weightWarning = "孩子体型重度消瘦";
+			}else if( bmiSd < -3 && ( (birthBmiSd >= -3 && birthBmiSd<-2) || (perBmiSd >=-3 && perBmiSd <-2) )){
+				// 1.6   当前体重<M-3SD && ( M-3SD≤出生时<M-2SD  || M-3SD≤上一次体重<M-2SD )
+				weightWarning = "孩子体型重度消瘦";
+				evaluation = String.format(BaseGlobal.WEIGHT_OBESITY_EVALUATION_FIVE, name, age , name);
+			}else if(bmiSd >= 2 ){
+				weightWarning = "孩子体型超重(肥胖)";
+				evaluation = String.format(BaseGlobal.WEIGHT_OBESITY_EVALUATION_SIX, name);
+			}
+			/*if (bmiSd >= -2 && bmiSd < 1) {
+				 身高别体重表 
+				WhoStandardHeightWeightSd whoStandardHeightWeightSd = new WhoStandardHeightWeightSd();
+				whoStandardHeightWeightSd.setSex(diagnosis.getSex());
+				if (diagnosis.getMonthAge() >= 0 && diagnosis.getMonthAge() <= 24) {
+					whoStandardHeightWeightSd.setMonthAgeStart(0);
+					whoStandardHeightWeightSd.setMonthAgeEnd(24);
+				} else if (diagnosis.getMonthAge() >= 25 && diagnosis.getMonthAge() <= 60) {
+					whoStandardHeightWeightSd.setMonthAgeStart(25);
+					whoStandardHeightWeightSd.setMonthAgeEnd(72);
+				}
+				whoStandardHeightWeightSd.setStandardValue(new BigDecimal(bmi));
+				whoStandardHeightWeightSd.setHeight(new BigDecimal(diagnosis.getHeight()));
+				Map<String, Object> whoStandardHeightWeightSdMap = whoStandardHeightWeightSdMapper
+						.getHeightWeightSd(whoStandardHeightWeightSd);
+				if (whoStandardHeightWeightSdMap != null
+						&& Integer.parseInt(whoStandardHeightWeightSdMap.get("sd").toString()) < -2) {
+					evaluation = String.format(BaseGlobal.WEIGHT_OBESITY_EVALUATION_TWO, name, name);
+				} else {
+					evaluation = String.format(BaseGlobal.WEIGHT_OBESITY_EVALUATION_ONE, name);
+				}
+			} else if ((bmiSd >= -3 && bmiSd < -2) || (birthBmiSd >= -3 && birthBmiSd < -2)) {
+				 M-3SD≤当前和出生时(上一次)体重/身长（身高）<M-2SD(中度消瘦) 
+				evaluation = String.format(BaseGlobal.WEIGHT_OBESITY_EVALUATION_THREE, name, name);
+			} else if (bmiSd < -3 && birthBmiSd < -3) {
+				 当前和出生时(上一次)体重/身长（身高）<M-3SD(重度消瘦) 
+				evaluation = String.format(BaseGlobal.WEIGHT_OBESITY_EVALUATION_FOUR, name);
+			} else if (bmiSd < -3 && birthBmiSd >= -3 || birthBmiSd < -2) {
+				 当前体重/身长（身高）<M-3SD且M-3SD≤出生时或上一次体重/身高<M-2SD 
+				evaluation = String.format(BaseGlobal.WEIGHT_OBESITY_EVALUATION_FIVE, name);
+			}*/
+		} else { //2:  0-18岁出生时正常的儿童 || 2-3岁的小于胎龄儿：
+			// 2.1 M＋1SD≤当前体重< M＋2SD(超重)
+			if (bmiSd >= 1 && bmiSd < 2) {
+				weightWarning = "孩子体型超重";
+				evaluation = String.format(BaseGlobal.WEIGHT_OBESITY_SIX, name, "超重", name, name);
+			}// 2.2 当前体重≥M＋2SD(肥胖)
+			else if(bmiSd >= 2){
+				weightWarning = "孩子体型肥胖";
+				evaluation = String.format(BaseGlobal.WEIGHT_OBESITY_SIX, name, "肥胖", name, name);
+			}// 2.3  M -2SD≤当前体重<M-1SD（正常偏低体型）
+			else if(bmiSd >= -2 && bmiSd <- 1){
+				evaluation = String.format(BaseGlobal.WEIGHT_OBESITY_SEVEN, name);
+			}// 2.4 M -1SD≤当前体重<M+1SD（正常体型）
+			else if(bmiSd >= -1 && bmiSd < 1){
+				evaluation = String.format(BaseGlobal.TWO_FOUR, name);
+			}// 2.5 M-3SD≤当前体重<M-2SD (中度消瘦体型)
+			else if(bmiSd >= -3 && bmiSd < -2 ){
+				weightWarning = "孩子体型中度消瘦";
+				evaluation = String.format(BaseGlobal.TWO_FIVE, name);
+			}// 2.6 体重/身长（身高）<M-3SD (重度消瘦体型)
+			else if(bmiSd < -3  ){
+				evaluation = String.format(BaseGlobal.TWO_SIX, name);
+				weightWarning = "孩子体型重度消瘦";
+			}
+			
+			
+			
+			/*if ((bmiSd >= 1 && bmiSd < 2)) {
+				
+				 * 1.M＋1SD≤当前体重/身长（身高）< M＋2SD(超重) 2.当前体重/身长（身高）≥M＋2SD(肥胖)
+				 
+				evaluation = String.format(BaseGlobal.WEIGHT_OBESITY_SIX, name, "超重");
+				more = String.format(BaseGlobal.WEIGHT_OBESITY_SIX_MORE, name, name, name);
+			} else if ((bmiSd >= 2)) {
+				
+				 * 2.当前体重/身长（身高）≥M＋2SD(肥胖)
+				 
+				evaluation = String.format(BaseGlobal.WEIGHT_OBESITY_SIX, name, "肥胖");
+				more = String.format(BaseGlobal.WEIGHT_OBESITY_SIX_MORE, name, name, name);
+			} else if (bmiSd >= -2 && bmiSd < 1) {
+
+				evaluation = String.format(BaseGlobal.WEIGHT_OBESITY_SEVEN, name);
+				// 查询高危因素
+				if (diagnosis.getChildrenFamily() != null) {
+
+					String jibinName = "";
+					if (diagnosis.getChildrenFamily().get("motherGestationalDiabetes") != null
+							&& ((Integer) diagnosis.getChildrenFamily().get("motherGestationalDiabetes"))
+									.intValue() == 1) {
+						 母亲是患有妊娠糖尿病 
+						jibinName += BaseGlobal.JIBING_NAME_ONE + ",";
+					}
+					if (diagnosis.getChildrenFamily().get("motherGestationalHypertension") != null
+							&& ((Integer) diagnosis.getChildrenFamily().get("motherGestationalHypertension"))
+									.intValue() == 1) {
+						 母亲妊娠高血压 
+						jibinName += BaseGlobal.JIBING_NAME_TWO + ",";
+					}
+
+					if (diagnosis.getChildrenFamily().get("familialObesity") != null
+							&& ((Integer) diagnosis.getChildrenFamily().get("familialObesity")).intValue() == 1) {
+						 是否有家族肥胖史 
+						jibinName += BaseGlobal.JIBING_NAME_THREE + ",";
+					}
+
+					if (diagnosis.getChildrenFamily().get("fatherObesity") != null
+							&& ((Integer) diagnosis.getChildrenFamily().get("fatherObesity")).intValue() == 1) {
+						 父亲肥胖 
+						jibinName += BaseGlobal.JIBING_NAME_FOUR + ",";
+					}
+
+					if (diagnosis.getChildrenFamily().get("fatherObesity") != null
+							&& ((Integer) diagnosis.getChildrenFamily().get("fatherObesity")).intValue() == 1) {
+						 父亲肥胖 
+						jibinName += BaseGlobal.JIBING_NAME_FIVE + ",";
+					}
+
+					if (jibinName != "") {
+						jibinName = jibinName.substring(0, jibinName.length() - 1);
+						evaluation += String.format(BaseGlobal.WEIGHT_OBESITY_SEVEN_BUT, name, jibinName);
+					}
+				}
+			} else if (bmiSd >= -3 && bmiSd < -2) {
+
+				if (bmiSd == -3 && bmiStand > diagnosis.getWeight()) {
+					 判断是否小于-3SD 
+					evaluation = String.format(BaseGlobal.WEIGHT_OBESITY_NINE, name);
+				} else {
+					evaluation = String.format(BaseGlobal.WEIGHT_OBESITY_EIGHT, name);
+				}
+			}
+
+			 3岁以上儿童增加测骨龄/腹围和血压 
+			if (diagnosis.getMonthAge() > 36) {
+				 查询是否有腰围数据 
+				if (diagnosis.getAbdomenCircumference() != null
+						&& diagnosis.getAbdomenCircumference() > diagnosis.getHeight() / 2) {
+					if (evaluation != "") {
+						evaluation += "[br]";
+					}
+					evaluation += String.format(BaseGlobal.WEIGHT_OBESITY_TEN, name);
+				} else if (diagnosis.getAbdomenCircumference() != null
+						&& diagnosis.getAbdomenCircumference() <= diagnosis.getHeight() / 2) {
+					if (evaluation != "") {
+						evaluation += "[br]";
+					}
+					evaluation += String.format(BaseGlobal.WEIGHT_OBESITY_ELEVEN, name);
+				}
+
+				 查询最近三条血压记录 
+				// ChildrenMeasure childrenMeasure = new ChildrenMeasure();
+				// childrenMeasure.setUserId(diagnosis.getUserId());
+				// childrenMeasure.setNum(3);
+
+				// List<Map<String, Object>> pressureList =
+				// childrenMeasureMapper.getLastList(childrenMeasure);
+
+			}*/
+
+		}
+
+		/* 干预效果评价 */
+		Integer oldBmiSd = null;
+		if (perBmiSd != null) {
+			oldBmiSd = perBmiSd;
+		} else if (birthBmiSd != null) {
+			oldBmiSd = birthBmiSd;
+		}
+		String evaluationOfInterventionEffect = null;
+		if (oldBmiSd != null) {
+			//1.上次肥胖体型，本次依旧肥胖体型
+			if (oldBmiSd >= 2 && (bmiSd >= 2)) {
+				evaluationOfInterventionEffect = BaseGlobal.OBSITY_EVALUATION_BAD;
+			} 
+			//2上次肥胖体型，本次变为超重体型
+			else if(oldBmiSd >= 2 && (bmiSd >= 1 && bmiSd < 2) ){
+				evaluationOfInterventionEffect = BaseGlobal.OBSITY_EVALUATION_GOOD;
+			}
+			//3上次超重体型，本次超重或肥胖体型
+			else if((oldBmiSd >= 1 && oldBmiSd < 2) && ((bmiSd >= 1 && bmiSd < 2) || bmiSd >= 2) ){
+				evaluationOfInterventionEffect = BaseGlobal.OBSITY_EVALUATION_BAD;
+			}
+			//4上次超重体型，本次正常体型
+			else if( (oldBmiSd >= 1 && oldBmiSd < 2) && (bmiSd >= -2 && bmiSd < 1) ){
+				evaluationOfInterventionEffect = BaseGlobal.OBSITY_EVALUATION_GOOD;
+			}
+			//5上次超重体型，本次正常偏低或重度消瘦或中度消瘦
+			else if((oldBmiSd >= 1 && oldBmiSd < 2) && (bmiSd < 0 )){
+				evaluationOfInterventionEffect = BaseGlobal.OBSITY_EVALUATION_BAD;
+			}
+			//6上次正常体型，本次正常偏低或重度消瘦或中度消瘦或超重或肥胖
+			else if((oldBmiSd >= -2 && oldBmiSd < 1) && (bmiSd != 0 )){
+				evaluationOfInterventionEffect = BaseGlobal.OBSITY_EVALUATION_BAD;
+			}
+			//7上次正常体型，本次正常体型
+			else if((oldBmiSd >= -2 && oldBmiSd < 1) && (bmiSd >= -2 && bmiSd < 1)){
+				evaluationOfInterventionEffect = BaseGlobal.OBSITY_EVALUATION_GOOD;
+			}
+			//8上次正常偏低，本次正常体型
+			else if((oldBmiSd >= -2 && oldBmiSd < -1) && (bmiSd >= -2 && bmiSd < 1)){
+				evaluationOfInterventionEffect = BaseGlobal.OBSITY_EVALUATION_GOOD;
+			}
+			//9上次正常偏低，本次中度消瘦或重度消瘦或超重或肥胖
+			else if((oldBmiSd >= -2 && oldBmiSd < -1) && (bmiSd >= 1 && bmiSd < -1)){
+				evaluationOfInterventionEffect = BaseGlobal.OBSITY_EVALUATION_BAD;
+			}
+			//10上次重度消瘦体型，本次依旧重度消瘦体型
+			else if((oldBmiSd < -2) && (bmiSd < -2)){
+				evaluationOfInterventionEffect = BaseGlobal.OBSITY_EVALUATION_BAD;
+			}
+			//11上次重度消瘦体型，本次中度消瘦体型或正常体型
+			else if((oldBmiSd < -2) && (bmiSd >= -2 && bmiSd < 1)){
+				evaluationOfInterventionEffect = BaseGlobal.OBSITY_EVALUATION_GOOD;
+			}
+			//12上次重度消瘦体型，本次超重或肥胖体型
+			else if((oldBmiSd < -2) && (bmiSd >= 1)){
+				evaluationOfInterventionEffect = BaseGlobal.OBSITY_EVALUATION_BAD;
+			}
+			//13上次中度消瘦体型，本次中度消瘦或重度消瘦体型
+			else if((oldBmiSd >= -2 && oldBmiSd < 0) && (bmiSd  <= -2)){
+				evaluationOfInterventionEffect = BaseGlobal.OBSITY_EVALUATION_BAD;
+			}
+			//14上次中度消瘦体型，本次正常体型
+			else if((oldBmiSd >= -2 && oldBmiSd < 0) && (bmiSd > -2 && bmiSd < 1)){
+				evaluationOfInterventionEffect = BaseGlobal.OBSITY_EVALUATION_GOOD;
+			}
+			//15上次中度消瘦体型，本次超重或肥胖
+			else if((oldBmiSd >= -2 && oldBmiSd < 0) && (bmiSd >= 1 )){
+				evaluationOfInterventionEffect = BaseGlobal.OBSITY_EVALUATION_BAD;
+			}
+
+			
+			
+			/*
+			if (oldBmiSd >= 2 && (bmiSd >= 2 || bmiSd < -2)) {
+				 上次肥胖体型，本次依旧肥胖体型 
+				evaluationOfInterventionEffect = BaseGlobal.OBSITY_EVALUATION_BAD;
+			} else if (oldBmiSd >= 2 && bmiSd < 2 && bmiSd >= -2) {
+				 上次肥胖体型，本次变为不是肥胖体型 
+				evaluationOfInterventionEffect = BaseGlobal.OBSITY_EVALUATION_GOOD;
+			} else if (oldBmiSd >= 1 && oldBmiSd < 2 && (bmiSd >= 1 || bmiSd < -2)) {
+				 上次超重体型，本次超重或肥胖体型或重度消瘦 
+				evaluationOfInterventionEffect = BaseGlobal.OBSITY_EVALUATION_BAD;
+			} else if (oldBmiSd >= 1 && oldBmiSd < 2 && bmiSd < 1 && bmiSd >= -2) {
+				 上次超重，本次正常 
+				evaluationOfInterventionEffect = BaseGlobal.OBSITY_EVALUATION_GOOD;
+			} else if (oldBmiSd >= -2 && oldBmiSd < 1 && bmiSd >= -2 && bmiSd < 1) {
+				 上次正常，本次正常 
+				evaluationOfInterventionEffect = BaseGlobal.OBSITY_EVALUATION_GOOD;
+			} else if (oldBmiSd >= -2 && oldBmiSd < 1 && (bmiSd >= 1 || bmiSd < -2)) {
+				 上次正常，本次超重或瘦小 
+				evaluationOfInterventionEffect = BaseGlobal.OBSITY_EVALUATION_BAD;
+			} else if (oldBmiSd < -3 && (bmiSd < -3 || bmiSd >= 1)) {
+				 上次重度消瘦，本次重度消瘦或超重 
+				evaluationOfInterventionEffect = BaseGlobal.OBSITY_EVALUATION_BAD;
+			} else if (oldBmiSd < -3 && bmiSd > -3 && bmiSd < 1) {
+				 上次重度消瘦，本次正常方向 
+				evaluationOfInterventionEffect = BaseGlobal.OBSITY_EVALUATION_GOOD;
+			}*/
+		}
+		map.put("evaluationOfInterventionEffect", evaluationOfInterventionEffect);
+		List<Map<String, Object>> childrenMeasureList = childrenMeasureMapper.getList(childrenMeasure);
+		if (childrenMeasureList ==null || (childrenMeasureList !=null && childrenMeasureList.size() <= 1) ) {
+			map.put("evaluationOfInterventionEffect", null);
+		}
+		map.put("evaluation", evaluation);
+		map.put("more", more);
+		map.put("weightWarning", weightWarning);
+		return map;
+	}
+}

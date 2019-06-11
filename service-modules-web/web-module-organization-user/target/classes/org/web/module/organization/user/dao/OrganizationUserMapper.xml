@@ -1,0 +1,389 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.web.module.organization.user.dao.OrganizationUserMapper">
+	<!-- 新增数据 -->
+	<insert id="insert" parameterType="org.web.module.organization.user.domain.OrganizationUser" useGeneratedKeys="true" keyProperty="id">
+	INSERT INTO
+		base_organization_user(name,birthday,phone,phone_status,photo,status,account,password,is_init_password,create_date,remark,sex,organization_person_type_id,
+		certificate_type,certificate_type_name,certificate_number,positive,opposite)
+	VALUES
+		(#{name},#{birthday},#{phone},#{phoneStatus},#{photo},#{status},#{account},#{password},#{isInitPassword},#{createDate},#{remark},#{sex},#{organizationPersonTypeId},
+		#{certificateType},#{certificateTypeName},#{certificateNumber},#{positive},#{opposite})
+	</insert>
+	<!--检查数据是否存在  -->
+	<select id="getRepeat" parameterType="org.web.module.organization.user.domain.OrganizationUser" resultType="map">
+		SELECT
+		bou.id,
+		bou.account,
+		bou.birthday,
+		bou.create_date createDate,
+		bou.is_init_password isInitPassword,
+		bou.`name`,
+		bou.phone,
+		bou.phone_status phoneStatus,
+		bou.photo,
+		bou.remark,
+		bou.sex,
+		bou.`status`,
+		bou.organization_person_type_id organizationPersonTypeId,
+		bou.certificate_type certificateType,
+		bou.certificate_type_name certificateTypeName,
+		bou.certificate_number certificateNumber,
+		bou.positive,
+		bou.opposite
+	FROM
+		base_organization_user bou 
+	<where>
+	   <if test="phone!=null and phone!=''">
+	         bou.phone =#{phone} 
+	   </if>
+	    <if test="account!=null and account!=''">
+	    and  bou.account =#{account}
+	    </if>
+	    </where>
+	</select>
+	<!-- 修改数据 -->
+	<update id="update" parameterType="org.web.module.organization.user.domain.OrganizationUser">
+		UPDATE base_organization_user set id = #{id}
+			<if test="name!=null and name!=''">
+				,name = #{name}
+			</if>
+			<if test="sex!=null">
+				, sex = #{sex}
+			</if>
+			<if test="birthday!=null ">
+				,birthday = #{birthday}
+			</if>
+			<if test="phone!=null and phone!=''">
+				,phone = #{phone}
+			</if>
+			<if test="photo!=null and photo!=''">
+				,photo = #{photo}
+			</if>
+			<if test="status!=null">
+				,status = #{status}
+			</if>
+			<if test="account!=null and account!=''">
+				,account = #{account}
+			</if>
+			<if test="password!=null and password!=''">
+				,password = #{password}
+			</if>
+			<if test="isInitPassword!=null ">
+				,is_init_password = #{isInitPassword}
+			</if>
+			<if test="remark!=null and remark!=''">
+				, remark = #{remark}
+			</if>
+			<if test="organizationPersonTypeId !=null">
+			    ,organization_person_type_id=#{organizationPersonTypeId}
+			</if>
+		    <if test="certificateType !=null and certificateType !=''">
+			    ,certificate_type=#{certificateType}
+		    </if>
+		       <if test="certificateTypeName !=null and certificateTypeName !=''">
+	 		   ,certificate_type_name=#{certificateTypeName}
+	       </if>
+		    <if test="certificateNumber !=null and certificateNumber !=''">
+		        ,certificate_number=#{certificateNumber}
+		    </if>
+		 	<if test="positive !=null and positive !=''">
+		 		,positive=#{positive}
+			</if>
+		 	<if test="opposite !=null and opposite !=''">
+		 		,opposite=#{opposite}
+			</if>
+		WHERE 
+			id = #{id}
+	</update>
+	
+	<resultMap type="map" id="organizationUserMap">
+		<result column="id" property="id"/>
+		<collection property="organizationUserCertificates" column="id" javaType="list" select="getOrganizationUserCertificates"/>
+	</resultMap>
+<!--个人信息详情  -->
+<select id="getOne" parameterType="org.web.module.organization.user.domain.OrganizationUser" resultMap="organizationUserMap">
+SELECT
+	bou.id,
+	bou.account,
+	bou.birthday,
+	TIMESTAMPDIFF(YEAR,bou.birthday, CURDATE()) age, 
+	bou.create_date createDate,
+	bou.is_init_password isInitPassword,
+	bou.`name`,
+	bou.phone,
+	bou.phone_status phoneStatus,
+	bou.photo,
+	bou.remark,
+	bou.sex,
+	bou.`status`,
+	bou.organization_person_type_id organizationPersonTypeId,
+	bou.certificate_type certificateType,
+	bou.certificate_type_name certificateTypeName,
+	bou.certificate_number certificateNumber,
+	bou.positive,
+	bou.opposite,
+	bou.password,
+	bopt.`name` personTypeName,
+	bdi.id doctorInfoId,
+	bdi.certification,
+	bdi.`name` doctorName,
+	bdi.remark doctorRemark,
+	bdi.school,
+	bdodd.post,
+	bdodd.department_id departmentId,
+	bd.`name` departmentName,
+	bdodd.id doctorOrganizationDepartmentDutyId
+FROM
+	base_organization_user bou
+	LEFT JOIN base_organization_person_type bopt ON bou.organization_person_type_id=bopt.id
+LEFT JOIN base_doctor_info bdi ON bou.id = bdi.organization_user_id
+LEFT JOIN base_doctor_organization_department_duty bdodd ON bdodd.organization_user_id = bou.id AND bdodd.organization_id = #{organizationId}
+LEFT JOIN base_department bd ON bd.id = bdodd.department_id
+WHERE 
+    bou.id=#{id}
+</select>
+
+<select id="getOrganizationUserCertificates" parameterType="int" resultType="map">
+SELECT
+	bouc.id,
+	bouc.organization_user_id organizationUserId,
+	bouc.certificate_type certificateType,
+	bouc.certificate_type_name certificateTypeName,
+	bouc.certificate_number certificateNumber,
+	bouc.positive,
+	bouc.opposite,
+	bouc.images,
+	bouc.create_date createDate
+FROM
+	base_organization_user_certificate bouc
+WHERE 
+    bouc.organization_user_id = #{id}	
+</select>
+
+	
+	<!-- 查询机构用户模块菜单列表 -->
+	<select id="getOrganizationUserModuleMenuList"  parameterType="org.web.module.organization.user.domain.OrganizationUser"  resultType="map">
+		SELECT
+			bom.id,
+			bom.`code`,
+			bom.`name`,
+			bom.pid,
+			bom.remark,
+			bom.icon,
+			bom.sort,
+			bom.type
+		FROM
+			base_organization_user_role bour
+		INNER JOIN base_organization_role bor ON bor.id = bour.organization_role_id AND bor.organization_id = #{organizationId} 
+			AND bor.system_module_id = #{moduleId} AND bor.`status` = 0
+		INNER JOIN base_operational_role boRole ON boRole.id = bor.operational_role_id AND boRole.is_used = TRUE
+		INNER JOIN base_operational_role_permission borp ON borp.operational_role_id = boRole.id
+		INNER JOIN base_operational_permission bop ON bop.id = borp.operational_permission_id AND bop.is_used = TRUE
+		INNER JOIN base_operational_permission_menu bopm ON bopm.operational_permission_id = bop.id
+		INNER JOIN base_operational_menu bom ON bom.id = bopm.operational_menu_id AND bom.is_used = TRUE
+		WHERE
+			bour.organization_user_id = #{id} AND bour.`status`=0
+		GROUP BY
+			bom.id
+		ORDER BY bom.sort DESC
+	</select>
+	
+	<!-- 查询超级管理员模块菜单列表 -->
+	<select id="getManagerModuleMenuList" parameterType="org.web.module.organization.user.domain.OrganizationUser" resultType="map">
+		SELECT
+			bom.id,
+			bom.`code`,
+			bom.`name`,
+			bom.pid,
+			bom.remark,
+			bom.icon,
+			bom.sort,
+			bom.type
+		FROM base_organization_role bor 
+		INNER JOIN base_operational_role boRole ON boRole.id = bor.operational_role_id AND boRole.is_used = TRUE
+		INNER JOIN base_operational_role_permission borp ON borp.operational_role_id = boRole.id
+		INNER JOIN base_operational_permission bop ON bop.id = borp.operational_permission_id AND bop.is_used = TRUE 
+		INNER JOIN base_operational_permission_menu bopm ON bopm.operational_permission_id = bop.id
+		INNER JOIN base_operational_menu bom ON bom.id = bopm.operational_menu_id AND bom.is_used =TRUE
+		WHERE  
+			bor.organization_id = #{organizationId} AND bor.system_module_id =#{moduleId} AND bor.`status` = 0 
+		GROUP BY bom.id
+		ORDER BY bom.sort DESC
+	</select>
+	
+	<!-- 查询机构用户的模块角色列表 -->
+	<select id="getOrganizationUserModuleRoleList" parameterType="org.web.module.organization.user.domain.OrganizationUser" resultType="map">
+		SELECT
+			boRole.id,
+			boRole.`code`,
+			boRole.`name`
+		FROM
+			base_organization_user_role bour
+		INNER JOIN base_organization_role bor ON bor.id = bour.organization_role_id 
+			AND bor.organization_id = #{organizationId} AND bor.system_module_id = #{moduleId} AND bor.`status` = 0
+		INNER JOIN base_organization_module bom ON bom.system_module_id = bor.system_module_id 
+			AND bom.organization_id = #{organizationId} AND bom.system_module_id = #{moduleId} AND bom.`status`= 0
+		INNER JOIN base_operational_role boRole ON boRole.id = bor.operational_role_id AND boRole.is_used = TRUE
+		WHERE bour.organization_user_id = #{id} AND bour.`status` = 0 
+		GROUP BY boRole.id
+	</select>
+	<!-- 超级管理员角色列表 -->
+	<select id="getManagerRoleList" parameterType="org.web.module.organization.user.domain.OrganizationUser" resultType="map">
+		SELECT
+			boRole.id,
+			boRole.`code`,
+			boRole.`name`
+		FROM
+			base_organization_role bor
+		INNER JOIN base_operational_role boRole ON boRole.id = bor.operational_role_id AND boRole.is_used = TRUE
+		INNER JOIN base_organization_module bom ON bom.system_module_id = bor.system_module_id 
+			AND bom.organization_id = #{organizationId} AND bom.system_module_id = #{moduleId} AND bom.`status`= 0
+		WHERE 
+			bor.organization_id =#{organizationId} AND 
+			bor.system_module_id = #{moduleId} AND 
+			bor.`status` = 0 
+		GROUP BY boRole.id
+	</select>
+	<!-- 查询机构用户模块权限列表 -->
+	<select id="getOrganizationUserModulePermissionList" parameterType="org.web.module.organization.user.domain.OrganizationUser" resultType="map">
+		SELECT
+			bop.id,
+			bop.`code`,
+			bop.`name`
+		FROM base_organization_user_role bour
+		INNER JOIN base_organization_role bor ON bor.id = bour.organization_role_id AND bor.organization_id = #{organizationId} 
+			AND bor.system_module_id =#{moduleId}  AND bor.`status` = 0 
+		INNER JOIN base_organization_module bom ON bom.system_module_id = bor.system_module_id 
+			AND bom.organization_id = #{organizationId} AND bom.system_module_id = #{moduleId} AND bom.`status`= 0
+		INNER JOIN base_operational_role boRole ON boRole.id = bor.operational_role_id AND boRole.is_used = TRUE
+		INNER JOIN base_operational_role_permission borp ON borp.operational_role_id = boRole.id
+		INNER JOIN base_operational_permission bop ON bop.id = borp.operational_permission_id AND bop.is_used = TRUE
+		WHERE 
+			bour.organization_user_id = #{id} 
+			AND bour.`status`=0
+		GROUP BY bop.id
+	</select>
+	<!-- 查询超级管理员模块权限列表 -->
+	<select id="getManagerPermissionList" parameterType="org.web.module.organization.user.domain.OrganizationUser" resultType="map">
+		SELECT
+			bop.id,
+			bop.`code`,
+			bop.`name`
+		FROM base_organization_role bor 
+		INNER JOIN base_organization_module bom ON bom.system_module_id = bor.system_module_id 
+			AND bom.organization_id = #{organizationId} AND bom.system_module_id = #{moduleId} AND bom.`status`= 0
+		INNER JOIN base_operational_role boRole ON boRole.id = bor.operational_role_id AND boRole.is_used = TRUE
+		INNER JOIN base_operational_role_permission borp ON borp.operational_role_id = boRole.id
+		INNER JOIN base_operational_permission bop ON bop.id = borp.operational_permission_id AND bop.is_used = TRUE
+		WHERE     
+			bor.organization_id = #{organizationId} AND 
+			bor.system_module_id =#{moduleId} AND 
+			bor.`status` = 0
+		GROUP BY bop.id
+	</select>
+	<!-- 查询机构用户模块操作列表 -->
+	<select id="getOrganizationUserModuleOperationList" parameterType="org.web.module.organization.user.domain.OrganizationUser" resultType="map">
+		SELECT
+			boo.id,
+			boo.`code`,
+			boo.`name`
+		FROM base_organization_user_role bour
+		INNER JOIN base_organization_role bor ON bor.id = bour.organization_role_id AND bor.organization_id = #{organizationId} 
+			AND bor.system_module_id =#{moduleId}  AND bor.`status` = 0
+		INNER JOIN base_organization_module bom ON bom.system_module_id = bor.system_module_id 
+			AND bom.organization_id = #{organizationId} AND bom.system_module_id = #{moduleId} AND bom.`status`= 0
+		INNER JOIN base_operational_role boRole ON boRole.id = bor.operational_role_id AND boRole.is_used = TRUE 
+		INNER JOIN base_operational_role_permission borp ON borp.operational_role_id = boRole.id
+		INNER JOIN base_operational_permission bop ON bop.id = borp.operational_permission_id AND bop.is_used = TRUE
+		INNER JOIN base_operational_permission_operation bopo ON bopo.operational_permission_id = bop.id
+		INNER JOIN base_operational_operation boo ON boo.id = bopo.operational_operation_id AND boo.is_used = TRUE
+		WHERE 
+			bour.organization_user_id = #{id} 
+			AND bour.`status`=0
+		GROUP BY boo.id
+	</select>
+	<!-- 查询超级管理员模块操作列表 -->
+	<select id="getManagerOperationList" parameterType="org.web.module.organization.user.domain.OrganizationUser" resultType="map">
+		SELECT
+			boo.id,
+			boo.`code`,
+			boo.`name`
+		FROM base_organization_role bor 
+		INNER JOIN base_organization_module bom ON bom.system_module_id = bor.system_module_id 
+			AND bom.organization_id = #{organizationId} AND bom.system_module_id = #{moduleId} AND bom.`status`= 0
+		INNER JOIN base_operational_role boRole ON boRole.id = bor.operational_role_id AND boRole.is_used = TRUE 
+		INNER JOIN base_operational_role_permission borp ON borp.operational_role_id = boRole.id
+		INNER JOIN base_operational_permission bop ON bop.id = borp.operational_permission_id AND bop.is_used = TRUE 
+		INNER JOIN base_operational_permission_operation bopo ON bopo.operational_permission_id = bop.id
+		INNER JOIN base_operational_operation boo ON boo.id = bopo.operational_operation_id AND boo.is_used = TRUE
+		WHERE 
+			bor.organization_id = #{organizationId} 
+			AND bor.system_module_id =#{moduleId} 
+			AND bor.`status` = 0 
+		GROUP BY boo.id
+	</select>
+	<!-- 查询账号 -->
+	<select id="getUserByAccount" parameterType="org.web.module.organization.user.domain.OrganizationUser" resultType="map">
+		SELECT
+			ou.id,ou.`name`,ou.birthday,ou.is_init_password isInitPassword,ou.phone,ou.photo,ou.sex,bo.`status` organizationStatus
+		FROM
+			base_organization_user ou
+			INNER JOIN base_doctor_organization_department_duty bdodd ON ou.id = bdodd.organization_user_id
+			INNER JOIN base_organization bo ON bo.id = bdodd.organization_id
+		WHERE
+			ou.account =#{account}
+	</select>
+	<!-- 查询账号和密码-->
+	<select id="getUserByAccountAndPassword" parameterType="org.web.module.organization.user.domain.OrganizationUser" resultType="map">
+		SELECT
+			ou.id,ou.`name`,ou.birthday,ou.is_init_password isInitPassword,ou.phone,ou.photo,ou.sex,bo.`status` organizationStatus
+		FROM
+			base_organization_user ou
+			INNER JOIN base_doctor_organization_department_duty bdodd ON ou.id = bdodd.organization_user_id
+			INNER JOIN base_organization bo ON bo.id = bdodd.organization_id
+		WHERE
+			ou.account =#{account}
+			AND ou.`password` =#{password}
+	</select>
+	
+	
+
+	
+	 <resultMap type="map" id="organzationUserMap">
+		<result column="organizationId" property="organizationId"/>
+		<result column="organizationTypeId" property="organizationTypeId"/>
+		<collection property="organizationPersonType" column="organizationTypeId" javaType="list" select="getOrganizationPersonType"/>
+	</resultMap>
+	<select id="getOrganizationPersonType" parameterType="int" resultType="map">
+		SELECT
+			botuc.organization_person_type_id organizationPersonTypeId,
+			bopt.`code` organizationPersonTypeCode,
+			bopt.`name` organizationPersonTypeName,
+			bopt.interface_url organizationPersonTypeInterfaceUrl,
+			bopt.create_date organizationPersonTypeCreateDate
+		FROM
+			base_organization_type_user_category botuc
+		LEFT JOIN base_organization_person_type bopt ON bopt.id = botuc.organization_person_type_id
+		WHERE
+			botuc.organization_type_id = #{organizationTypeId}
+	</select> 
+	
+	<!--查询机构用户的机构列表  -->
+	<select id="getOrganzationUserOrganzationList" parameterType="org.web.module.organization.user.domain.OrganizationUser" resultType="map">
+		SELECT
+			bo.id organizationId,
+			bo.`name` organizationName,
+			bo.`code` organizationCode,
+			bo.logo organizationLogo,
+			bou.id organizationUserId,
+			bo.organization_type_id organizationTypeId
+		FROM
+			base_organization_user bou
+		LEFT JOIN base_doctor_organization_department_duty bdodd ON bou.id = bdodd.organization_user_id
+		LEFT JOIN base_organization bo ON bdodd.organization_id = bo.id
+		WHERE
+			bou.id =#{id}
+	</select>
+	
+</mapper>

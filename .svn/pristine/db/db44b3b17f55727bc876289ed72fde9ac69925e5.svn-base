@@ -1,0 +1,194 @@
+package org.web.module.bone.age.controller;
+
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+
+import javax.annotation.Resource;
+
+import org.service.core.api.ApiCodeEnum;
+import org.service.core.api.JsonApi;
+import org.service.core.api.MultiLine;
+import org.service.core.auth.control.RequiresAuthentication;
+import org.service.core.auth.level.Level;
+import org.service.core.entity.BaseEntity;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RestController;
+import org.web.module.bone.age.domain.RemoteBoneAgeOrder;
+import org.web.module.bone.age.domain.RemoteQuestion;
+import org.web.module.bone.age.global.BaseGlobal;
+import org.web.module.bone.age.global.GlobalEnum;
+import org.web.module.bone.age.message.Prompt;
+import org.web.module.bone.age.service.RemoteBoneAgeOrderService;
+import org.web.module.bone.age.service.RemoteQuestionService;
+import org.web.module.bone.age.service.feign.IOrganizationUserRoleService;
+
+import com.github.pagehelper.Page;
+import com.github.pagehelper.PageHelper;
+
+@RestController
+public class RemoteQuestionController {
+	
+	@Resource
+	private RemoteQuestionService remoteQuestionService;
+	@Resource
+	private IOrganizationUserRoleService organizationUserRoleService;
+
+	@Resource
+	private RemoteBoneAgeOrderService remoteBoneAgeOrderService;
+	
+	/**
+	 * @author: ChenYan
+	 * @date: 2019年3月5日
+	 * @param remoteQuestion
+	 * @param result
+	 * @return
+	 * @description: 根据远程阅片骨龄工单id查看疑问列表，按时间降序（取前三条）
+	 */
+	@RequiresAuthentication(level = Level.OPERATION, value = { "web-module-bone-age:remote-question:get-list" })
+	@GetMapping(value = { "/remote/question/{id}" })
+	public JsonApi getList(@PathVariable("id") Integer id,@Validated({ BaseEntity.SelectAll.class })  RemoteQuestion remoteQuestion, BindingResult result) {
+		remoteQuestion.setBaseRemoteBoneAgeOrderId(id);
+		Page<?> page = PageHelper.startPage(remoteQuestion.getPage(), remoteQuestion.getPageSize());
+		List<Map<String, Object>> remoteBoneAgeOrderList = remoteQuestionService.getList(remoteQuestion);
+		if (remoteBoneAgeOrderList != null && !remoteBoneAgeOrderList.isEmpty()) {
+			return new JsonApi(ApiCodeEnum.OK, new MultiLine(page.getTotal(), remoteBoneAgeOrderList));
+		}
+		return new JsonApi(ApiCodeEnum.NOT_FOUND);
+	}
+
+		/**
+		 * @author: ChenYan
+		 * @date: 2019年3月25日
+		 * @param id
+		 * @param remoteQuestion
+		 * @param result
+		 * @return
+		 * @description: 查询疑问最后一条数据状态
+		 */
+		@RequiresAuthentication(ignore=true,level = Level.OPERATION, value = { "web-module-bone-age:remote-question:get-one" })
+		@GetMapping(value = { "/remote/question/{id}" })
+		public JsonApi getIsAnswer(@PathVariable("id") Integer id,@Validated({ BaseEntity.SelectAll.class })  RemoteQuestion remoteQuestion, BindingResult result) {
+			remoteQuestion.setBaseRemoteBoneAgeOrderId(id);
+			remoteQuestion.setType(2);
+			Map<String, Object> map=remoteQuestionService.getIsAnswer(remoteQuestion);
+			if (map!=null) {
+				return new JsonApi(ApiCodeEnum.OK,map.put("isAnswer", true));
+			}else {
+				return new JsonApi(ApiCodeEnum.OK,map.put("isAnswer", false));
+			}
+		} 
+	
+	
+	
+	/**
+	 * @author: ChenYan
+	 * @date: 2019年3月5日
+	 * @param remoteQuestion
+	 * @param result
+	 * @param token
+	 * @param organizationId
+	 * @return
+	 * @description: 新增发起疑问远程骨龄疑问表
+	 */
+	@RequiresAuthentication(level=Level.OPERATION, value = { "web-module-bone-age:remote-question:insert-launch" })
+	@PostMapping(value= {"/remote/question/launch/{id}"})
+	@Transactional
+	public JsonApi insertLaunch( @PathVariable("id") Integer id,@Validated({ BaseEntity.Insert.class }) @RequestBody RemoteQuestion remoteQuestion, BindingResult result,
+			@RequestHeader(required = true, value = BaseGlobal.TOKEN_FLAG) String token) {
+		
+		 /*获取机构用户ID*/
+		Integer organizationUserId = null;
+		JsonApi jsonApi = organizationUserRoleService.getSession(BaseGlobal.CACHE_ORGANIZATION_USER, token,token);
+		if (jsonApi.getCode() == ApiCodeEnum.OK.getValue()) {
+			organizationUserId = Integer.parseInt(jsonApi.getData().toString());
+		}else {
+			 return new JsonApi(ApiCodeEnum.NOT_FOUND).setMsg(Prompt.bundle("user.id.is.notblank.valid"));
+		}
+		remoteQuestion.setId(organizationUserId);
+		/*通过用户ID查询用户名称*/
+		Map<String, Object> map=remoteQuestionService.getOrganizationUserName(remoteQuestion);
+		if (map==null) {
+			 return new JsonApi(ApiCodeEnum.NOT_FOUND);
+		}
+		/*设置默认值*/
+		remoteQuestion.setCreateTime(new Date());
+		remoteQuestion.setLaunchOrganizationUserId(organizationUserId);
+		remoteQuestion.setLaunchOrganizationUserName(map.get("name").toString());
+		remoteQuestion.setType(GlobalEnum.Question.LAUNCH.getValue());
+		remoteQuestion.setBaseRemoteBoneAgeOrderId(id);
+		if (remoteQuestionService.insert(remoteQuestion) > 0) {
+			/*修改远程阅片状态为质疑*/
+			RemoteBoneAgeOrder remoteBoneAgeOrder=new RemoteBoneAgeOrder();
+			remoteBoneAgeOrder.setStatus(GlobalEnum.RemoteBoneAgeOrder.QUESTION.getValue());
+			remoteBoneAgeOrder.setId(id);
+			if (remoteBoneAgeOrderService.update(remoteBoneAgeOrder)>0) {
+				return new JsonApi(ApiCodeEnum.OK);
+			}
+			throw new RuntimeException();
+		}
+		return new JsonApi(ApiCodeEnum.FAIL);
+	}
+	
+	
+	/**
+	 * @author: ChenYan
+	 * @date: 2019年3月5日
+	 * @param id
+	 * @param remoteQuestion
+	 * @param result
+	 * @param token
+	 * @return
+	 * @description: 回答疑问
+	 */
+	@RequiresAuthentication(level=Level.OPERATION, value = { "web-module-bone-age:remote-question:insert-answer" })
+	@PostMapping(value= {"/remote/question/answer/{id}"})
+	@Transactional
+	public JsonApi insertAnswer( @PathVariable("id") Integer id,@Validated({ BaseEntity.Insert.class }) @RequestBody RemoteQuestion remoteQuestion, BindingResult result,
+			@RequestHeader(required = true, value = BaseGlobal.TOKEN_FLAG) String token) {
+		
+		 /*获取机构用户ID*/
+		Integer organizationUserId = null;
+		JsonApi jsonApi = organizationUserRoleService.getSession(BaseGlobal.CACHE_ORGANIZATION_USER, token,token);
+		if (jsonApi.getCode() == ApiCodeEnum.OK.getValue()) {
+			organizationUserId = Integer.parseInt(jsonApi.getData().toString());
+		}else {
+			 return new JsonApi(ApiCodeEnum.NOT_FOUND).setMsg(Prompt.bundle("user.id.is.notblank.valid"));
+		}
+		remoteQuestion.setId(organizationUserId);
+		/*通过用户ID查询用户名称*/
+		Map<String, Object> map=remoteQuestionService.getOrganizationUserName(remoteQuestion);
+		if (map==null) {
+			 return new JsonApi(ApiCodeEnum.NOT_FOUND);
+		}
+		/*设置默认值*/
+		remoteQuestion.setCreateTime(new Date());
+		remoteQuestion.setLaunchOrganizationUserId(organizationUserId);
+		remoteQuestion.setLaunchOrganizationUserName(map.get("name").toString());
+		remoteQuestion.setType(GlobalEnum.Question.ANSWER.getValue());
+		remoteQuestion.setBaseRemoteBoneAgeOrderId(id);
+		if (remoteQuestionService.insert(remoteQuestion) > 0) {
+			/*修改远程阅片状态为*/
+			RemoteBoneAgeOrder remoteBoneAgeOrder=new RemoteBoneAgeOrder();
+			remoteBoneAgeOrder.setStatus(GlobalEnum.RemoteBoneAgeOrder.INEXECUTION.getValue());
+			remoteBoneAgeOrder.setId(id);
+			if (remoteBoneAgeOrderService.update(remoteBoneAgeOrder)>0) {
+				return new JsonApi(ApiCodeEnum.OK);
+			}
+			throw new RuntimeException();
+		}
+		return new JsonApi(ApiCodeEnum.FAIL);
+	}
+	
+	
+	
+	
+	
+}

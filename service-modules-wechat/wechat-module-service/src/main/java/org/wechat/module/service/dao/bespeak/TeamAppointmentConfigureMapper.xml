@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.wechat.module.service.dao.bespeak.TeamAppointmentConfigureMapper">
+  <!--查询详情  -->
+  <select id="getOne" parameterType="org.wechat.module.service.domain.bespeak.TeamAppointmentConfigure" resultType="map">
+    SELECT 
+    	btac.id, 
+    	btac.service_id serviceId,
+    	btac.organization_team_id organizationTeamId, 
+    	btac.name, btac.cycle, btac.status, 
+    	btac.start_date startDate, 
+    	btac.end_date endDate, 
+    	btac.create_date createDate
+    FROM base_team_appointment_configure btac
+    <where>
+    	<if test="id != null">
+    		btac.id = #{id}
+    	</if>
+    	<if test="status != null">
+    		AND btac.status = #{status}
+    	</if>
+    	<if test="serviceId != null">
+    		AND btac.service_id = #{serviceId}
+    	</if>
+    	<if test="organizationTeamId != null">
+    		AND btac.organization_team_id = #{organizationTeamId}
+    	</if>
+    	<if test="startDate != null and endDate != null">
+    		AND NOT ((btac.end_date &lt; #{startDate}) OR (btac.start_date &gt; #{endDate}))
+    	</if>
+    </where> 
+  </select>
+  
+  <!-- 是否可预约详情 -->
+  <select id="getAppointmentDetail" parameterType="org.wechat.module.service.domain.bespeak.TeamAppointmentConfigure" resultType="map">
+    SELECT
+		btacd.id,
+		btacd.team_appointment_configure_id teamAppointmentConfigureId,
+		btacd.start_date startDate,
+		btacd.end_date endDate,
+		(btacd.end_no - btacd.start_no) total,
+		(
+			SELECT
+				COUNT(btao.id)
+			FROM
+				base_team_appointment_order btao
+			WHERE
+				btao.team_appointment_configure_detail_id = btacd.id
+			AND 
+				DATE_FORMAT(btao.appointment_date,'%Y-%m-%d') = #{strAppointmentDate}
+		) appointmentedNum,
+		IF (
+			btacd.end_no - btacd.start_no > (
+				SELECT
+					COUNT(btao.id)
+				FROM
+					base_team_appointment_order btao
+				WHERE
+					btao.team_appointment_configure_detail_id = btacd.id
+				AND DATE_FORMAT(btao.appointment_date,'%Y-%m-%d') = #{strAppointmentDate}
+			),
+			true,
+			false
+		) appointment
+	FROM base_team_appointment_configure_detail btacd
+	INNER JOIN base_team_appointment_configure btac ON btac.id = btacd.team_appointment_configure_id
+	WHERE
+		btacd.team_appointment_configure_id = #{id}
+		<if test="cycle != null and cycle == 2">
+			AND (btac.start_date &lt;=#{appointmentDate} and btac.end_date &gt;=#{appointmentDate})
+		</if>
+		<if test="status != null">
+        	AND btac.status = #{status}
+    	</if>
+    ORDER BY btacd.id DESC
+  </select>
+  
+  <!-- 团队预约配置列表 -->
+  <select id="getList" parameterType="org.wechat.module.service.domain.bespeak.TeamAppointmentConfigure" resultType="map">
+    SELECT 
+    	btac.id, 
+    	btac.organization_team_id organizationTeamId, 
+    	btac.`name`, btac.cycle, btac.`status`, 
+    	btac.start_date startDate, 
+    	btac.end_date endDate, 
+    	btac.create_date createDate
+    FROM base_team_appointment_configure btac
+    <where>
+    	<if test="organizationTeamId != null">
+        	btac.organization_team_id = #{organizationTeamId}
+    	</if>
+    	<if test="serviceId != null"> 
+    		btac.service_id = #{serviceId}
+    	</if>
+    	<if test="startDate != null and endDate != null">
+    		AND NOT ((btac.end_date &lt; #{startDate}) OR (btac.start_date &gt; #{endDate}))
+    	</if>
+    	<if test="status != null">
+        	AND btac.status = #{status}
+    	</if>
+    	<choose>
+    		<when test="appointmentDate != null">
+    			AND (btac.start_date &gt;#{appointmentDate} AND btac.end_date &lt;#{appointmentDate}) OR btac.cycle = 1
+    		</when>
+    		<otherwise>
+    			OR btac.cycle = 1
+    		</otherwise>
+    	</choose>
+    </where>
+    ORDER BY btac.id DESC
+  </select>
+</mapper>

@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.web.module.height.obesity.dao.UserDrugsProjectMapper">
+  <delete id="deleteByChildrenMeasureId" parameterType="org.web.module.height.obesity.entity.UserDrugsProject">
+    delete from base_user_drugs_project
+    where children_measure_id = #{childrenMeasureId}
+  </delete>
+  <insert id="insert" parameterType="org.web.module.height.obesity.entity.UserDrugsProject">
+    insert into base_user_drugs_project (id, user_id, children_measure_id, 
+      base_drugs_config_id, usage, dosage, 
+      create_date_time)
+    values (#{id}, #{userId}, #{childrenMeasureId}, #{baseDrugsConfigId}, #{usage}, #{dosage}, #{createDateTime})
+  </insert>
+  <insert id="insertBatch" parameterType="java.util.List">
+    insert into base_user_drugs_project (user_id, children_measure_id, 
+      base_drugs_config_id, using_frequency_code, using_frequency_value, 
+      using_way_code,using_way_value,using_method_code,using_method_value,
+      create_date_time)
+    values
+    <foreach collection="list" item="userDrugsProject" index="index" separator=",">    
+    (
+      #{userDrugsProject.userId}, 
+      #{userDrugsProject.childrenMeasureId}, 
+      #{userDrugsProject.baseDrugsConfigId},
+      #{userDrugsProject.usingFrequencyCode}, 
+      #{userDrugsProject.usingFrequencyValue}, 
+      #{userDrugsProject.usingWayCode}, 
+      #{userDrugsProject.usingWayValue}, 
+      #{userDrugsProject.usingMethodCode}, 
+      #{userDrugsProject.usingMethodValue}, 
+      #{userDrugsProject.createDateTime}   
+    )
+    </foreach>
+  </insert>
+  <select id="getList" parameterType="org.web.module.height.obesity.entity.UserDrugsProject" resultType="map">
+  select 
+    a.id, 
+    a.user_id userId, 
+    a.children_measure_id childrenMeasureId, 
+    base_drugs_config_id baseDrugsConfigId, 
+    using_frequency_code usingFrequencyCode,
+    using_frequency_value usingFrequencyValue, 
+    using_way_code usingWayCode,
+    using_way_value usingWayValue,
+    using_method_code usingMethodCode,
+    using_method_value usingMethodValue,
+    a.create_date_time createDateTime,
+    b.name
+    from base_user_drugs_project as a
+    inner join base_drugs_config as b on a.base_drugs_config_id=b.id
+    <where>
+      <if test="childrenMeasureId!=null">children_measure_id=#{childrenMeasureId}</if>
+    </where>
+  </select>
+  <select id="getOne" parameterType="org.web.module.height.obesity.entity.UserDrugsProject" resultType="map">
+    select 
+    id, 
+    user_id user_id, 
+    children_measure_id childrenMeasureId, 
+    base_drugs_config_id baseDrugsConfigId, 
+    using_frequency_code usingFrequencyCode,
+    using_frequency_value usingFrequencyValue, 
+    using_way_code usingWayCode,
+    using_way_value usingWayValue,
+    using_method_code usingMethodCode,
+    using_method_value usingMethodValue,
+    create_date_time createDateTime
+    from base_user_drugs_project
+    <where>
+      <if test="id!=null">id=#{id}</if>
+      <if test="childrenMeasureId!=null">AND children_measure_id=#{childrenMeasureId}</if>
+    </where>
+  </select>
+</mapper>

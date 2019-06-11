@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.wechat.module.height.obesity.dao.NewsMapper">  
+  <delete id="delete" parameterType="org.wechat.module.height.obesity.entity.News">
+    delete from base_news
+    where id = #{id}
+  </delete>
+  <insert id="insert" parameterType="org.wechat.module.height.obesity.entity.News">
+    insert into base_news (title, subheading,
+      brief_introduction, picture, type, 
+      is_host, hot_sort, create_date_time,source,
+      content)
+    values (#{title}, #{subheading},
+      #{briefIntroduction}, #{picture}, #{type}, 
+      #{isHost,jdbcType=TINYINT}, #{hotSort}, #{createDateTime}, #{source},
+      #{content})
+  </insert>
+  <update id="update" parameterType="org.wechat.module.height.obesity.entity.News">
+    update base_news
+    set title = #{title},
+      subheading = #{subheading},
+      brief_introduction = #{briefIntroduction},
+      picture = #{picture},
+      type = #{type},
+      is_host = #{isHost,jdbcType=TINYINT},
+      hot_sort = #{hotSort},
+      content = #{content},
+      source=#{source}
+    where id = #{id}
+  </update>
+  <select id="getOne"  parameterType="org.wechat.module.height.obesity.entity.News"   resultType="map">
+    SELECT id, title, subheading, brief_introduction briefIntroduction, picture, type, is_host isHost, hot_sort hotSort,
+    create_date_time createDateTime, content,source
+    FROM base_news
+    WHERE id = #{id}
+  </select>
+  <select id="getList"   parameterType="org.wechat.module.height.obesity.entity.News"   resultType="map">
+    SELECT id, title, subheading, brief_introduction briefIntroduction, picture, type, is_host isHost, hot_sort hotSort,
+    create_date_time createDateTime,source
+    FROM base_news a
+    WHERE a.type =#{type}
+  </select>
+  <select id="getNewsIndexList" parameterType="org.wechat.module.height.obesity.entity.News"   resultType="map">
+    SELECT id, title, subheading, brief_introduction briefIntroduction, picture, type, is_host isHost, hot_sort hotSort,
+    create_date_time createDateTime,source
+    FROM base_news a
+    WHERE a.type =#{type} AND a.is_host=#{isHost}
+    ORDER BY a.hot_sort ASC,a.id DESC
+  </select>
+</mapper>

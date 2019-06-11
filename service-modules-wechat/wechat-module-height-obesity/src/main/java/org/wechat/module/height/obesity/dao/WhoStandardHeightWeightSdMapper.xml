@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.wechat.module.height.obesity.dao.WhoStandardHeightWeightSdMapper">
+  <delete id="delete" parameterType="org.wechat.module.height.obesity.entity.WhoStandardHeightWeightSd">
+    delete from who_standard_height_weight_sd
+    where id = #{id}
+  </delete>
+  <insert id="insert" parameterType="org.wechat.module.height.obesity.entity.WhoStandardHeightWeightSd">
+    insert into who_standard_height_weight_sd (id, type, sex, 
+      height, sd, standard_value
+      )
+    values (#{id}, #{type}, #{sex}, 
+      #{height}, #{sd}, #{standardValue}
+      )
+  </insert>
+  <update id="update" parameterType="org.wechat.module.height.obesity.entity.WhoStandardHeightWeightSd">
+    update who_standard_height_weight_sd
+    set type = #{type},
+      sex = #{sex},
+      height = #{height},
+      sd = #{sd},
+      standard_value = #{standardValue}
+    where id = #{id}
+  </update>
+  <select id="getOne" parameterType="org.wechat.module.height.obesity.entity.WhoStandardHeightWeightSd" resultType="map">
+    select id, type, sex, height, sd, standard_value
+    from who_standard_height_weight_sd
+    where id = #{id}
+  </select>
+  <select id="getList" parameterType="org.wechat.module.height.obesity.entity.WhoStandardHeightWeightSd" resultType="map">
+    select id, type, sex, height, sd, standard_value
+    from who_standard_height_weight_sd
+  </select>
+</mapper>

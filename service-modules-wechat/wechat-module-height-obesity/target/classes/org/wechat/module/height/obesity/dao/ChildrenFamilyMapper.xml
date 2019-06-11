@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.wechat.module.height.obesity.dao.ChildrenFamilyMapper">  
+
+  <delete id="delete" parameterType="org.wechat.module.height.obesity.entity.ChildrenFamily">
+	DELETE
+	FROM
+		base_children_family
+	WHERE
+		id = #{id}
+  </delete>
+  
+  <!--新增儿童家族信息-->
+  <insert id="insert" parameterType="org.wechat.module.height.obesity.entity.ChildrenFamily"  keyProperty="id"  useGeneratedKeys="true">
+   INSERT INTO base_children_family
+    ( user_id, father_height,  father_weight, father_preadolescence_weight, father_upper, father_lower, mother_height, mother_weight, mother_childbirth_age, pre_pregnancy_weight, pregnancy_weight_add, 
+      mother_gestational_diabetes, mother_gestational_hypertension,  mother_hypothyroidism, mother_abnormal_pregnancy,  mother_abnormal_pregnancy_content, mother_disability,  mother_disability_content, familial_obesity, 
+      father_obesity, mother_obesity, last_update_time,  create_date_time,mother_upper,mother_lower,delayed_adolescence)
+    VALUES
+     (#{userId}, #{fatherHeight}, #{fatherWeight}, #{fatherPreadolescenceWeight}, #{fatherUpper},  #{fatherLower}, #{motherHeight}, #{motherWeight},   #{motherChildbirthAge}, #{prePregnancyWeight}, #{pregnancyWeightAdd}, 
+      #{motherGestationalDiabetes}, #{motherGestationalHypertension}, #{motherHypothyroidism}, #{motherAbnormalPregnancy}, #{motherAbnormalPregnancyContent}, #{motherDisability},  #{motherDisabilityContent}, #{familialObesity}, 
+      #{fatherObesity}, #{motherObesity}, #{lastUpdateTime},   #{createDateTime},#{motherUpper},#{motherLower},#{delayedAdolescence})
+  </insert>
+  
+  <update id="update" parameterType="org.wechat.module.height.obesity.entity.ChildrenFamily">
+    UPDATE base_children_family SET user_id = #{userId}
+	   <if test="fatherHeight!=null">
+	      , father_height = #{fatherHeight}
+	    </if>
+	     <if test="fatherWeight!=null">
+	      , father_weight = #{fatherWeight}
+	    </if>
+	      <if test="fatherPreadolescenceWeight!=null">
+	      ,  father_preadolescence_weight = #{fatherPreadolescenceWeight}
+	    </if>
+	      <if test="fatherUpper!=null">
+	      ,   father_upper = #{fatherUpper}
+	    </if>
+	      <if test="fatherLower!=null">
+	      ,    father_lower = #{fatherLower}
+	    </if>
+	      <if test="motherHeight!=null">
+	      ,   mother_height = #{motherHeight}
+	    </if>
+	      <if test="motherWeight!=null">
+	      , mother_weight = #{motherWeight}
+	    </if>
+	     <if test="motherUpper!=null">
+	      ,   mother_upper = #{motherUpper}
+	    </if>
+	      <if test="motherLower!=null">
+	      , mother_lower = #{motherLower}
+	    </if>
+	      <if test="motherChildbirthAge!=null">
+	      ,     mother_childbirth_age = #{motherChildbirthAge}
+	    </if>
+	      <if test="prePregnancyWeight!=null">
+	      ,   pre_pregnancy_weight = #{prePregnancyWeight}
+	    </if>
+	      <if test="pregnancyWeightAdd!=null">
+	      , pregnancy_weight_add = #{pregnancyWeightAdd}
+	    </if>
+	       <if test="motherGestationalDiabetes!=null">
+	      ,   mother_gestational_diabetes = #{motherGestationalDiabetes}
+	    </if>
+	       <if test="motherGestationalHypertension!=null">
+	      , mother_gestational_hypertension = #{motherGestationalHypertension}
+	    </if>
+	       <if test="motherHypothyroidism!=null">
+	      ,  mother_hypothyroidism = #{motherHypothyroidism}
+	    </if>
+	       <if test="motherAbnormalPregnancy!=null">
+	      ,mother_abnormal_pregnancy = #{motherAbnormalPregnancy}
+	    </if>
+	       <if test="motherAbnormalPregnancyContent!=null and motherAbnormalPregnancyContent!=''">
+	      , mother_abnormal_pregnancy_content = #{motherAbnormalPregnancyContent}
+	    </if>
+	  <if test="motherDisabilityContent!=null and motherDisabilityContent!=''">
+	      ,  mother_disability_content = #{motherDisabilityContent}
+	    </if>
+	    <if test="motherDisability!=null">
+	    ,mother_disability=#{motherDisability}
+	    </if>
+	      <if test="familialObesity!=null">
+	      ,familial_obesity = #{familialObesity}
+	    </if>
+	      <if test="fatherObesity!=null">
+	      ,father_obesity = #{fatherObesity}
+	    </if>
+	     <if test="motherObesity!=null">
+	      ,mother_obesity = #{motherObesity}
+	    </if>
+	      <if test="delayedAdolescence!=null">
+	      ,delayed_adolescence = #{delayedAdolescence}
+	    </if>
+	      <if test="lastUpdateTime!=null">
+	      , last_update_time = #{lastUpdateTime}
+	    </if>
+    WHERE
+    	user_id = #{userId}
+  </update>
+  
+  <select id="getOne" parameterType="org.wechat.module.height.obesity.entity.ChildrenFamily" resultType="map">
+	SELECT
+		id,
+		user_id userId,
+		father_height fatherHeight,
+		father_weight fatherWeight,
+		father_preadolescence_weight fatherPreadolescenceWeight,
+		father_upper fatherUpper,
+		father_lower fatherLower,
+		mother_height motherHeight,
+		mother_weight motherWeight,
+		mother_upper motherUpper,
+		mother_lower motherLower,
+		mother_childbirth_age motherChildbirthAge,
+		pre_pregnancy_weight prePregnancyWeight,
+		pregnancy_weight_add pregnancyWeightAdd,
+		mother_gestational_diabetes motherGestationalDiabetes,
+		mother_gestational_hypertension motherGestationalHypertension,
+		mother_hypothyroidism motherHypothyroidism,
+		mother_abnormal_pregnancy motherAbnormalPregnancy,
+		mother_abnormal_pregnancy_content motherAbnormalPregnancyContent,
+		mother_disability motherDisability,
+		mother_disability_content motherDisabilityContent,
+		familial_obesity familialObesity,
+		father_obesity fatherObesity,
+		mother_obesity motherObesity,
+		delayed_adolescence delayedAdolescence,
+		last_update_time lastUpdateTime,
+		create_date_time createDateTime
+	FROM
+		base_children_family
+	WHERE
+		id = #{id}   
+  </select>
+  
+  <!-- 通过用户id查询儿童家族信息 -->
+  <select id="getChildrenFamilyByUserId" parameterType="org.wechat.module.height.obesity.entity.ChildrenFamily" resultType="map">
+	SELECT
+		id,
+		user_id userId,
+		father_height fatherHeight,
+		father_weight fatherWeight,
+		father_preadolescence_weight fatherPreadolescenceWeight,
+		father_upper fatherUpper,
+		father_lower fatherLower,
+		mother_height motherHeight,
+		mother_weight motherWeight,
+		mother_upper motherUpper,
+		mother_lower motherLower,
+		mother_childbirth_age motherChildbirthAge,
+		pre_pregnancy_weight prePregnancyWeight,
+		pregnancy_weight_add pregnancyWeightAdd,
+		mother_gestational_diabetes motherGestationalDiabetes,
+		mother_gestational_hypertension motherGestationalHypertension,
+		mother_hypothyroidism motherHypothyroidism,
+		mother_abnormal_pregnancy motherAbnormalPregnancy,
+		mother_abnormal_pregnancy_content motherAbnormalPregnancyContent,
+		mother_disability motherDisability,
+		mother_disability_content motherDisabilityContent,
+		familial_obesity familialObesity,
+		father_obesity fatherObesity,
+		mother_obesity motherObesity,
+		delayed_adolescence delayedAdolescence,
+		last_update_time lastUpdateTime,
+		create_date_time createDateTime
+	FROM
+		base_children_family
+	WHERE
+		user_id=#{userId} 
+  </select>
+  
+  <select id="getList" parameterType="org.wechat.module.height.obesity.entity.ChildrenFamily" resultType="map">
+	SELECT
+		id,
+		user_id userId,
+		father_height fatherHeight,
+		father_weight fatherWeight,
+		father_preadolescence_weight fatherPreadolescenceWeight,
+		father_upper fatherUpper,
+		father_lower fatherLower,
+		mother_height motherHeight,
+		mother_weight motherWeight,
+		mother_upper motherUpper,
+		mother_lower motherLower,
+		mother_childbirth_age motherChildbirthAge,
+		pre_pregnancy_weight prePregnancyWeight,
+		pregnancy_weight_add pregnancyWeightAdd,
+		mother_gestational_diabetes motherGestationalDiabetes,
+		mother_gestational_hypertension motherGestationalHypertension,
+		mother_hypothyroidism motherHypothyroidism,
+		mother_abnormal_pregnancy motherAbnormalPregnancy,
+		mother_abnormal_pregnancy_content motherAbnormalPregnancyContent,
+		mother_disability motherDisability,
+		mother_disability_content motherDisabilityContent,
+		familial_obesity familialObesity,
+		father_obesity fatherObesity,
+		mother_obesity motherObesity,
+		delayed_adolescence delayedAdolescence,
+		last_update_time lastUpdateTime,
+		create_date_time createDateTime
+	FROM
+		base_children_family
+  </select>
+</mapper>

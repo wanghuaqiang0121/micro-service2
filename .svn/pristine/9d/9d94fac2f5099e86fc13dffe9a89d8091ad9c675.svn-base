@@ -1,0 +1,168 @@
+package org.web.module.height.obesity.entity;
+
+import java.util.Date;
+
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+
+import org.service.core.entity.BaseEntity;
+
+public class UserDrugsProject extends BaseEntity {
+
+    private static final long serialVersionUID = 2837075732881379341L;
+
+    private Integer id;
+
+    @NotNull(message = "{children.user.id.notblank.valid}", groups = { Insert.class })
+    private Integer userId;
+
+    @NotNull(message = "{children.user.childrenmeasureid.notblank.valid}", groups = { Insert.class })
+    private Integer childrenMeasureId;
+
+    @NotNull(message = "{drugs.config.id.notblank.valid}", groups = { Insert.class })
+    private Integer baseDrugsConfigId;
+
+    //@NotBlank(message = "{drugs.config.usingfrequencycode.valid}", groups = { Insert.class })
+    private String usingFrequencyCode;
+
+    //@NotBlank(message = "{drugs.config.usingfrequencyvalue.valid}", groups = { Insert.class })
+    private String usingFrequencyValue;
+
+    //@NotBlank(message = "{drugs.config.usingwaycode.valid}", groups = { Insert.class })
+    private String usingWayCode;
+
+    //@NotBlank(message = "{drugs.config.usingwayvalue.valid}", groups = { Insert.class })
+    private String usingWayValue;
+
+    @NotBlank(message = "{drugs.config.usingmethodcode.valid}", groups = { Insert.class })
+    private String usingMethodCode;
+
+    @NotBlank(message = "{drugs.config.usingmethodvalue.valid}", groups = { Insert.class })
+    private String usingMethodValue;
+
+    private Date createDateTime;
+
+    public Integer getId() {
+        return id;
+    }
+
+    /**
+     * @return the usingMethodValue
+     */
+    public String getUsingMethodValue() {
+        return usingMethodValue;
+    }
+
+    /**
+     * @param usingMethodValue the usingMethodValue to set
+     */
+    public void setUsingMethodValue(String usingMethodValue) {
+        this.usingMethodValue = usingMethodValue;
+    }
+
+    /**
+     * @return the usingMethodCode
+     */
+    public String getUsingMethodCode() {
+        return usingMethodCode;
+    }
+
+    /**
+     * @param usingMethodCode the usingMethodCode to set
+     */
+    public void setUsingMethodCode(String usingMethodCode) {
+        this.usingMethodCode = usingMethodCode;
+    }
+
+    /**
+     * @return the usingWayValue
+     */
+    public String getUsingWayValue() {
+        return usingWayValue;
+    }
+
+    /**
+     * @param usingWayValue the usingWayValue to set
+     */
+    public void setUsingWayValue(String usingWayValue) {
+        this.usingWayValue = usingWayValue;
+    }
+
+    /**
+     * @return the usingWayCode
+     */
+    public String getUsingWayCode() {
+        return usingWayCode;
+    }
+
+    /**
+     * @param usingWayCode the usingWayCode to set
+     */
+    public void setUsingWayCode(String usingWayCode) {
+        this.usingWayCode = usingWayCode;
+    }
+
+    /**
+     * @return the usingFrequencyValue
+     */
+    public String getUsingFrequencyValue() {
+        return usingFrequencyValue;
+    }
+
+    /**
+     * @param usingFrequencyValue the usingFrequencyValue to set
+     */
+    public void setUsingFrequencyValue(String usingFrequencyValue) {
+        this.usingFrequencyValue = usingFrequencyValue;
+    }
+
+    /**
+     * @return the usingFrequencyCode
+     */
+    public String getUsingFrequencyCode() {
+        return usingFrequencyCode;
+    }
+
+    /**
+     * @param usingFrequencyCode the usingFrequencyCode to set
+     */
+    public void setUsingFrequencyCode(String usingFrequencyCode) {
+        this.usingFrequencyCode = usingFrequencyCode;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public Integer getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Integer userId) {
+        this.userId = userId;
+    }
+
+    public Integer getChildrenMeasureId() {
+        return childrenMeasureId;
+    }
+
+    public void setChildrenMeasureId(Integer childrenMeasureId) {
+        this.childrenMeasureId = childrenMeasureId;
+    }
+
+    public Integer getBaseDrugsConfigId() {
+        return baseDrugsConfigId;
+    }
+
+    public void setBaseDrugsConfigId(Integer baseDrugsConfigId) {
+        this.baseDrugsConfigId = baseDrugsConfigId;
+    }
+
+    public Date getCreateDateTime() {
+        return createDateTime;
+    }
+
+    public void setCreateDateTime(Date createDateTime) {
+        this.createDateTime = createDateTime;
+    }
+}

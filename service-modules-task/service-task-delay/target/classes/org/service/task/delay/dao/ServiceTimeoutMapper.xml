@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.service.task.delay.dao.ServiceTimeoutMapper">
+	<select id="getInquiry" parameterType="org.service.task.delay.entity.service.ServiceTimeout" resultType="map">
+		select id,`status`from base_inquiry where id=#{id}
+	</select>
+	<select id="getAppointment" parameterType="org.service.task.delay.entity.service.ServiceTimeout" resultType="map">
+		select id,user_service_id userServiceId,`status` from base_team_appointment_order where id=#{id}
+	</select>
+	<update id="updateAppointment" parameterType="org.service.task.delay.entity.service.ServiceTimeout">
+		update base_team_appointment_order set status=4 where id=#{id}
+	</update>
+	<update id="deductService" parameterType="map">
+		update base_user_service set lock_times=lock_times-1,use_times=use_times+1 where id=#{userServiceId}
+	</update>
+	<update id="closeInquiry" parameterType="org.service.task.delay.entity.service.ServiceTimeout">
+		update base_inquiry set status=5 where id=#{id}
+	</update>
+</mapper>

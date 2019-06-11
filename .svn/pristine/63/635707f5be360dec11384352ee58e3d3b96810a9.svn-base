@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper
+	namespace="org.web.module.height.obesity.dao.ChildrenHighRiskFactorMapper">
+	<delete id="delete"  parameterType="org.web.module.height.obesity.entity.ChildrenHighRiskFactor">
+		delete from base_children_high_risk_factor
+		where id =
+		#{id}
+	</delete>
+	<insert id="insert"
+		parameterType="org.web.module.height.obesity.entity.ChildrenHighRiskFactor">
+		insert into base_children_high_risk_factor (id, code,
+		name,
+		condition_value, remark)
+		values (#{id}, #{code}, #{name},
+		#{conditionValue}, #{remark})
+	</insert>
+	<update id="update"
+		parameterType="org.web.module.height.obesity.entity.ChildrenHighRiskFactor">
+		update base_children_high_risk_factor
+		set code = #{code},
+		name = #{name},
+		condition_value = #{conditionValue},
+		remark = #{remark}
+		where id = #{id}
+	</update>
+	<select id="getOne"
+		parameterType="org.web.module.height.obesity.entity.ChildrenHighRiskFactor"
+		 resultType="map">
+		select id, code, name, condition_value conditionValue, remark
+		from
+		base_children_high_risk_factor
+		<where>
+			<if test="id!=null">id=#{id}</if>
+			<if test="code!=null">AND code=#{code}</if>
+		</where>
+	</select>
+	<select id="getList"
+		parameterType="org.web.module.height.obesity.entity.ChildrenHighRiskFactor"
+	 resultType="map">
+		select id, code, name,
+		condition_value conditionValue, remark
+		from
+		base_children_high_risk_factor
+		<where>
+			<if test="code!=null">code=#{code}</if>
+		</where>
+	</select>
+	
+</mapper>

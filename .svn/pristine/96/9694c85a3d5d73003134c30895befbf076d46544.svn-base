@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.wechat.module.height.obesity.dao.WhoStandardHeightWeightSdTempMapper">
+  <delete id="delete" parameterType="org.wechat.module.height.obesity.entity.WhoStandardHeightWeightSdTemp">
+    delete from who_standard_height_weight_sd_temp
+    where id = #{id}
+  </delete>
+  <insert id="insert" parameterType="org.wechat.module.height.obesity.entity.WhoStandardHeightWeightSdTemp">
+    insert into who_standard_height_weight_sd_temp (id, type, sex, 
+      height, sub_three_sd, sub_two_sd, 
+      sub_one_sd, median_sd, plus_one_sd, 
+      plus_two_sd, plus_three_sd)
+    values (#{id}, #{type}, #{sex}, 
+      #{height}, #{subThreeSd}, #{subTwoSd}, 
+      #{subOneSd}, #{medianSd}, #{plusOneSd}, 
+      #{plusTwoSd}, #{plusThreeSd})
+  </insert>
+  <update id="update" parameterType="org.wechat.module.height.obesity.entity.WhoStandardHeightWeightSdTemp">
+    update who_standard_height_weight_sd_temp
+    set type = #{type},
+      sex = #{sex},
+      height = #{height},
+      sub_three_sd = #{subThreeSd},
+      sub_two_sd = #{subTwoSd},
+      sub_one_sd = #{subOneSd},
+      median_sd = #{medianSd},
+      plus_one_sd = #{plusOneSd},
+      plus_two_sd = #{plusTwoSd},
+      plus_three_sd = #{plusThreeSd}
+    where id = #{id}
+  </update>
+  <select id="getOne" parameterType="org.wechat.module.height.obesity.entity.WhoStandardHeightWeightSdTemp" resultType="map">
+    select id, type, sex, height, sub_three_sd, sub_two_sd, sub_one_sd, median_sd, plus_one_sd, 
+    plus_two_sd, plus_three_sd
+    from who_standard_height_weight_sd_temp
+    where id = #{id}
+  </select>
+  <select id="getList" parameterType="org.wechat.module.height.obesity.entity.WhoStandardHeightWeightSdTemp" resultType="map">
+    select id, type, sex, height, sub_three_sd, sub_two_sd, sub_one_sd, median_sd, plus_one_sd, 
+    plus_two_sd, plus_three_sd
+    from who_standard_height_weight_sd_temp
+  </select>
+</mapper>

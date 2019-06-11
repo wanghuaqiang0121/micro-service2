@@ -1,0 +1,21 @@
+server:
+  port: 2000
+spring:
+  application:
+    name: zipkin-server
+eureka:
+  client:
+    healthcheck:
+      enabled: true
+    service-url:
+      defaultZone: http://localhost:1000/eureka/
+    register-with-eureka: true
+    fetch-registry: true
+  instance:
+    prefer-ip-address: true
+    instance-id: ${spring.cloud.client.ip-address}:${server.port}:${spring.application.name}
+management:
+  metrics:
+    web:
+      server:
+        auto-time-requests: false

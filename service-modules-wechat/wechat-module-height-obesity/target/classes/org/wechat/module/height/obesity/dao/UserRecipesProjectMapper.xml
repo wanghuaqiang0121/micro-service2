@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.wechat.module.height.obesity.dao.UserRecipesProjectMapper">
+
+  <delete id="deleteByChildrenMeasureId" parameterType="org.wechat.module.height.obesity.entity.UserRecipesProject">
+    delete from base_user_recipes_project
+    where children_measure_id = #{childrenMeasureId}
+  </delete>
+  <insert id="insert" parameterType="org.wechat.module.height.obesity.entity.UserRecipesProject">
+    insert into base_user_recipes_project ( user_id, children_measure_id, 
+      food_recipes_config_id, create_date_time
+      )
+    values ( #{userId}, #{childrenMeasureId}, #{foodRecipesConfigId}, #{createDateTime}
+      )
+  </insert>
+  <insert id="insertBatch" parameterType="java.util.List">
+    insert into base_user_recipes_project (
+      user_id,
+      children_measure_id, 
+      food_recipes_config_id, 
+      create_date_time
+    )values 
+    <foreach collection="list" item="userRecipesProject" index="index" separator=",">  
+    (
+      #{userRecipesProject.userId},
+      #{userRecipesProject.childrenMeasureId},
+      #{userRecipesProject.foodRecipesConfigId},
+      #{userRecipesProject.createDateTime}   
+    )
+    </foreach>
+  </insert>
+
+  <update id="updateByPrimaryKey" parameterType="org.wechat.module.height.obesity.entity.UserRecipesProject">
+    update base_user_recipes_project
+    set user_id = #{userId},
+      children_measure_id = #{childrenMeasureId},
+      food_recipes_config_id = #{foodRecipesConfigId},
+      create_date_time = #{createDateTime}
+    where id = #{id}
+  </update>
+  <select id="getList" parameterType="org.wechat.module.height.obesity.entity.UserRecipesProject" resultType="map">
+    select id, user_id userId, children_measure_id childrenMeasureId, food_recipes_config_id foodRecipesConfigId, 
+    create_date_time createDateTime
+    from base_user_recipes_project
+  </select>
+  <select id="getOne" parameterType="org.wechat.module.height.obesity.entity.UserRecipesProject" resultType="map">
+    select 
+    a.id, 
+    a.user_id userId, 
+    a.children_measure_id childrenMeasureId, 
+    food_recipes_config_id foodRecipesConfigId, 
+    b.name,
+    a.create_date_time createDateTime
+    from base_user_recipes_project as a
+    INNER JOIN base_food_recipes_config as b ON a.food_recipes_config_id=b.id
+    <where>
+      <if test="id!=null">id=#{id}</if>
+      <if test="childrenMeasureId!=null">AND children_measure_id=#{childrenMeasureId}</if>
+    </where>
+    ORDER BY create_date_time DESC
+    limit 1
+  </select>
+</mapper>

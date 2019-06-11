@@ -1,0 +1,172 @@
+package org.web.module.height.obesity.global;
+
+/**
+ * Copyright © 2018 四川易迅通健康医疗技术发展有限公司. All rights reserved.
+ *
+ * @author: LiuGangQiang
+ * @date: 2018年8月31日
+ * @description: 全局通用静态变量
+ */
+public class BaseGlobal {
+
+	public static final String TOKEN_FLAG = "token";
+	public static final String ORGANIZATION_ID = "organizationId";
+	public static final String ORGANIZATION_TEAM_ID = "organizationTeamId";
+	public static final String MODULE_ID = "moduleId";
+	public static final String CACHE_ORGANIZATION_USER = "organization_user:login_cache";
+	public static final Object PERMISSION_CODE = "code";
+	/* 18岁月龄 */
+	public static final int MAX_MONTH_AGE = 216;
+	/* 最大身高百分位 */
+	public static final int MAX_HEIGHT_PERCENTILE = 97;
+	/* 最小身高百分位 */
+	public static final int MIN_HEIGHT_PERCENTILE = 3;
+	/* 最大SD */
+	public static final int MAX_SD = 3;
+	/* 最小SD */
+	public static final int MIN_SD = -3;
+	/* 大于 */
+	public static final String GREATER_THAN = ">";
+	/* 小于 */
+	public static final String LESS_THAN = "<";
+	/* 等于 */
+	public static final String EQUAL = "=";
+	/* 早产 */
+	public static final String PREMATURE_DELIVERY_LT = "premature_delivery_lt";
+	/* 母亲分娩年龄≥35岁 */
+	public static final String MATERNAL_CHILDBIRTH_AGE_GTT = "maternal_childbirth_age_gtt";
+	/* 出生时体重<2500克 */
+	public static final String BIRTH_WEIGHT_LT = "birth_weight_lt";
+	/* 出生时宫内、产时或产后窒息 */
+	public static final String POSTPARTUM_ASPHYXIA = "postpartum_asphyxia";
+	/* 患有缺氧缺血性脑病 */
+	public static final String AIE = "aie";
+	/* 颅内出血 */
+	public static final String ENCEPHALOPATHY = "encephalopathy";
+	/* 患有高胆红素血症 */
+	public static final String HYPERBILIRUBINEMIA = "hyperbilirubinemia";
+	/* 患有新生儿肺炎 */
+	public static final String PNEUMONIA_OF_NEWBORN = "pneumonia_of_newborn";
+	/* 患有新生儿败血症 */
+	public static final String NEONATAL_SEPTICEMIA = "neonatal_septicemia";
+	/* 患有其他新生儿严重感染疾病 */
+	public static final String SEVERE_INFECTIOUS_DISEASES = "severe_infectious_diseases";
+	/* 患有影响生活能力的出生缺陷疾病 */
+	public static final String BIRTH_DEFECT = "birth_defect";
+	/* 患有遗传代谢性疾病 */
+	public static final String HEREDITARY_DISEASE = "hereditary_disease";
+	/* 母亲有异常妊娠及分娩史 */
+	public static final String MOTHER_ABNORMAL_PREGNANCY = "mother_abnormal_pregnancy";
+	/* 母亲患有残疾（视、听、智力、肢体、精神）并影响养育能力 */
+	public static final String MOTHER_DISABILITY = "mother_disability";
+	/* 超重,肥胖 */
+	public static final String BIRTH_WEIGHT_GT = "birth_weight_gt";
+	/* 母亲妊娠糖尿病 */
+	public static final String MOTHER_GESTATIONAL_DIABETES = "mother_gestational_diabetes";
+	/* 母亲妊娠高血压 */
+	public static final String MOTHER_GESTATIONAL_HYPERTENSION = "mother_gestational_hypertension";
+
+	public static final String MOTHER_BMI_GT = "mother_bmi_gt";
+	public static final String EXAMINATION_BONEAGE = "gl";
+
+	public static final String MOTHER_WEIGHT_ADD = "母亲孕期体重增重过多";
+
+	public static final String HEIGHT_EVALUATION = "%s，%s岁%s童，目前身高%s厘米";
+	public static final String WEIGHT_EVALUATION_STAND = "%s，%s岁%s童";
+	public static final String HEIGHT_EVALUATION_FAMILY = "，考虑家族性矮身材可能性大“应排除矮小症”，建议测骨龄。";
+	public static final String HEIGHT_EVALUATION_MORE = "，根据中国九市《0-18岁儿童青少年身高体重百分位数值表》，“%s”岁“%s”童的第%s百分位身高值为“%s厘米”，故%s目前的身高";
+	public static final String HEIGHT_EVALUATION_MORE_DWARF = "属于矮身材";
+	public static final String HEIGHT_EVALUATION_MORE_DWARF_SIDE = "属于偏矮";
+	public static final String HEIGHT_EVALUATION_MORE_MEDIUM_HEIGHT = "属于中等";
+	public static final String HEIGHT_EVALUATION_MORE_HEIGHT_SIDE = "属于偏高";
+	public static final String HEIGHT_EVALUATION_MORE_OVER_HEIGHT = "属于超高。请检测骨龄预防性早熟。";
+
+	public static final String HEIGHT_EVALUATION_TNQK = "，属于矮身材，但考虑胎内发育情况，请持续跟踪观察生长曲线";
+	public static final String HEIGHT_EVALUATION_HYPOEVOLUTISM = "，考虑体质性生长和发育延迟的可能性大“应排除矮小症”";
+	public static final String HEIGHT_EVALUATION_BONAGE = "，建议测骨龄。";
+	public static final String HEIGHT_EVALUATION_NANOSOMA_ESSENTIALIS = "考虑特发性矮身材可能性大。“应排除矮小症”";
+
+	public static final String HEIGHT_EVALUATION_ON_THE_DWARF_SIDE = "，为偏矮。";
+	public static final String HEIGHT_EVALUATION_ON_THE_HIGH_SIDE = "，为偏高。";
+	public static final String HEIGHT_EVALUATION_MEDIUM_HEIGHT = "，为中等高度。";
+	public static final String HEIGHT_EVALUATION_HEIGHT_SIDE = "，为偏高。";
+	public static final String HEIGHT_EVALUATION_OVER_HEIGHT = "，为超高。请检测骨龄预防性早熟。";
+
+	public static final String HEIGHT_EVALUATION_EFFECT_BAD = "身高干预效果不好，应仔细评估干预措施，密切身高门诊随访。";
+	public static final String HEIGHT_EVALUATION_EFFECT_GOOD = "身高干预效果好，要注意小朋友目前的身高仍属偏矮，需继续并加强身高干预。";
+	public static final String HEIGHT_EVALUATION_EFFECT_BETTER = "身高干预效果好,应继续保持。";
+	public static final String HEIGHT_EVALUATION_EFFECT_VERY_GOOD = "身高干预效果好，但当前身高过高，警惕早熟可能。";
+
+	public static final String WEIGHT_EVALUATION = "%s，%s岁%s童，目前体重%skg";
+	public static final String WEIGHT_EVALUATION_OVERWEIGHT = "，属于超重";
+	public static final String WEIGHT_EVALUATION_OBESITY = "，属于肥胖";
+	public static final String WEIGHT_EVALUATION_MODERATE_EMACIATION = "，属于中度消瘦";
+	public static final String WEIGHT_EVALUATION_SEVERE_EMACIATION = "，属于重度消瘦";
+	public static final String WEIGHT_EVALUATION_GOOD = "，属于正常体型";
+
+	public static final String WEIGHT_EVALUATION_EFFECT_GOOD = "体型干预效果好,应继续保持";
+	public static final String WEIGHT_EVALUATION_EFFECT_BAD = "体型干预效果不好，应仔细评估干预措施，密切肥胖门诊随访。";
+
+	public static final String HEIGHT_GENETICHEIGHT = "%s，%s岁%s童，遗传身高%s，预测成年身高%s";
+	public static final String HEIGHT_JGCK = "(仅供参考)";
+
+	public static final String HEIGHT_GENETIC_WARNING = "目前非遗传因素对%s身高的影响过大，应进一步搜索影响身高病因。";
+	public static final String HEIGHT_ZERO_WARNING = "季度身高增长为0，存在生长迟缓的风险。";
+	public static final String HEIGHT_BIRTH_WARNING = "婴儿期年生长速度<23cm，存在生长迟缓的风险。";
+	public static final String HEIGHT_WARNING_COMM = "%s岁年生长速度<%scm，存在生长迟缓的风险。";
+	public static final String HEIGHT_OVER_WARNING = "生长速度偏快，须至少3个月一次复诊身高门诊，评估小朋友的身高增长情况，警惕早熟可能。";
+
+	public static final String WEIGHT_OBESITY_EVALUATION_ONE = "%s,体重大于%s月龄儿童平均体重%s，已“赶上”同龄儿童，且是超重体型。[br]"
+															+ "%s,可能会在3岁前继续追赶同龄人，我国研究#提示发育追赶上同龄人的低于胎龄儿，肥胖的几率较大。建议生长发育门诊密切随访。";
+	
+	public static final String WEIGHT_OBESITY_EVALUATION_TWO = "%s,体重大于%s月龄儿童平均体重%s，属于正常偏低体型，已“赶上”同龄儿童的正常体型。[br]"
+															+ "%s,可能会在3岁前继续追赶同龄人，我国研究#提示发育追赶上同龄人的低于胎龄儿，肥胖的几率较大。建议生长发育门诊密切随访。";
+	
+	public static final String WEIGHT_OBESITY_EVALUATION_THREE = "%s,体重小于%d月龄儿童平均体重-2SD，还未赶上正常儿童体重,%s属于中度消瘦体型。"
+								+ "[br]70%-90%的低于胎龄儿在3岁时可以赶上其他儿童，但有10%却不能，成年后也矮小*。建议密切生长发育门诊随访。";
+	
+	public static final String WEIGHT_OBESITY_EVALUATION_FOUR = "%s,体重小于%d月龄儿童平均体重-3SD，还未赶上正常儿童体重,%s属于重度消瘦体型。"
+								+ "[br]70%-90%的低于胎龄儿在3岁时可以赶上其他儿童，但有10%却不能，成年后也矮小*。建议密切生长发育门诊随访。";
+	
+	public static final String WEIGHT_OBESITY_EVALUATION_FIVE = "%s,体重小于%d月龄儿童平均体重-3SD,较出生时体重还在减轻,%s属于重度消瘦体型。"
+								+ "[br]70%-90%的低于胎龄儿在3岁时可以赶上其他儿童，但有10%却不能，成年后也矮小*。建议密切生长发育门诊随访。";
+	
+	public static final String WEIGHT_OBESITY_EVALUATION_SIX = "%s,属于超重(肥胖)体型,建议生长发育门诊密切随访。";
+	
+	
+	public static final String WEIGHT_OBESITY_SIX = "%s,属于%s体型,请排除是否与水肿有关。[br]"
+											+ "1.若体重增加与水肿有关，需进一步评估病因 [br]"
+											+ "2.若已排除水肿,需进一步评估病因(0-2岁儿童) [br]"
+											+ "3.若已排除水肿,请进一步排除外表四肢比例异常/甲减和皮质醇增多可能。(2岁以上才排除甲减和皮质醇增多)[br]"
+											+ "4.若排除甲减和皮质醇增多,但%s这个阶段的营养非常重要，切勿控制“她”的饮食。 [br]"
+											+ "5.查看%s外表四肢比例有无异常，若有 建议儿童内分泌专科排除有无内源性肥胖疾病可能。";
+	
+/*	public static final String WEIGHT_OBESITY_SIX_MORE = "1.体重增加与水肿有关，需进一步评估病因(第一次管理时已排除水肿,第二次还需要排除嘛?)[br]"
+			+ "2.已排除水肿,需进一步评估病因(0-2岁儿童)[br]" + "3.已排除水肿,请进一步排除外表四肢比例异常/甲减和皮质醇增多可能。(2岁以上才排除甲减和皮质醇增多)";*/
+	// + "弹出排除外表四肢比例异常甲减/和皮质醇增多内容,排除后:[br]" +
+	// "1.已排除甲减和皮质醇增多,但%s这个阶段的营养非常重要，切勿控制“她”的饮食。[br]"
+	// + "INSIGHT临床研究证明#3，不减少小宝宝摄食量，优化喂养方式，可以减少小宝宝1周岁时超重的几率。【链接- - 喂养方式】[br]"
+	// + "2.%s外表四肢比例异常，建议儿童内分泌专科排除有无内源性肥胖疾病可能。[br]" +
+	// "3.%s排除甲减和皮质醇增多症建议儿童内分泌专科排除有无内源性肥胖疾病可能。";
+
+	public static final String WEIGHT_OBESITY_SEVEN = "%s,的体重在同龄儿童的平均体重M-2SD和M-1SD之间,属于正常偏低体型。";
+	public static final String TWO_FOUR = "%s,的体重在同龄儿童的平均体重M-1SD和M+1SD之间,属于正常体型";
+	public static final String TWO_FIVE = "%s,体重/身长（身高）小于M-2SD，属于中度消瘦体型";
+	public static final String TWO_SIX = "%s,体重/身长（身高）小于M-3SD，属于重度消瘦体型";
+	
+	public static final String WEIGHT_OBESITY_SEVEN_BUT = "但%s母亲在怀她时有%s，这些都是肥胖的危险因素，建议体重门诊密切随访。";
+	public static final String JIBING_NAME_ONE = "妊娠期糖尿病";
+	public static final String JIBING_NAME_TWO = "妊娠期高血压";
+	public static final String JIBING_NAME_THREE = "家族肥胖史";
+	public static final String JIBING_NAME_FOUR = "父亲肥胖";
+	public static final String JIBING_NAME_FIVE = "母亲肥胖";
+
+	public static final String WEIGHT_OBESITY_EIGHT = "%s，体重/身长（身高）小于M-2SD，属于中度消瘦";
+	public static final String WEIGHT_OBESITY_NINE = "%s，体重/身长（身高）小于M-3SD，属于重度消瘦";
+	public static final String WEIGHT_OBESITY_TEN = "%s,腰围超过身高的一半为腹型肥胖";
+	public static final String WEIGHT_OBESITY_ELEVEN = "%s,腹围正常";
+
+	public static final String OBSITY_EVALUATION_GOOD = "肥胖干预效果好,应继续保持";
+	public static final String OBSITY_EVALUATION_BAD = "体型干预效果不好，应仔细评估干预措施，密切肥胖门诊随访。";
+
+}

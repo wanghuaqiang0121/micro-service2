@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.web.module.height.obesity.dao.UserBehavioralDevelopmentRecordMapper">
+  <delete id="delete" parameterType="org.web.module.height.obesity.entity.UserBehavioralDevelopmentRecord">
+	DELETE
+	FROM
+		base_user_behavioral_development_record
+	WHERE
+		id = #{id}  
+  </delete>
+  
+  <delete id="deleteByChildrenMeasureId" parameterType="org.web.module.height.obesity.entity.UserBehavioralDevelopmentRecord">
+	DELETE
+	FROM
+		base_user_behavioral_development_record
+	WHERE
+		children_measure_id = #{childrenMeasureId}  
+  </delete>
+  
+  <insert id="insert" parameterType="org.web.module.height.obesity.entity.UserBehavioralDevelopmentRecord" keyProperty="id"  useGeneratedKeys="true">
+   INSERT INTO base_user_behavioral_development_record
+    	 (user_id, month_age,  children_measure_id, behavioral_development_config_id, organization_user_id, create_date_time)
+    VALUES 
+    	(#{userId}, #{monthAge}, #{childrenMeasureId}, #{behavioralDevelopmentConfigId},#{organizationUserId}, #{createDateTime})
+  </insert>
+  
+  <update id="update" parameterType="org.web.module.height.obesity.entity.UserBehavioralDevelopmentRecord">
+    UPDATE base_user_behavioral_development_record  SET id=#{id}
+	    <if test="userId!=null">
+	     , user_id = #{userId},
+	    </if>
+	     <if test="monthAge!=null">
+	    , month_age = #{monthAge}
+	    </if>
+	     <if test="childrenMeasureId!=null">
+	       ,children_measure_id = #{childrenMeasureId}
+	    </if>
+	     <if test="behavioralDevelopmentConfigId!=null">
+	      ,behavioral_development_config_id = #{behavioralDevelopmentConfigId}
+	    </if>
+	     <if test="organizationUserId!=null">
+	      ,organization_user_id = #{organizationUserId}
+	    </if>
+    WHERE
+    	 id = #{id}
+  </update>
+  
+  <select id="getOne" parameterType="org.web.module.height.obesity.entity.UserBehavioralDevelopmentRecord" resultType="map">
+	SELECT
+		ubdr.id,
+		ubdr.user_id userId,
+		ubdr.month_age monthAge,
+		ubdr.children_measure_id childrenMeasureId,
+		ubdr.behavioral_development_config_id behavioralDevelopmentConfigId,
+		ubdr.organization_user_id organizationUserId,
+		ubdr.create_date_time createDateTime,
+		bbdc.name,
+		bbdc.picture,
+		bbdc.remark
+	FROM
+		base_user_behavioral_development_record ubdr
+	INNER JOIN base_behavioral_development_config bbdc ON bbdc.id = ubdr.behavioral_development_config_id
+	WHERE
+		<if test="childrenMeasureId!= null">
+			ubdr.children_measure_id = #{childrenMeasureId} 
+		</if>
+  </select>
+  
+  <select id="getList"  parameterType="org.web.module.height.obesity.entity.UserBehavioralDevelopmentRecord"  resultType="map">
+	 SELECT
+			id,
+			user_id userId,
+			month_age monthAge,
+			children_measure_id childrenMeasureId,
+			behavioral_development_config_id behavioralDevelopmentConfigId,
+			organization_user_id organizationUserId,
+			create_date_time createDateTime
+		FROM
+			base_user_behavioral_development_record
+  </select>
+</mapper>

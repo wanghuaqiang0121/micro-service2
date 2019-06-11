@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.web.module.height.obesity.dao.FoodRecipesConfigMapper">
+
+	<!-- 删除 -->
+	<delete id="delete" parameterType="org.web.module.height.obesity.entity.FoodRecipesConfig">
+	DELETE
+	FROM
+		base_food_recipes_config
+	WHERE
+		id = #{id}  
+	</delete>
+
+	<insert id="insert" parameterType="org.web.module.height.obesity.entity.FoodRecipesConfig" keyProperty="id" useGeneratedKeys="true">
+    INSERT INTO base_food_recipes_config
+    	 (sex, month_age_start,month_age_end, code_type, code_name,name)
+    VALUES
+    	 (#{sex}, #{monthAgeStart},  #{monthAgeEnd}, #{codeType}, #{codeName},#{name})
+	</insert>
+
+	<update id="update" parameterType="org.web.module.height.obesity.entity.FoodRecipesConfig">
+    UPDATE base_food_recipes_config SET id=#{id}
+		<if test="sex!=null">
+	    ,  sex = #{sex}
+		</if>
+		<if test="monthAgeStart!=null">
+	    , month_age_start = #{monthAgeStart}
+		</if>
+		<if test="monthAgeEnd!=null">
+	     ,  month_age_end = #{monthAgeEnd}
+		</if>
+		<if test="codeType!=null and codeType!=''">
+	     , code_type = #{codeType}
+		</if>
+		<if test="codeName!=null and codeName!=''">
+	       ,code_name = #{codeName}
+		</if>
+		<if test="name!=null and name!=''">
+	       ,name = #{name}
+		</if>
+     WHERE
+     	 id = #{id}
+	</update>
+
+
+ <resultMap type="map" id="foodRecipesHasBaseFoodRecipesConfigMap">
+ 		 <result property="id" column="id" />
+		  <collection property="foodRecipesHasBaseFoodRecipesConfigs" column="id" javaType="list" select="getFoodRecipesHasBaseFoodRecipesConfigs"/>
+ </resultMap>
+
+<!-- 查询详情 -->
+	<select id="getOne"  parameterType="org.web.module.height.obesity.entity.FoodRecipesConfig"  resultMap="foodRecipesHasBaseFoodRecipesConfigMap">
+	SELECT
+		id,
+		sex,
+		month_age_start monthAgeStart,
+		month_age_end monthAgeEnd,
+		code_type codeType,
+		name,
+		code_name codeName
+	FROM
+		base_food_recipes_config
+	WHERE
+		id = #{id} 
+	</select>
+	
+	<!-- 查询配置与菜品关联表 -->
+	<select id="getFoodRecipesHasBaseFoodRecipesConfigs"  parameterType="org.web.module.height.obesity.entity.FoodRecipesHasBaseFoodRecipesRonfig"  resultMap="foodRecipesConfigHasBaseFoodMap">
+	SELECT
+		bfrhbfrc.id ,
+		bfrhbfrc.food_recipes_config_id foodRecipesConfigId,
+		bfrhbfrc.food_recipes_code foodRecipesCode,
+		bfrhbfrc.food_recipes_name foodRecipesName
+	FROM
+		base_food_recipes_has_base_food_recipes_config bfrhbfrc
+	WHERE
+		bfrhbfrc.food_recipes_config_id =#{id}
+	</select>
+	
+	<resultMap type="map" id="foodRecipesConfigHasBaseFoodMap">
+	 		<result property="id" column="id"/>
+			  <collection property="foodRecipesConfigHasBaseFoods" column="id" javaType="list" select="getFoodRecipesConfigHasBaseFoods"/>
+	</resultMap>
+	<select id="getFoodRecipesConfigHasBaseFoods"  parameterType="int"  resultType="map">
+		SELECT
+			bfrchbf.id,
+			bfrchbf.food_code foodCode,
+			bfrchbf.food_name foodName,
+			bfrchbf.food_recipes_code foodRecipesCode,
+			bfrchbf.food_recipes_name foodRecipesName,
+			bfrchbf.number,
+			bfrchbf.base_food_recipes_has_base_food_recipes_config_id foodRecipesHasBaseFoodRecipesConfigId
+		FROM
+			base_food_recipes_config_has_base_food bfrchbf
+		WHERE
+			bfrchbf.base_food_recipes_has_base_food_recipes_config_id = #{id}
+	</select>
+	<select id="getList" parameterType="org.web.module.height.obesity.entity.FoodRecipesConfig" resultType="map">
+	SELECT
+		id,
+		sex,
+		month_age_start monthAgeStart,
+		month_age_end monthAgeEnd,
+		code_type codeType,
+		name,
+		code_name codeName
+	FROM
+		base_food_recipes_config
+		<where>
+			<if test="monthAge!=null">
+				 month_age_start &lt;=#{monthAge}
+			</if>
+			<if test="monthAge!=null">
+				AND month_age_end &gt;=#{monthAge}
+			</if>
+			   <if test="name!=null and name!=''">
+		      and  `name`  LIKE CONCAT(CONCAT('%',#{name},'%'))
+		    </if>
+		</where>
+	</select>
+	<select id="getRandomConfig" parameterType="org.web.module.height.obesity.entity.FoodRecipesConfig" resultType="map">
+	SELECT
+		id,
+		sex,
+		month_age_start monthAgeStart,
+		month_age_end monthAgeEnd,
+		code_type codeType,
+		code_name codeName, name 
+	FROM base_food_recipes_config 
+	WHERE sex=#{sex} 
+		AND #{monthAgeStart}&gt;=month_age_start
+		AND #{monthAgeEnd}&lt;=month_age_end
+		AND code_type=#{codeType}
+	ORDER BY  RAND() LIMIT 1
+	</select>
+	
+	
+	
+</mapper>

@@ -1,0 +1,515 @@
+package org.web.module.bone.age.domain;
+
+import java.util.Date;
+
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+
+import org.service.core.entity.BaseEntity;
+import org.springframework.format.annotation.DateTimeFormat;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
+
+/**
+ * Copyright © 2019 四川易迅通健康医疗技术发展有限公司. All rights reserved.
+ *
+ * @author: ChenYan
+ * @date: 2019年4月8日
+ * @description: 影像资料
+ */
+public class MedicalImagingData extends BaseEntity {
+	private static final long serialVersionUID = 1L;
+	
+	/**
+	 * Copyright © 2019 四川易迅通健康医疗技术发展有限公司. All rights reserved.
+	 *
+	 * @author: ChenYan
+	 * @date: 2019年4月10日
+	 * @description: 上传影像资料 
+	 */
+	public interface UpdateMedical{};
+
+	private Integer id;
+	@NotNull(message = "{medical.imaging.data.user.id.notnull.valid}", groups = { Insert.class})
+    private Integer userId;
+	@NotNull(message = "{medical.imaging.data.height.notnull.valid}", groups = { UpdateMedical.class})
+    private Float height;
+	@NotNull(message = "{medical.imaging.data.weight.notnull.valid}", groups = { UpdateMedical.class})
+    private Float weight;
+	@NotNull(message = "{medical.imaging.data.sex.notnull.valid}", groups = { UpdateMedical.class})
+    private Integer sex;
+
+    private String menarcheType;
+
+    private Float menarcheAge;
+    @NotBlank(message = "{medical.imaging.data.leftWristImg.notblank.valid}", groups = { UpdateMedical.class })
+    private String leftWristImg;
+    @NotBlank(message = "{medical.imaging.data.leftWristNumber.notblank.valid}", groups = { UpdateMedical.class })
+    private String leftWristNumber;
+    @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
+	@DateTimeFormat(pattern = "yyyy-MM-dd")
+    private Date leftWristDate;
+    @NotBlank(message = "{medical.imaging.data.pelvisImg.notblank.valid}", groups = { UpdateMedical.class })
+    private String pelvisImg;
+    @NotBlank(message = "{medical.imaging.data.pelvisNumber.notblank.valid}", groups = { UpdateMedical.class})
+    private String pelvisNumber;
+    @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
+	@DateTimeFormat(pattern = "yyyy-MM-dd")
+    private Date pelvisDate;
+    @NotBlank(message = "{medical.imaging.data.bilateralSternoclavicularImg.notblank.valid}", groups = { UpdateMedical.class })
+    private String bilateralSternoclavicularImg;
+    @NotBlank(message = "{medical.imaging.data.bilateralSternoclavicularNumber.notblank.valid}", groups = { UpdateMedical.class })
+    private String bilateralSternoclavicularNumber;
+    @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
+	@DateTimeFormat(pattern = "yyyy-MM-dd")
+    private Date bilateralSternoclavicularDate;
+    private String ctTomography;
+    private String ctTomographyNumber;
+    @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
+	@DateTimeFormat(pattern = "yyyy-MM-dd")
+    private Date ctTomographyDate;
+    
+    
+    
+    private String leftKneeJointImg;
+    private String leftKneeJointNumber;
+    @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
+  	@DateTimeFormat(pattern = "yyyy-MM-dd")
+    private Date leftKneeJointDate;
+    
+    private String leftKneeJointLateralImg;
+    private String leftKneeJointLateraNumber;
+    @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
+  	@DateTimeFormat(pattern = "yyyy-MM-dd")
+    private Date leftKneeJointLateraDate;
+    
+  
+
+    private String advisoryImg;
+
+    private Integer advisoryStatus;
+
+    private String advisoryReason;
+
+    private String entrusImg;
+    private Integer  entrusImgStatus;
+
+    private Integer judicialexpertiseStatus;
+
+    private Integer medicalImagingStatus;
+
+    private Integer boneAgeStatus;
+
+    private Integer organizationUserId;
+
+    private Integer judicialBoneAgeOrganizationId;
+
+    private Integer judicialBoneAgeOrganizationTeamId;
+    
+    private String  supplementaryMaterialsImg;
+    private Integer supplementaryMaterialsStatus;
+    
+    private String medicalImagingReason;
+
+    private Date createTime;
+    
+    private Integer currentAge;
+    
+    private Integer updateOrganizationTeamId;
+    private Integer updateOrganizationUserId;
+    private Integer organizationTeamId;
+    
+    private String idCard;
+    private String  phone;
+    private Integer organizationId;
+
+    
+    public String getPhone() {
+		return phone;
+	}
+
+	public void setPhone(String phone) {
+		this.phone = phone;
+	}
+
+	public Integer getCurrentAge() {
+		return currentAge;
+	}
+
+	public void setCurrentAge(Integer currentAge) {
+		this.currentAge = currentAge;
+	}
+
+	public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public Integer getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Integer userId) {
+        this.userId = userId;
+    }
+
+    public Float getHeight() {
+        return height;
+    }
+
+    public void setHeight(Float height) {
+        this.height = height;
+    }
+
+    public Float getWeight() {
+        return weight;
+    }
+
+    public void setWeight(Float weight) {
+        this.weight = weight;
+    }
+
+    public Integer getSex() {
+        return sex;
+    }
+
+    public void setSex(Integer sex) {
+        this.sex = sex;
+    }
+
+    public String getMenarcheType() {
+        return menarcheType;
+    }
+
+    public void setMenarcheType(String menarcheType) {
+        this.menarcheType = menarcheType;
+    }
+
+    public Float getMenarcheAge() {
+        return menarcheAge;
+    }
+
+    public void setMenarcheAge(Float menarcheAge) {
+        this.menarcheAge = menarcheAge;
+    }
+
+    public String getLeftWristImg() {
+        return leftWristImg;
+    }
+
+    public void setLeftWristImg(String leftWristImg) {
+        this.leftWristImg = leftWristImg;
+    }
+
+    public String getLeftWristNumber() {
+        return leftWristNumber;
+    }
+
+    public Integer getOrganizationTeamId() {
+		return organizationTeamId;
+	}
+
+	public void setOrganizationTeamId(Integer organizationTeamId) {
+		this.organizationTeamId = organizationTeamId;
+	}
+
+	public void setLeftWristNumber(String leftWristNumber) {
+        this.leftWristNumber = leftWristNumber;
+    }
+
+    public Date getLeftWristDate() {
+        return leftWristDate;
+    }
+
+    public void setLeftWristDate(Date leftWristDate) {
+        this.leftWristDate = leftWristDate;
+    }
+
+    public String getPelvisImg() {
+        return pelvisImg;
+    }
+
+    public void setPelvisImg(String pelvisImg) {
+        this.pelvisImg = pelvisImg;
+    }
+
+    public String getPelvisNumber() {
+        return pelvisNumber;
+    }
+
+    public void setPelvisNumber(String pelvisNumber) {
+        this.pelvisNumber = pelvisNumber;
+    }
+
+    public Date getPelvisDate() {
+        return pelvisDate;
+    }
+
+    public void setPelvisDate(Date pelvisDate) {
+        this.pelvisDate = pelvisDate;
+    }
+
+    public String getBilateralSternoclavicularImg() {
+        return bilateralSternoclavicularImg;
+    }
+
+    public void setBilateralSternoclavicularImg(String bilateralSternoclavicularImg) {
+        this.bilateralSternoclavicularImg = bilateralSternoclavicularImg;
+    }
+
+    public String getBilateralSternoclavicularNumber() {
+        return bilateralSternoclavicularNumber;
+    }
+
+    public void setBilateralSternoclavicularNumber(String bilateralSternoclavicularNumber) {
+        this.bilateralSternoclavicularNumber = bilateralSternoclavicularNumber;
+    }
+
+    public Date getBilateralSternoclavicularDate() {
+        return bilateralSternoclavicularDate;
+    }
+
+    public void setBilateralSternoclavicularDate(Date bilateralSternoclavicularDate) {
+        this.bilateralSternoclavicularDate = bilateralSternoclavicularDate;
+    }
+
+    public String getCtTomography() {
+        return ctTomography;
+    }
+
+    public void setCtTomography(String ctTomography) {
+        this.ctTomography = ctTomography;
+    }
+
+    public String getLeftKneeJointImg() {
+		return leftKneeJointImg;
+	}
+
+	public void setLeftKneeJointImg(String leftKneeJointImg) {
+		this.leftKneeJointImg = leftKneeJointImg;
+	}
+
+	public String getLeftKneeJointNumber() {
+		return leftKneeJointNumber;
+	}
+
+	public void setLeftKneeJointNumber(String leftKneeJointNumber) {
+		this.leftKneeJointNumber = leftKneeJointNumber;
+	}
+
+	public Date getLeftKneeJointDate() {
+		return leftKneeJointDate;
+	}
+
+	public void setLeftKneeJointDate(Date leftKneeJointDate) {
+		this.leftKneeJointDate = leftKneeJointDate;
+	}
+
+	public String getLeftKneeJointLateralImg() {
+		return leftKneeJointLateralImg;
+	}
+
+	public void setLeftKneeJointLateralImg(String leftKneeJointLateralImg) {
+		this.leftKneeJointLateralImg = leftKneeJointLateralImg;
+	}
+
+	public String getLeftKneeJointLateraNumber() {
+		return leftKneeJointLateraNumber;
+	}
+
+	public void setLeftKneeJointLateraNumber(String leftKneeJointLateraNumber) {
+		this.leftKneeJointLateraNumber = leftKneeJointLateraNumber;
+	}
+
+	public Date getLeftKneeJointLateraDate() {
+		return leftKneeJointLateraDate;
+	}
+
+	public void setLeftKneeJointLateraDate(Date leftKneeJointLateraDate) {
+		this.leftKneeJointLateraDate = leftKneeJointLateraDate;
+	}
+
+	public String getCtTomographyNumber() {
+        return ctTomographyNumber;
+    }
+
+    public void setCtTomographyNumber(String ctTomographyNumber) {
+        this.ctTomographyNumber = ctTomographyNumber;
+    }
+
+    public Date getCtTomographyDate() {
+        return ctTomographyDate;
+    }
+
+    public void setCtTomographyDate(Date ctTomographyDate) {
+        this.ctTomographyDate = ctTomographyDate;
+    }
+
+    public String getAdvisoryImg() {
+        return advisoryImg;
+    }
+
+    public void setAdvisoryImg(String advisoryImg) {
+        this.advisoryImg = advisoryImg;
+    }
+
+    public Integer getAdvisoryStatus() {
+        return advisoryStatus;
+    }
+
+    public void setAdvisoryStatus(Integer advisoryStatus) {
+        this.advisoryStatus = advisoryStatus;
+    }
+
+    public String getAdvisoryReason() {
+        return advisoryReason;
+    }
+
+    public void setAdvisoryReason(String advisoryReason) {
+        this.advisoryReason = advisoryReason;
+    }
+
+    public String getEntrusImg() {
+        return entrusImg;
+    }
+
+    public void setEntrusImg(String entrusImg) {
+        this.entrusImg = entrusImg;
+    }
+
+    public Integer getJudicialexpertiseStatus() {
+        return judicialexpertiseStatus;
+    }
+
+    public void setJudicialexpertiseStatus(Integer judicialexpertiseStatus) {
+        this.judicialexpertiseStatus = judicialexpertiseStatus;
+    }
+
+    public Integer getMedicalImagingStatus() {
+        return medicalImagingStatus;
+    }
+
+    public void setMedicalImagingStatus(Integer medicalImagingStatus) {
+        this.medicalImagingStatus = medicalImagingStatus;
+    }
+
+    public Integer getBoneAgeStatus() {
+        return boneAgeStatus;
+    }
+
+    public void setBoneAgeStatus(Integer boneAgeStatus) {
+        this.boneAgeStatus = boneAgeStatus;
+    }
+
+    public Integer getOrganizationUserId() {
+        return organizationUserId;
+    }
+
+    public void setOrganizationUserId(Integer organizationUserId) {
+        this.organizationUserId = organizationUserId;
+    }
+
+    public Integer getJudicialBoneAgeOrganizationId() {
+        return judicialBoneAgeOrganizationId;
+    }
+
+    public void setJudicialBoneAgeOrganizationId(Integer judicialBoneAgeOrganizationId) {
+        this.judicialBoneAgeOrganizationId = judicialBoneAgeOrganizationId;
+    }
+
+    public Integer getJudicialBoneAgeOrganizationTeamId() {
+        return judicialBoneAgeOrganizationTeamId;
+    }
+
+    public void setJudicialBoneAgeOrganizationTeamId(Integer judicialBoneAgeOrganizationTeamId) {
+        this.judicialBoneAgeOrganizationTeamId = judicialBoneAgeOrganizationTeamId;
+    }
+
+    public Date getCreateTime() {
+        return createTime;
+    }
+
+    public void setCreateTime(Date createTime) {
+        this.createTime = createTime;
+    }
+    
+    public String getIdCard() {
+		return idCard;
+	}
+
+	public void setIdCard(String idCard) {
+		this.idCard = idCard;
+	}
+
+	public Integer getOrganizationId() {
+		return organizationId;
+	}
+
+	public void setOrganizationId(Integer organizationId) {
+		this.organizationId = organizationId;
+	}
+
+	public String getSupplementaryMaterialsImg() {
+		return supplementaryMaterialsImg;
+	}
+
+	public void setSupplementaryMaterialsImg(String supplementaryMaterialsImg) {
+		this.supplementaryMaterialsImg = supplementaryMaterialsImg;
+	}
+
+	public String getMedicalImagingReason() {
+		return medicalImagingReason;
+	}
+
+	public void setMedicalImagingReason(String medicalImagingReason) {
+		this.medicalImagingReason = medicalImagingReason;
+	}
+
+	public Integer getEntrusImgStatus() {
+		return entrusImgStatus;
+	}
+
+	public void setEntrusImgStatus(Integer entrusImgStatus) {
+		this.entrusImgStatus = entrusImgStatus;
+	}
+
+	public Integer getSupplementaryMaterialsStatus() {
+		return supplementaryMaterialsStatus;
+	}
+
+	public void setSupplementaryMaterialsStatus(Integer supplementaryMaterialsStatus) {
+		this.supplementaryMaterialsStatus = supplementaryMaterialsStatus;
+	}
+
+	
+	public Integer getUpdateOrganizationTeamId() {
+		return updateOrganizationTeamId;
+	}
+
+	public void setUpdateOrganizationTeamId(Integer updateOrganizationTeamId) {
+		this.updateOrganizationTeamId = updateOrganizationTeamId;
+	}
+
+	public Integer getUpdateOrganizationUserId() {
+		return updateOrganizationUserId;
+	}
+
+	public void setUpdateOrganizationUserId(Integer updateOrganizationUserId) {
+		this.updateOrganizationUserId = updateOrganizationUserId;
+	}
+
+	@Override
+	@NotNull(message = "{page.empty}", groups = { SelectAll.class })
+	public Integer getPage() {
+		return super.getPage();
+	}
+
+	@Override
+	@NotNull(message = "{pageSize.empty}", groups = { SelectAll.class })
+	public Integer getPageSize() {
+		return super.getPageSize();
+	}
+}

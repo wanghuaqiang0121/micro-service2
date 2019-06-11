@@ -1,0 +1,110 @@
+package org.web.module.height.obesity.controller;
+
+import java.util.Date;
+import java.util.Map;
+
+import javax.annotation.Resource;
+
+import org.service.core.api.ApiCodeEnum;
+import org.service.core.api.JsonApi;
+import org.service.core.auth.control.RequiresAuthentication;
+import org.service.core.auth.level.Level;
+import org.service.core.entity.BaseEntity;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RestController;
+import org.web.module.height.obesity.entity.ChildrenMeasure;
+import org.web.module.height.obesity.entity.UserBehavioralDevelopmentRecord;
+import org.web.module.height.obesity.global.BaseGlobal;
+import org.web.module.height.obesity.message.Prompt;
+import org.web.module.height.obesity.service.ChildrenMeasureService;
+import org.web.module.height.obesity.service.UserBehavioralDevelopmentRecordService;
+import org.web.module.height.obesity.service.feign.IOrganizationUserRoleService;
+
+/**
+ * Copyright © 2019 四川易迅通健康医疗技术发展有限公司. All rights reserved.
+ *
+ * @author: WangHuaQiang
+ * @date: 2019年1月11日
+ * @description: 用户行为发育记录表
+ */
+@RestController
+public class UserBehavioralDevelopmentRecordController {
+
+	@Autowired
+	private UserBehavioralDevelopmentRecordService userBehavioralDevelopmentRecordService;
+	@Resource
+	private IOrganizationUserRoleService organizationUserRoleService;
+	@Resource
+	private ChildrenMeasureService childrenMeasureService;	
+	
+	/** 
+	 * @author: WangHuaQiang
+	 * @date: 2019年1月11日
+	 * @param userBehavioralDevelopmentRecord
+	 * @param resul
+	 * @param token
+	 * @return
+	 * @description: 修改用户行为发育记录
+	 */
+	@RequiresAuthentication(ignore = false,value = { "web-module-height-obesity:user-behavioral-record:update" },level = Level.OPERATION)
+	@PutMapping(value = { "/user/behavioral/record/{childrenMeasureId}" })
+	public JsonApi insert(@PathVariable("childrenMeasureId") Integer childrenMeasureId,@RequestBody @Validated({ BaseEntity.Update.class }) UserBehavioralDevelopmentRecord userBehavioralDevelopmentRecord, BindingResult resul,
+			@RequestHeader(required = true, value = BaseGlobal.TOKEN_FLAG) String token) {
+		
+		/* 查询儿童测量信息是否存在 */
+		ChildrenMeasure childrenMeasure = new ChildrenMeasure();
+		childrenMeasure.setId(childrenMeasureId);
+		Map<String, Object> childrenMeasureMap = childrenMeasureService.getOne(childrenMeasure);
+		if (childrenMeasureMap == null) {
+			return new JsonApi(ApiCodeEnum.FAIL,Prompt.bundle("children.measure.is.null"));
+		}
+		/* 获取登录机构用户id */
+		JsonApi jsonApi = organizationUserRoleService.getSession(BaseGlobal.CACHE_ORGANIZATION_USER, token,token);
+		Integer organizationUserId = null;
+		if (jsonApi.getCode() == ApiCodeEnum.OK.getValue()) {
+			organizationUserId = Integer.parseInt(jsonApi.getData().toString());
+		}
+		userBehavioralDevelopmentRecord.setChildrenMeasureId(childrenMeasureId);
+		userBehavioralDevelopmentRecord.setUserId(Integer.parseInt(childrenMeasureMap.get("userId").toString()));
+		userBehavioralDevelopmentRecord.setMonthAge(Integer.parseInt(childrenMeasureMap.get("monthAge").toString()));
+		userBehavioralDevelopmentRecord.setOrganizationUserId(organizationUserId);
+		userBehavioralDevelopmentRecord.setCreateDateTime(new Date());
+		if (userBehavioralDevelopmentRecordService.deleteByChildrenMeasureId(userBehavioralDevelopmentRecord) < 0) {
+			throw new RuntimeException();
+		}
+		if (userBehavioralDevelopmentRecordService.insert(userBehavioralDevelopmentRecord) > 0) {
+			return new JsonApi(ApiCodeEnum.OK);
+		}
+		return new JsonApi(ApiCodeEnum.FAIL);
+	}
+	
+	/** 
+	 * @author: WangHuaQiang
+	 * @date: 2019年1月11日
+	 * @param childrenMeasureId
+	 * @param userBehavioralDevelopmentRecord
+	 * @param resul
+	 * @return
+	 * @description: 行为发育记录详情
+	 */
+	@RequiresAuthentication(ignore = false,value = { "web-module-height-obesity:user-behavioral-record:detail" },level = Level.OPERATION)
+	@GetMapping(value = { "/user/behavioral/record/{childrenMeasureId}" })
+	public JsonApi detail(@PathVariable("childrenMeasureId") Integer childrenMeasureId, @Validated({ BaseEntity.SelectOne.class }) UserBehavioralDevelopmentRecord userBehavioralDevelopmentRecord, BindingResult resul, @RequestHeader(required = true, value = BaseGlobal.TOKEN_FLAG) String token) {
+		userBehavioralDevelopmentRecord.setChildrenMeasureId(childrenMeasureId);
+		Map<String, Object> map = userBehavioralDevelopmentRecordService.getOne(userBehavioralDevelopmentRecord);
+		if (map != null) {
+			return new JsonApi(ApiCodeEnum.OK,map);
+		}
+		return new JsonApi(ApiCodeEnum.NOT_FOUND);
+	}
+	
+	
+	
+}

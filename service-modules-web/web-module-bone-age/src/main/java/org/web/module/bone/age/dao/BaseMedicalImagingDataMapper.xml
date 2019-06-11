@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.web.module.bone.age.dao.BaseMedicalImagingDataMapper">
+  
+  <delete id="delete" parameterType="org.web.module.bone.age.domain.BaseMedicalImagingData">
+    delete from base_medical_imaging_data
+    where id = #{id}
+  </delete>
+  
+  <insert id="insert" parameterType="org.web.module.bone.age.domain.BaseMedicalImagingData">
+    insert into base_medical_imaging_data (user_id, current_age, 
+      height, weight, sex, menarche_type, 
+      menarche_age, left_wrist_img, left_wrist_number, 
+      left_wrist_date, pelvis_img, pelvis_number, 
+      pelvis_date, bilateral_sternoclavicular_img, 
+      bilateral_sternoclavicular_number, bilateral_sternoclavicular_date, 
+      ct_tomography, ct_tomography_number, ct_tomography_date, 
+      advisory_img, advisory_status, advisory_reason, 
+      entrus_img, entrus_img_status, judicialexpertise_status, 
+      medical_imaging_status, medical_imaging_reason, 
+      bone_age_status, organization_user_id, organization_id, 
+      organization_team_id, judicial_bone_age_organization_id, 
+      judicial_bone_age_organization_team_id, supplementary_materials_img, 
+      supplementary_materials_status, create_time, 
+      left_knee_joint_img, left_knee_joint_img_number, 
+      left_knee_joint_date, left_knee_joint_lateral_img, 
+      left_knee_joint_lateral_number, left_knee_joint_lateral_date, 
+      update_organization_team_id, update_organization_user_id
+      )
+    values (#{userId}, #{currentAge}, 
+      #{height}, #{weight}, #{sex}, #{menarcheType}, 
+      #{menarcheAge}, #{leftWristImg}, #{leftWristNumber}, 
+      #{leftWristDate}, #{pelvisImg}, #{pelvisNumber}, 
+      #{pelvisDate}, #{bilateralSternoclavicularImg}, 
+      #{bilateralSternoclavicularNumber}, #{bilateralSternoclavicularDate}, 
+      #{ctTomography}, #{ctTomographyNumber}, #{ctTomographyDate}, 
+      #{advisoryImg}, #{advisoryStatus}, #{advisoryReason}, 
+      #{entrusImg}, #{entrusImgStatus}, #{judicialexpertiseStatus}, 
+      #{medicalImagingStatus}, #{medicalImagingReason}, 
+      #{boneAgeStatus}, #{organizationUserId}, #{organizationId}, 
+      #{organizationTeamId}, #{judicialBoneAgeOrganizationId}, 
+      #{judicialBoneAgeOrganizationTeamId}, #{supplementaryMaterialsImg}, 
+      #{supplementaryMaterialsStatus}, #{createTime,jdbcType=TIMESTAMP}, 
+      #{leftKneeJointImg}, #{leftKneeJointImgNumber}, 
+      #{leftKneeJointDate}, #{leftKneeJointLateralImg}, 
+      #{leftKneeJointLateralNumber}, #{leftKneeJointLateralDate}, 
+      #{updateOrganizationTeamId}, #{updateOrganizationUserId}
+      )
+  </insert>
+  
+  <update id="update" parameterType="org.web.module.bone.age.domain.BaseMedicalImagingData">
+    update base_medical_imaging_data
+    set user_id = #{userId},
+      current_age = #{currentAge},
+      height = #{height},
+      weight = #{weight},
+      sex = #{sex},
+      menarche_type = #{menarcheType},
+      menarche_age = #{menarcheAge},
+      left_wrist_img = #{leftWristImg},
+      left_wrist_number = #{leftWristNumber},
+      left_wrist_date = #{leftWristDate},
+      pelvis_img = #{pelvisImg},
+      pelvis_number = #{pelvisNumber},
+      pelvis_date = #{pelvisDate},
+      bilateral_sternoclavicular_img = #{bilateralSternoclavicularImg},
+      bilateral_sternoclavicular_number = #{bilateralSternoclavicularNumber},
+      bilateral_sternoclavicular_date = #{bilateralSternoclavicularDate},
+      ct_tomography = #{ctTomography},
+      ct_tomography_number = #{ctTomographyNumber},
+      ct_tomography_date = #{ctTomographyDate},
+      advisory_img = #{advisoryImg},
+      advisory_status = #{advisoryStatus},
+      advisory_reason = #{advisoryReason},
+      entrus_img = #{entrusImg},
+      entrus_img_status = #{entrusImgStatus},
+      judicialexpertise_status = #{judicialexpertiseStatus},
+      medical_imaging_status = #{medicalImagingStatus},
+      medical_imaging_reason = #{medicalImagingReason},
+      bone_age_status = #{boneAgeStatus},
+      organization_user_id = #{organizationUserId},
+      organization_id = #{organizationId},
+      organization_team_id = #{organizationTeamId},
+      judicial_bone_age_organization_id = #{judicialBoneAgeOrganizationId},
+      judicial_bone_age_organization_team_id = #{judicialBoneAgeOrganizationTeamId},
+      supplementary_materials_img = #{supplementaryMaterialsImg},
+      supplementary_materials_status = #{supplementaryMaterialsStatus},
+      create_time = #{createTime,jdbcType=TIMESTAMP},
+      left_knee_joint_img = #{leftKneeJointImg},
+      left_knee_joint_img_number = #{leftKneeJointImgNumber},
+      left_knee_joint_date = #{leftKneeJointDate},
+      left_knee_joint_lateral_img = #{leftKneeJointLateralImg},
+      left_knee_joint_lateral_number = #{leftKneeJointLateralNumber},
+      left_knee_joint_lateral_date = #{leftKneeJointLateralDate},
+      update_organization_team_id = #{updateOrganizationTeamId},
+      update_organization_user_id = #{updateOrganizationUserId}
+    where id = #{id}
+  </update>
+  
+  <select id="getOne" parameterType="org.web.module.bone.age.domain.BaseMedicalImagingData" resultType="map">
+    select id, user_id, current_age, height, weight, sex, menarche_type, menarche_age, 
+    left_wrist_img, left_wrist_number, left_wrist_date, pelvis_img, pelvis_number, pelvis_date, 
+    bilateral_sternoclavicular_img, bilateral_sternoclavicular_number, bilateral_sternoclavicular_date, 
+    ct_tomography, ct_tomography_number, ct_tomography_date, advisory_img, advisory_status, 
+    advisory_reason, entrus_img, entrus_img_status, judicialexpertise_status, medical_imaging_status, 
+    medical_imaging_reason, bone_age_status, organization_user_id, organization_id, organization_team_id, 
+    judicial_bone_age_organization_id, judicial_bone_age_organization_team_id, supplementary_materials_img, 
+    supplementary_materials_status, create_time, left_knee_joint_img, left_knee_joint_img_number, 
+    left_knee_joint_date, left_knee_joint_lateral_img, left_knee_joint_lateral_number, 
+    left_knee_joint_lateral_date, update_organization_team_id, update_organization_user_id
+    from base_medical_imaging_data
+    where id = #{id}
+  </select>
+  
+  <select id="selectAll" parameterType="org.web.module.bone.age.domain.BaseMedicalImagingData" resultType="map">
+    select id, user_id, current_age, height, weight, sex, menarche_type, menarche_age, 
+    left_wrist_img, left_wrist_number, left_wrist_date, pelvis_img, pelvis_number, pelvis_date, 
+    bilateral_sternoclavicular_img, bilateral_sternoclavicular_number, bilateral_sternoclavicular_date, 
+    ct_tomography, ct_tomography_number, ct_tomography_date, advisory_img, advisory_status, 
+    advisory_reason, entrus_img, entrus_img_status, judicialexpertise_status, medical_imaging_status, 
+    medical_imaging_reason, bone_age_status, organization_user_id, organization_id, organization_team_id, 
+    judicial_bone_age_organization_id, judicial_bone_age_organization_team_id, supplementary_materials_img, 
+    supplementary_materials_status, create_time, left_knee_joint_img, left_knee_joint_img_number, 
+    left_knee_joint_date, left_knee_joint_lateral_img, left_knee_joint_lateral_number, 
+    left_knee_joint_lateral_date, update_organization_team_id, update_organization_user_id
+    from base_medical_imaging_data
+  </select>
+</mapper>

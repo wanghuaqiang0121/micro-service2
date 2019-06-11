@@ -1,0 +1,492 @@
+package org.web.module.height.obesity.controller;
+
+import java.math.BigDecimal;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
+import javax.annotation.Resource;
+
+import org.service.core.api.ApiCodeEnum;
+import org.service.core.api.JsonApi;
+import org.service.core.api.MultiLine;
+import org.service.core.auth.control.RequiresAuthentication;
+import org.service.core.auth.level.Level;
+import org.service.core.entity.BaseEntity;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RestController;
+import org.web.module.height.obesity.entity.ChildrenFamily;
+import org.web.module.height.obesity.entity.ChildrenMaternity;
+import org.web.module.height.obesity.entity.ChildrenMeasure;
+import org.web.module.height.obesity.entity.Diagnosis;
+import org.web.module.height.obesity.entity.User;
+import org.web.module.height.obesity.global.BaseGlobal;
+import org.web.module.height.obesity.global.GlobalEnum.ChildrenMeasureStatus;
+import org.web.module.height.obesity.message.Prompt;
+import org.web.module.height.obesity.service.ChildrenFamilyService;
+import org.web.module.height.obesity.service.ChildrenMaternityService;
+import org.web.module.height.obesity.service.ChildrenMeasureService;
+import org.web.module.height.obesity.service.DiagnosisService;
+import org.web.module.height.obesity.service.UserService;
+import org.web.module.height.obesity.service.feign.IOrganizationUserRoleService;
+
+import com.github.pagehelper.Page;
+import com.github.pagehelper.PageHelper;
+
+/**
+ * Copyright © 2018 四川易迅通健康医疗技术发展有限公司. All rights reserved.
+ *
+ * @author: WangHuaQiang
+ * @date: 2018年12月17日
+ * @description: 儿童测量信息
+ */
+@RestController
+public class ChildrenMeasureController {
+
+	@Resource
+	private ChildrenMeasureService childrenMeasureService;
+	@Resource
+	private ChildrenFamilyService childrenFamilyService;
+	@Resource
+	private IOrganizationUserRoleService organizationUserRoleService;
+	@Resource
+	private UserService userService;
+	@Resource
+	private DiagnosisService diagnosisService;
+	@Resource
+	private ChildrenMaternityService childrenMaternityervice;
+
+	/**
+	 * @author: WangHuaQiang
+	 * @date: 2018年12月17日
+	 * @param childrenMeasure
+	 * @param resul
+	 * @return
+	 * @description: 添加儿童测量信息
+	 */
+	@RequiresAuthentication(value = { "web-module-height-obesity:children-measure:insert" }, level = Level.OPERATION)
+	@PostMapping(value = { "/children/measure/insert" })
+	@Transactional
+	public JsonApi insert(@RequestBody @Validated({ BaseEntity.Insert.class }) ChildrenMeasure childrenMeasure, BindingResult resul,
+			@RequestHeader(required = true, value = BaseGlobal.TOKEN_FLAG) String token,@RequestHeader(required = true, value = BaseGlobal.ORGANIZATION_TEAM_ID) Integer organizationTeamId) {
+		/* 判断用户是否存在 */
+		User user = new User();
+		user.setId(childrenMeasure.getUserId());
+		Map<String, Object> userMap = userService.getOne(user);
+		if (userMap == null) {
+			return new JsonApi(ApiCodeEnum.FAIL).setMsg(Prompt.bundle("user.is.not.exists"));
+		}
+		if (userMap.get("monthAge") == null) {
+			return new JsonApi(ApiCodeEnum.FAIL).setMsg(Prompt.bundle("user.borthday.is.not.exists"));
+		}
+		/* 添加儿童测量信息 */
+		childrenMeasure.setMonthAge(Integer.parseInt(userMap.get("monthAge").toString()));
+		childrenMeasure.setCreateDateTime(new Date());
+		childrenMeasure.setNumber(UUID.randomUUID().toString().replace("-", ""));
+		childrenMeasure.setStatus(ChildrenMeasureStatus.MEASURED.getValue());
+		/* 获取登录机构用户id */
+		JsonApi jsonApi = organizationUserRoleService.getSession(BaseGlobal.CACHE_ORGANIZATION_USER, token, token);
+		if (jsonApi.getCode() == ApiCodeEnum.OK.getValue()) {
+			childrenMeasure.setCreateOrganizationUserId(Integer.parseInt(jsonApi.getData().toString()));
+		}
+		if (childrenMeasureService.insert(childrenMeasure) > 0) {
+			childrenMeasure.setOrganizationTeamId(organizationTeamId);
+			/* 判断是否需要添加用户团队关系 */
+			childrenMeasure.setIsHeightObesity(true);
+			Map<String, Object> userTeamRelationMap = childrenMeasureService.isExistsUserTeamRelation(childrenMeasure);
+			/* 有就修改关系*/
+			if (userTeamRelationMap != null) {
+				/* 具有身高肥胖关系 */
+				childrenMeasure.setIsHeightObesity(true);
+				/* 新增用户团队关系 */
+				if (childrenMeasureService.updateUserTeamRelation(childrenMeasure) < 1) {
+					throw new RuntimeException();
+				}
+			}else {
+				if (childrenMeasureService.insertUserTeamRelation(childrenMeasure) < 1) {
+					throw new RuntimeException();
+				}
+			}
+			/* 添加儿童家族信息 */
+			ChildrenFamily childrenFamily = new ChildrenFamily();
+			childrenFamily.setUserId(childrenMeasure.getUserId());
+			childrenFamily.setFatherUpper(childrenMeasure.getFatherUpper());
+			childrenFamily.setFatherLower(childrenMeasure.getFatherLower());
+			childrenFamily.setMotherUpper(childrenMeasure.getMotherUpper());
+			childrenFamily.setMotherLower(childrenMeasure.getMotherLower());
+			childrenFamily.setFatherHeight(childrenMeasure.getFatherHeight());
+			childrenFamily.setMotherHeight(childrenMeasure.getMotherHeight());
+			/* 判断该用户家族信息是否存在数据 */
+			Map<String, Object> childrenFamilyMap = childrenFamilyService.getOne(childrenFamily);
+			/* 如果修改父亲身高或母亲身高 计算遗传身高 */
+			if (childrenMeasure.getFatherHeight() == null) {
+				if (childrenFamilyMap != null && childrenFamilyMap.get("fatherHeight") != null) {
+					childrenMeasure.setFatherHeight((Float) childrenFamilyMap.get("fatherHeight"));
+				}
+			}
+			if (childrenMeasure.getMotherHeight() == null) {
+				if (childrenFamilyMap != null && childrenFamilyMap.get("motherHeight") != null) {
+					childrenMeasure.setFatherHeight((Float) childrenFamilyMap.get("motherHeight"));
+				}
+			}
+			if ((childrenMeasure.getFatherHeight() != null && childrenMeasure.getMotherHeight() != null)
+					&& userMap.get("sex") != null && childrenFamilyMap != null) {
+				Diagnosis diagnosis = new Diagnosis();
+				diagnosis.setSex((Integer) userMap.get("sex"));
+				diagnosis.setMotherHeight(new BigDecimal(childrenMeasure.getMotherHeight()).doubleValue());
+				diagnosis.setFatherHeight(new BigDecimal(childrenMeasure.getFatherHeight()).doubleValue());
+				// 计算遗传身高 并设置
+				ChildrenMaternity childrenMaternity = new ChildrenMaternity();
+				childrenMaternity.setUserId(childrenMeasure.getUserId());
+				childrenMaternity
+						.setGeneticHeight(new BigDecimal(diagnosisService.getGeneticHeight(diagnosis)).floatValue());
+				childrenMaternityervice.update(childrenMaternity);
+			}
+			/* 存在家族信息就修改家族信息 */
+			if (childrenFamilyMap != null) {
+				/* 存在就修改 */
+				childrenFamily.setId((Integer) childrenFamilyMap.get("id"));
+				if (childrenFamilyService.update(childrenFamily) < 1) {
+					throw new RuntimeException();
+				}
+				return new JsonApi(ApiCodeEnum.OK,childrenMeasure.getId());
+			}
+			/* 不存在家族信息就新增家族信息 */
+			childrenFamily.setCreateDateTime(new Date());
+			if (childrenFamilyService.insert(childrenFamily) < 1) {
+				throw new RuntimeException();
+			}
+			return new JsonApi(ApiCodeEnum.OK,childrenMeasure.getId());
+		}
+		return new JsonApi(ApiCodeEnum.FAIL);
+	}
+
+	/**
+	 * @author: WangHuaQiang
+	 * @date: 2019年1月14日
+	 * @param id
+	 * @param childrenMeasure
+	 * @param resul
+	 * @param token
+	 * @return
+	 * @description: 修改儿童测量信息
+	 */
+	@RequiresAuthentication(value = { "web-module-height-obesity:children-measure:update" }, level = Level.OPERATION)
+	@PutMapping(value = { "/children/measure/{id}" })
+	@Transactional
+	public JsonApi update(@PathVariable("id") Integer id,
+			@RequestBody @Validated({ BaseEntity.Update.class }) ChildrenMeasure childrenMeasure, BindingResult resul,
+			@RequestHeader(required = true, value = BaseGlobal.TOKEN_FLAG) String token) {
+		/* 判断数据是否存在 */
+		childrenMeasure.setId(id);
+		Map<String, Object> childrenMeasureMap = childrenMeasureService.getOne(childrenMeasure);
+		if (childrenMeasureMap == null) {
+			return new JsonApi(ApiCodeEnum.NOT_FOUND);
+		}
+		/* 添加儿童测量信息 */
+		// childrenMeasure.setMonthAge(Integer.parseInt(userMap.get("monthAge").toString()));
+		// childrenMeasure.setCreateDateTime(new Date());
+		// childrenMeasure.setNumber(UUID.randomUUID().toString().replace("-", ""));
+		// childrenMeasure.setStatus(ChildrenMeasureStatus.MEASURED.getValue());
+		/* 获取登录机构用户id */
+		JsonApi jsonApi = organizationUserRoleService.getSession(BaseGlobal.CACHE_ORGANIZATION_USER, token, token);
+		if (jsonApi.getCode() == ApiCodeEnum.OK.getValue()) {
+			childrenMeasure.setCreateOrganizationUserId(Integer.parseInt(jsonApi.getData().toString()));
+		}
+		if (childrenMeasureService.update(childrenMeasure) > 0) {
+			/* 添加儿童家族信息 */
+			ChildrenFamily childrenFamily = new ChildrenFamily();
+			childrenFamily.setUserId(Integer.parseInt(childrenMeasureMap.get("userId").toString()));
+			childrenFamily.setFatherUpper(childrenMeasure.getFatherUpper());
+			childrenFamily.setFatherLower(childrenMeasure.getFatherLower());
+			childrenFamily.setMotherUpper(childrenMeasure.getMotherUpper());
+			childrenFamily.setMotherLower(childrenMeasure.getMotherLower());
+			childrenFamily.setFatherHeight(childrenMeasure.getFatherHeight());
+			childrenFamily.setMotherHeight(childrenMeasure.getMotherHeight());
+			/* 判断该用户家族信息是否存在数据 */
+			Map<String, Object> childrenFamilyMap = childrenFamilyService.getOne(childrenFamily);
+			/* 如果修改父亲身高或母亲身高 计算遗传身高 */
+			if (childrenMeasure.getFatherHeight() == null) {
+				if (childrenFamilyMap.get("fatherHeight") != null) {
+					childrenMeasure.setFatherHeight((Float) childrenFamilyMap.get("fatherHeight"));
+				}
+			}
+			if (childrenMeasure.getMotherHeight() == null) {
+				if (childrenFamilyMap.get("motherHeight") != null) {
+					childrenMeasure.setFatherHeight((Float) childrenFamilyMap.get("motherHeight"));
+				}
+			}
+			/* 判断用户是否存在 */
+			User user = new User();
+			user.setId(childrenMeasure.getUserId());
+			Map<String, Object> userMap = userService.getOne(user);
+			if (userMap == null) {
+				return new JsonApi(ApiCodeEnum.FAIL, Prompt.bundle("user.is.not.exists"));
+			}
+			if ((childrenMeasure.getFatherHeight() != null || childrenMeasure.getMotherHeight() != null)
+					&& userMap.get("sex") != null && childrenFamilyMap != null) {
+				Diagnosis diagnosis = new Diagnosis();
+				diagnosis.setSex((Integer) userMap.get("sex"));
+				diagnosis.setMotherHeight(new BigDecimal(childrenMeasure.getMotherHeight()).doubleValue());
+				diagnosis.setFatherHeight(new BigDecimal(childrenMeasure.getFatherHeight()).doubleValue());
+				// 计算遗传身高 并设置
+				ChildrenMaternity childrenMaternity = new ChildrenMaternity();
+				childrenMaternity.setUserId(childrenMeasure.getUserId());
+				childrenMaternity
+						.setGeneticHeight(new BigDecimal(diagnosisService.getGeneticHeight(diagnosis)).floatValue());
+				childrenMaternityervice.update(childrenMaternity);
+			}
+			/* 存在家族信息就修改家族信息 */
+			if (childrenFamilyMap != null) {
+				/* 存在就修改 */
+				childrenFamily.setId((Integer) childrenFamilyMap.get("id"));
+				if (childrenFamilyService.update(childrenFamily) < 1) {
+					throw new RuntimeException();
+				}
+				return new JsonApi(ApiCodeEnum.OK);
+			}
+			/* 不存在家族信息就新增家族信息 */
+			childrenFamily.setCreateDateTime(new Date());
+			if (childrenFamilyService.insert(childrenFamily) < 1) {
+				throw new RuntimeException();
+			}
+			return new JsonApi(ApiCodeEnum.OK);
+		}
+		return new JsonApi(ApiCodeEnum.FAIL);
+	}
+
+	/**
+	 * @author: WangHuaQiang
+	 * @date: 2018年12月17日
+	 * @param id
+	 * @param childrenMeasure
+	 * @param resul
+	 * @return
+	 * @description: 儿童最新测量信息详情
+	 */
+	@RequiresAuthentication(value = { "web-module-height-obesity:children-measure:newDetail" }, level = Level.OPERATION)
+	@GetMapping(value = { "/children/new/measure/{userId}" })
+	public JsonApi newDetail(@PathVariable("userId") Integer userId,
+			@Validated({ BaseEntity.SelectOne.class }) ChildrenMeasure childrenMeasure, BindingResult resul) {
+		/* 设置用户id */
+		childrenMeasure.setUserId(userId);
+		Map<String, Object> childrenMeasureMap = childrenMeasureService.getNewOne(childrenMeasure);
+		if (childrenMeasureMap != null) {
+			/* 查询父亲身高母亲身高 */
+			ChildrenFamily childrenfamily = new ChildrenFamily();
+			childrenfamily.setUserId(userId);
+			Map<String, Object> childrenFamilyMap = childrenFamilyService.getOne(childrenfamily);
+			if (childrenFamilyMap != null) {
+				childrenMeasureMap.put("fatherUpper", childrenFamilyMap.get("fatherUpper"));
+				childrenMeasureMap.put("fatherLower", childrenFamilyMap.get("fatherLower"));
+				childrenMeasureMap.put("motherUpper", childrenFamilyMap.get("motherUpper"));
+				childrenMeasureMap.put("motherLower", childrenFamilyMap.get("motherLower"));
+				childrenMeasureMap.put("fatherHeight", childrenFamilyMap.get("fatherHeight"));
+				childrenMeasureMap.put("motherHeight", childrenFamilyMap.get("motherHeight"));
+			} else {
+				childrenMeasureMap.put("fatherUpper", null);
+				childrenMeasureMap.put("fatherLower", null);
+				childrenMeasureMap.put("motherUpper", null);
+				childrenMeasureMap.put("motherLower", null);
+				childrenMeasureMap.put("fatherHeight", null);
+				childrenMeasureMap.put("motherHeight", null);
+			}
+			return new JsonApi(ApiCodeEnum.OK, childrenMeasureMap);
+		}
+		return new JsonApi(ApiCodeEnum.NOT_FOUND);
+	}
+
+	/**
+	 * @author: WangHuaQiang
+	 * @date: 2018年12月25日
+	 * @param id
+	 * @param childrenMeasure
+	 * @param resul
+	 * @return
+	 * @description: 测量信息详情
+	 */
+	@RequiresAuthentication(value = { "web-module-height-obesity:children-measure:detail" }, level = Level.OPERATION)
+	@GetMapping(value = { "/children/measure/{id}" })
+	public JsonApi detail(@PathVariable("id") Integer id,
+			@Validated({ BaseEntity.SelectOne.class }) ChildrenMeasure childrenMeasure, BindingResult resul) {
+		/* 设置id */
+		childrenMeasure.setId(id);
+		Map<String, Object> childrenMeasureMap = childrenMeasureService.getOne(childrenMeasure);
+		if (childrenMeasureMap != null) {
+			/* 查询父亲身高母亲身高 */
+			ChildrenFamily childrenfamily = new ChildrenFamily();
+			childrenfamily.setUserId((Integer) childrenMeasureMap.get("userId"));
+			Map<String, Object> childrenFamilyMap = childrenFamilyService.getOne(childrenfamily);
+			if (childrenFamilyMap != null) {
+				childrenMeasureMap.put("fatherUpper", childrenFamilyMap.get("fatherUpper"));
+				childrenMeasureMap.put("fatherLower", childrenFamilyMap.get("fatherLower"));
+				childrenMeasureMap.put("motherUpper", childrenFamilyMap.get("motherUpper"));
+				childrenMeasureMap.put("motherLower", childrenFamilyMap.get("motherLower"));
+				childrenMeasureMap.put("fatherHeight", childrenFamilyMap.get("fatherHeight"));
+				childrenMeasureMap.put("motherHeight", childrenFamilyMap.get("motherHeight"));
+			} else {
+				childrenMeasureMap.put("fatherUpper", null);
+				childrenMeasureMap.put("fatherLower", null);
+				childrenMeasureMap.put("motherUpper", null);
+				childrenMeasureMap.put("motherLower", null);
+				childrenMeasureMap.put("fatherHeight", null);
+				childrenMeasureMap.put("motherHeight", null);
+			}
+			return new JsonApi(ApiCodeEnum.OK, childrenMeasureMap);
+		}
+		return new JsonApi(ApiCodeEnum.NOT_FOUND);
+	}
+
+	/**
+	 * @author: WangHuaQiang
+	 * @date: 2018年12月17日
+	 * @param id
+	 * @param childrenMeasure
+	 * @param resul
+	 * @return
+	 * @description: 儿童身高测量历史
+	 */
+	@RequiresAuthentication(value = { "web-module-height-obesity:children-measure:get-list" }, level = Level.OPERATION)
+	@GetMapping(value = { "/children/measures/{userId}" })
+	public JsonApi getList(@PathVariable("userId") Integer userId,
+			@Validated({ BaseEntity.SelectAll.class }) ChildrenMeasure childrenMeasure, BindingResult resul) {
+		/* 设置id */
+		childrenMeasure.setUserId(userId);
+		Page<?> page = PageHelper.startPage(childrenMeasure.getPage(), childrenMeasure.getPageSize());
+		List<Map<String, Object>> childrenMeasureList = childrenMeasureService.getList(childrenMeasure);
+		if (childrenMeasureList != null && !childrenMeasureList.isEmpty()) {
+			return new JsonApi(ApiCodeEnum.OK, new MultiLine(page.getTotal(), childrenMeasureList));
+		}
+		return new JsonApi(ApiCodeEnum.NOT_FOUND);
+	}
+
+	
+	/**
+	 * @author: ChenYan
+	 * @date: 2019年2月13日
+	 * @param userId
+	 * @param childrenMeasure
+	 * @param result
+	 * @return
+	 * @description:儿保同步生长发育数据
+	 */
+	@RequiresAuthentication(level = Level.OPERATION, value = { "web-module-height-obesity:children-measure:get-synchronization-data" })
+	@GetMapping(value = { "/children/measures/synchronization/{userId}" })
+	public JsonApi getSynchronizationDate(@PathVariable("userId") Integer userId, ChildrenMeasure childrenMeasure , BindingResult result) {
+		childrenMeasure.setUserId(userId);
+		Map<String, Object> resultMap=new HashMap<>();
+		/* 同步基本数据 */
+		Map<String, Object> synchronizationDataMap =childrenMeasureService.getSynchronizationData(childrenMeasure);
+		/*同步测量数据  */
+		Map<String, Object>  synchronizationMeasureMap= childrenMeasureService.getSynchronizationMeasure(childrenMeasure);
+		if (synchronizationDataMap!=null) {
+			resultMap.put("fatherHeight", synchronizationDataMap.get("fatherHeight") ==null ? null : synchronizationDataMap.get("fatherHeight"));
+			resultMap.put("fatherWeight",synchronizationDataMap.get("fatherWeight") ==null ? null : synchronizationDataMap.get("fatherWeight") );
+			resultMap.put("motherWeight", synchronizationDataMap.get("motherWeight") ==null ? null : synchronizationDataMap.get("motherWeight"));
+			resultMap.put("motherHeight",synchronizationDataMap.get("motherHeight") ==null ? null : synchronizationDataMap.get("motherHeight") );
+			resultMap.put("birthHeight", synchronizationDataMap.get("birthHeight") ==null ? null : synchronizationDataMap.get("birthHeight"));
+			resultMap.put("birthWeight", synchronizationDataMap.get("birthWeight") ==null ? null : synchronizationDataMap.get("birthWeight"));
+		}else {
+			resultMap.put("fatherHeight",null );
+			resultMap.put("fatherWeight", null );
+			resultMap.put("motherWeight",  null);
+			resultMap.put("motherHeight",null);
+			resultMap.put("birthHeight",  null);
+			resultMap.put("birthWeight", null);
+		}
+		if (synchronizationMeasureMap!=null) {
+			resultMap.put("currentHeight", synchronizationMeasureMap.get("currentHeight")==null ? null : synchronizationMeasureMap.get("currentHeight"));
+			resultMap.put("currentWeight", synchronizationMeasureMap.get("currentWeight")==null ? null : synchronizationMeasureMap.get("currentWeight"));
+			resultMap.put("headCircumference", synchronizationMeasureMap.get("headCircumference")==null ? null : synchronizationMeasureMap.get("headCircumference"));
+			resultMap.put("createDateTime", synchronizationMeasureMap.get("createDateTime")==null ? null : synchronizationMeasureMap.get("createDateTime"));
+		}else {
+			resultMap.put("currentHeight",null);
+			resultMap.put("currentWeight",null );
+			resultMap.put("headCircumference",null);
+			resultMap.put("createDateTime",null);
+		}
+		return new JsonApi(ApiCodeEnum.OK, resultMap);
+	}
+	
+	/**
+	 * @author: ChenYan
+	 * @date: 2019年2月13日
+	 * @param userId
+	 * @param childrenMeasure
+	 * @param result
+	 * @return
+	 * @description:生长发育同步儿保数据
+	 */
+	@RequiresAuthentication(level = Level.OPERATION, value = { "web-module-height-obesity:children-measure:get-synchronization-data" })
+	@GetMapping(value = { "/children/measures/synchronization/info/{userId}" })
+	public JsonApi getSynchronizationChildrenDate(@PathVariable("userId") Integer userId, ChildrenMeasure childrenMeasure , BindingResult result) {
+		childrenMeasure.setUserId(userId);
+		Map<String, Object> resultMap=new HashMap<>();
+		/* 同步基本数据 */
+		Map<String, Object> synchronizationHealthcareMap =childrenMeasureService.getSynchronizationHealthcare(childrenMeasure);
+		/*同步测量数据  */
+		Map<String, Object>  synchronizationnfoMap= childrenMeasureService.getSynchronizationInfo(childrenMeasure);
+		if (synchronizationnfoMap!=null) {
+			resultMap.put("fatherHeight", synchronizationnfoMap.get("fatherHeight") ==null ? null : synchronizationnfoMap.get("fatherHeight"));
+			resultMap.put("fatherWeight",synchronizationnfoMap.get("fatherWeight") ==null ? null : synchronizationnfoMap.get("fatherWeight") );
+			resultMap.put("motherWeight", synchronizationnfoMap.get("motherWeight") ==null ? null : synchronizationnfoMap.get("motherWeight"));
+			resultMap.put("motherHeight",synchronizationnfoMap.get("motherHeight") ==null ? null : synchronizationnfoMap.get("motherHeight") );
+			resultMap.put("birthHeight", synchronizationnfoMap.get("birthHeight") ==null ? null : synchronizationnfoMap.get("birthHeight"));
+			resultMap.put("birthWeight", synchronizationnfoMap.get("birthWeight") ==null ? null : synchronizationnfoMap.get("birthWeight"));
+		}else {
+			resultMap.put("fatherHeight",null );
+			resultMap.put("fatherWeight", null );
+			resultMap.put("motherWeight",  null);
+			resultMap.put("motherHeight",null);
+			resultMap.put("birthHeight",  null);
+			resultMap.put("birthWeight", null);
+		}
+		if (synchronizationHealthcareMap!=null) {
+			resultMap.put("currentHeight", synchronizationHealthcareMap.get("currentHeight")==null ? null : synchronizationHealthcareMap.get("currentHeight"));
+			resultMap.put("currentWeight", synchronizationHealthcareMap.get("currentWeight")==null ? null : synchronizationHealthcareMap.get("currentWeight"));
+			resultMap.put("headCircumference", synchronizationHealthcareMap.get("headCircumference")==null ? null : synchronizationHealthcareMap.get("headCircumference"));
+			resultMap.put("createDate", synchronizationHealthcareMap.get("createDate")==null ? null : synchronizationHealthcareMap.get("createDate"));
+		}else {
+			resultMap.put("currentHeight",null);
+			resultMap.put("currentWeight",null );
+			resultMap.put("headCircumference",null);
+			resultMap.put("createDate",null);
+		}
+		return new JsonApi(ApiCodeEnum.OK, resultMap);
+	}
+	
+	
+	/**
+	 * @author: ChenYan
+	 * @date: 2019年2月18日
+	 * @param userId
+	 * @param childrenMeasure
+	 * @param resul
+	 * @return
+	 * @description: 同步骨龄
+	 */
+	@RequiresAuthentication(value = { "web-module-height-obesity:children-measure:get-bone-age" }, level = Level.OPERATION)
+	@GetMapping(value = { "/children/measures/bone/age/{userId}" })
+	public JsonApi getBoneAge(@PathVariable("userId") Integer userId,ChildrenMeasure childrenMeasure, BindingResult resul) {
+		/* 设置id */
+		childrenMeasure.setUserId(userId);
+		Map<String, Object> resultMap=new HashMap<>();
+		Map<String, Object> boneAgeMap=childrenMeasureService.getBoneAge(childrenMeasure);
+		if (boneAgeMap!=null) {
+			resultMap.put("boneAge", boneAgeMap.get("boneAge")==null ? null :boneAgeMap.get("boneAge"));
+		}else {
+			resultMap.put("boneAge",null);
+		}
+		return new JsonApi(ApiCodeEnum.OK, resultMap);
+	}
+}

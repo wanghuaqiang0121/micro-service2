@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.web.module.height.obesity.dao.UserObesityManagerRecordMapper">
+	<delete id="delete" parameterType="org.web.module.height.obesity.entity.UserObesityManagerRecord">
+    delete from base_user_obesity_manager_record
+    where id = #{id}
+	</delete>
+	<insert id="insert" parameterType="org.web.module.height.obesity.entity.UserObesityManagerRecord" keyProperty="id" useGeneratedKeys="true">
+    insert into base_user_obesity_manager_record (user_id, children_measure_id, 
+      sex, month_age, height, 
+      weight, bmi, bmi_standard, overproof_bmi, 
+      end_time, organization_user_id, remark, 
+      crate_date_time)
+    values (#{userId}, #{childrenMeasureId}, 
+      #{sex}, #{monthAge}, #{height}, 
+      #{weight}, #{bmi}, #{bmiStandard}, #{overproofBmi}, 
+      #{endTime}, #{organizationUserId}, #{remark}, 
+      #{crateDateTime})
+	</insert>
+	<update id="update" parameterType="org.web.module.height.obesity.entity.UserObesityManagerRecord">
+    update base_user_obesity_manager_record
+    set user_id = #{userId},
+      children_measure_id = #{childrenMeasureId},
+      sex = #{sex},
+      month_age = #{monthAge},
+      height = #{height},
+      weight = #{weight},
+      bmi = #{bmi},
+      bmi_standard = #{bmiStandard},
+      overproof_bmi = #{overproofBmi},
+      end_time = #{endTime},
+      organization_user_id = #{organizationUserId},
+      remark = #{remark},
+      crate_date_time = #{crateDateTime}
+    where id = #{id}
+	</update>
+
+	<select id="getOne" parameterType="org.web.module.height.obesity.entity.UserObesityManagerRecord" resultType="map">
+
+	</select>
+
+	<!--查询肥胖专案管理  -->
+	<select id="getList" parameterType="org.web.module.height.obesity.entity.UserObesityManagerRecord" resultType="map">
+		SELECT
+			bu.id,
+			bu.`name`,
+			bu.sex,
+			TIMESTAMPDIFF(YEAR, bu.birthday, NOW())  ageYear,
+			TIMESTAMPDIFF(MONTH, bu.birthday, NOW()) % 12  ageMonth,
+			bu.phone,
+			bu.source,
+			( SELECT bcm. `status` FROM base_children_measure  bcm WHERE bcm.user_id = bu.id ORDER BY bcm.create_date_time DESC LIMIT 1 ) `status`,
+			MIN(buomr.crate_date_time) firstTime,
+			MAX(buomr.crate_date_time) endTime
+		FROM
+			base_user_obesity_manager_record buomr
+		INNER JOIN base_user bu ON buomr.user_id = bu.id
+		<where>
+			<if test="name!=null and name!=''">
+				bu.`name` like CONCAT(CONCAT('%', #{name}), '%')
+			</if>
+			<if test="phone!=null and phone!=''">
+		    and 	bu.phone like CONCAT(CONCAT('%', #{phone}), '%')
+			</if>
+			<if test="idCard!=null and idCard!=''">
+			and bu.id_card like CONCAT(CONCAT('%', #{idCard}), '%')
+			</if>
+		</where>
+		GROUP BY
+			bu.id
+	</select>
+
+	<!--查询用户专案管理列表  -->
+	<select id="getListByUserId" parameterType="org.web.module.height.obesity.entity.UserObesityManagerRecord" resultType="map">
+  SELECT
+		bu.id,
+		bu.`name`,
+		bu.sex,
+		TIMESTAMPDIFF(YEAR, bu.birthday, NOW()) ageYear,
+		TIMESTAMPDIFF(MONTH, bu.birthday, NOW()) % 12 ageMonth,
+		buomr.height,
+		buomr.weight,
+		buomr.bmi,
+		buomr.bmi_standard bmiStandard,
+		buomr.overproof_bmi overproofBmi,
+		buomr.end_time endTime,
+		buomr.remark,
+		buomr.organization_user_id organizationUserId,
+		buomr.crate_date_time crateDateTime,
+		bou.`name` organizationUserName
+	FROM
+		base_user_obesity_manager_record buomr
+	INNER JOIN base_user bu ON buomr.user_id = bu.id
+	INNER JOIN base_organization_user bou ON bou.id = buomr.organization_user_id
+	WHERE
+		buomr.user_id = #{userId}
+	</select>
+</mapper>

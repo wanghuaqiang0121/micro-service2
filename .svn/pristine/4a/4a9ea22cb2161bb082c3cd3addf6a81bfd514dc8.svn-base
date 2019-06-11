@@ -1,0 +1,58 @@
+package org.web.module.bone.age.service;
+
+import java.util.List;
+import java.util.Map;
+
+import javax.annotation.Resource;
+
+import org.springframework.stereotype.Service;
+import org.web.module.bone.age.dao.AiReadFilmMapper;
+import org.web.module.bone.age.domain.AiReadFilm;
+
+@Service
+public class AiReadFilmService {
+	@Resource
+	private AiReadFilmMapper aiReadFilmMapper;
+
+	public int insert(AiReadFilm aiReadFilm) {
+		return aiReadFilmMapper.insert(aiReadFilm);
+	}
+
+	public int delete(AiReadFilm aiReadFilm) {
+		return aiReadFilmMapper.delete(aiReadFilm);
+	}
+
+	public Map<String, Object> getOne(AiReadFilm aiReadFilm) {
+		return aiReadFilmMapper.getOne(aiReadFilm);
+	}
+
+	/**
+	 * @author: ChenYan
+	 * @date: 2019年3月6日
+	 * @param aiReadFilm
+	 * @return
+	 * @description: 人工智能使用次数
+	 */
+	public Map<String, Object> getAiReadFilmTimes(AiReadFilm aiReadFilm) {
+		return aiReadFilmMapper.getAiReadFilmTimes(aiReadFilm);
+	}
+
+	public List<Map<String, Object>> getList(AiReadFilm aiReadFilm) {
+		return aiReadFilmMapper.getList(aiReadFilm);
+	}
+
+	public int update(AiReadFilm newAiReadFilm) {
+		return aiReadFilmMapper.update(newAiReadFilm);
+	}
+	/**
+	 * @author: ChenYan
+	 * @date: 2019年3月15日
+	 * @param aiReadFilm
+	 * @return
+	 * @description: 人工智能阅片医生列表
+	 */
+	public List<Map<String, Object>>  getDoctors(AiReadFilm aiReadFilm){
+		return aiReadFilmMapper.getDoctors(aiReadFilm);
+	}
+
+}

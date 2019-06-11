@@ -1,0 +1,50 @@
+package org.web.module.height.obesity.dao;
+
+import java.util.List;
+import java.util.Map;
+
+import org.service.core.dao.IBaseMapper;
+import org.web.module.height.obesity.entity.ChildrenMeasure;
+import org.web.module.height.obesity.entity.Diagnosis;
+
+public interface ChildrenMeasureMapper extends IBaseMapper<ChildrenMeasure> {
+	int deleteByPrimaryKey(Integer id);
+
+	int insert(ChildrenMeasure record);
+
+	ChildrenMeasure selectByPrimaryKey(Integer id);
+
+	List<ChildrenMeasure> selectAll();
+
+	int updateByPrimaryKey(ChildrenMeasure record);
+
+	List<Map<String, Object>> getListByMonthAge(ChildrenMeasure record);
+
+	Map<String, Object> getNewOne(ChildrenMeasure record);
+
+	Map<String, Object> getRecordByMonthAge(ChildrenMeasure record);
+
+	List<Map<String, Object>> getLastList(ChildrenMeasure record);
+
+	Map<String, Object> isExistsUserTeamRelation(ChildrenMeasure childrenMeasure);
+
+	int insertUserTeamRelation(ChildrenMeasure childrenMeasure);
+
+	int updateUserTeamRelation(ChildrenMeasure childrenMeasure);
+
+	Map<String, Object> getSynchronizationData(ChildrenMeasure childrenMeasure);
+
+	Map<String, Object> getSynchronizationMeasure(ChildrenMeasure childrenMeasure);
+
+	Map<String, Object> getSynchronizationHealthcare(ChildrenMeasure childrenMeasure);
+
+	Map<String, Object> getSynchronizationInfo(ChildrenMeasure childrenMeasure);
+	
+	Map<String, Object> getForecastHeight(Diagnosis diagnosis);
+	
+	Map<String, Object> getBoneAge(ChildrenMeasure childrenMeasure);
+
+	List<Map<String, Object>> getListThreeDaysAgo(ChildrenMeasure childrenMeasure);
+	
+	
+}

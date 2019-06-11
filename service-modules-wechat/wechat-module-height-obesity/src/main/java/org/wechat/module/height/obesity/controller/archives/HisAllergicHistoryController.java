@@ -1,0 +1,131 @@
+package org.wechat.module.height.obesity.controller.archives;
+
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+
+import javax.annotation.Resource;
+
+import org.service.core.api.ApiCodeEnum;
+import org.service.core.api.JsonApi;
+import org.service.core.api.MultiLine;
+import org.service.core.auth.control.RequiresAuthentication;
+import org.service.core.entity.BaseEntity;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RestController;
+import org.wechat.module.height.obesity.entity.HisAllergicHistory;
+import org.wechat.module.height.obesity.global.BaseGlobal;
+import org.wechat.module.height.obesity.message.Prompt;
+import org.wechat.module.height.obesity.service.HisAllergicHistoryService;
+import org.wechat.module.height.obesity.service.feign.IUserService;
+
+import com.github.pagehelper.Page;
+import com.github.pagehelper.PageHelper;
+
+@RestController
+public class HisAllergicHistoryController {
+	
+	@Resource
+	private HisAllergicHistoryService  hisAllergicHistoryService;
+	@Resource
+	private IUserService useruService;
+	
+	
+	/**
+	 * @author: ChenYan
+	 * @date: 2019年1月30日
+	 * @param hisAllergicHistory
+	 * @param result
+	 * @param token
+	 * @return
+	 * @description: 新增过敏源
+	 */
+	@RequiresAuthentication(authc = true)
+	@PostMapping(value = { "/his/allergic/history" })
+	@Transactional
+	public JsonApi insert(@Validated({ BaseEntity.Insert.class }) @RequestBody HisAllergicHistory hisAllergicHistory, BindingResult result,@RequestHeader(required = true, value = BaseGlobal.TOKEN_FLAG) String token) {
+		 List<HisAllergicHistory> hisAllergicHistorys=hisAllergicHistory.getHisAllergicHistorys();
+		 
+		 
+		 
+		 /*判断是否有数据，有 删除*/
+			/*获取并设置用户ID  */
+			Integer userId = null;
+			JsonApi jsonApi = useruService.getSession(BaseGlobal.CACHE_USER, token,token);
+			if (jsonApi.getCode() == ApiCodeEnum.OK.getValue()) {
+				userId = Integer.parseInt(jsonApi.getData().toString());
+			}else {
+				return new JsonApi(ApiCodeEnum.NOT_FOUND).setMsg(Prompt.bundle("user.id.is.notblank.valid"));
+			}
+			hisAllergicHistory.setUserId(userId);
+			/*根据ID查询用户的过敏源信息*/
+			List<Map<String, Object>> hisAllergicHistorysList =hisAllergicHistoryService.getList(hisAllergicHistory);
+			if (hisAllergicHistorysList!=null &&  hisAllergicHistorysList.size()>0) {
+				/*存在则删除*/
+				if (hisAllergicHistoryService.delete(hisAllergicHistory)<0) {
+					return new JsonApi(ApiCodeEnum.FAIL);
+				}
+			}
+		 
+		 /*判断是否选择过敏源*/
+		 /*选择了过敏源*/
+		if (hisAllergicHistorys!=null&& !hisAllergicHistorys.isEmpty()) {
+			/*验证数据不能为空*/
+			for (HisAllergicHistory influence : hisAllergicHistorys) {
+				if (influence.getDicCode()==null) {
+					  return new JsonApi(ApiCodeEnum.NOT_FOUND).setMsg(Prompt.bundle("code.is.notblank.valid"));
+				}
+				if (influence.getDicValue()==null) {
+					 return new JsonApi(ApiCodeEnum.NOT_FOUND).setMsg(Prompt.bundle("value.is.notblank.valid"));
+				}
+			}
+			/*重新批量添加*/
+			for (HisAllergicHistory influenceHeight : hisAllergicHistorys) {
+				influenceHeight.setCreateDate(new Date());
+				influenceHeight.setUserId(userId);
+			}
+			if (hisAllergicHistoryService.batchInsert(hisAllergicHistorys)!=hisAllergicHistorys.size()) {
+				throw new RuntimeException();
+			}
+		}
+		
+		return new JsonApi(ApiCodeEnum.OK);
+	}
+	
+	
+	/**
+	 * @author: ChenYan
+	 * @date: 2019年1月30日
+	 * @param userId
+	 * @param hisAllergicHistory
+	 * @param result
+	 * @return
+	 * @description: 根据用户id查询过敏
+	 */
+	@RequiresAuthentication(authc = true)
+	@GetMapping(value = { "/his/allergic/history" })
+	public JsonApi getList(@Validated({ BaseEntity.SelectAll.class })   HisAllergicHistory hisAllergicHistory, BindingResult result,@RequestHeader(required = true, value = BaseGlobal.TOKEN_FLAG) String token) {
+		/*获取并设置用户ID  */
+		Integer userId = null;
+		JsonApi jsonApi = useruService.getSession(BaseGlobal.CACHE_USER, token,token);
+		if (jsonApi.getCode() == ApiCodeEnum.OK.getValue()) {
+			userId = Integer.parseInt(jsonApi.getData().toString());
+		}else {
+			 return new JsonApi(ApiCodeEnum.NOT_FOUND).setMsg(Prompt.bundle("user.id.is.notblank.valid"));
+		}
+		hisAllergicHistory.setUserId(userId);
+		Page<?> page = PageHelper.startPage(hisAllergicHistory.getPage(), hisAllergicHistory.getPageSize());
+		List<Map<String, Object>> influenceHeightDiseaseList = hisAllergicHistoryService.getList(hisAllergicHistory);
+		if (influenceHeightDiseaseList != null && !influenceHeightDiseaseList.isEmpty()) {
+			return new JsonApi(ApiCodeEnum.OK, new MultiLine(page.getTotal(), influenceHeightDiseaseList));
+		}
+		return new JsonApi(ApiCodeEnum.NOT_FOUND);
+	}
+	
+}

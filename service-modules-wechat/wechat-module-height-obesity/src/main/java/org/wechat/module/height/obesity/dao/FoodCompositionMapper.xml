@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.wechat.module.height.obesity.dao.FoodCompositionMapper">
+
+  <delete id="delete" parameterType="org.wechat.module.height.obesity.entity.FoodComposition">
+	DELETE
+	FROM
+		base_food_composition
+	WHERE
+		id = #{id}
+  </delete>
+  
+  <insert id="insert" parameterType="org.wechat.module.height.obesity.entity.FoodComposition" keyProperty="id"  useGeneratedKeys="true">
+    INSERT INTO base_food_composition 
+    	(code, name,  code_type, code_name)
+    VALUES
+    	 (#{code}, #{name}, #{codeType}, #{codeName})
+  </insert>
+  
+  <update id="update" parameterType="org.wechat.module.height.obesity.entity.FoodComposition">
+    UPDATE base_food_composition  SET id=#{id}
+	    <if test="code!null and code!=''">
+	    , code = #{code}
+	    </if>
+	    <if test="name!=null and name!=''">
+	    ,  name = #{name}
+	    </if>
+	       <if test="codeType!=null and codeType!=''">
+	      ,code_type = #{codeType}
+	       </if>
+	      <if test="codeName!=null and codeName!=''">
+	      ,code_name = #{codeName}
+	      </if>
+    WHERE
+    	 id = #{id}
+  </update>
+  
+  <select id="getOne" parameterType="org.wechat.module.height.obesity.entity.FoodComposition" resultType="map">
+	SELECT
+		id,
+		`code`,
+		`name`,
+		code_type codeType,
+		code_name codeName
+	FROM
+		base_food_composition
+	WHERE
+		id = #{id} 
+  </select>
+  
+  <!--食物成分列表  -->
+  <select id="getList" parameterType="org.wechat.module.height.obesity.entity.FoodComposition" resultType="map">
+	SELECT
+		bfc.id,
+		bfc.`code`,
+		bfc.`name`,
+		bfcr.code_unit codeUnit,
+		bfcr.`value`,
+		bfcr.code_name codeName
+	FROM
+		base_food_composition bfc
+	INNER JOIN base_food_composition_record bfcr ON bfc.`code` = bfcr.food_composition_code
+	INNER JOIN base_code_table bct ON bct.`code` = bfc.code_type
+	AND bct.type = 'food_composition_type'
+	WHERE
+		bfcr.`code` = 3
+    AND bfcr.code_unit LIKE 'kcal'
+    <if test="name!=null and name!=''">
+    	AND bfc.`name`  LIKE CONCAT(CONCAT('%', #{name}), '%')
+    </if>
+    <if test="codeType!=null and codeType!=''">
+     AND bfc.code_type =#{codeType}
+    </if>
+  </select>
+</mapper>

@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.web.module.height.obesity.dao.DrugsConfigMapper">
+
+  <delete id="delete" parameterType="org.web.module.height.obesity.entity.DrugsConfig">
+	DELETE
+	FROM
+		base_drugs_config
+	WHERE
+		id = #{id} 
+  </delete>
+  
+  <insert id="insert" parameterType="org.web.module.height.obesity.entity.DrugsConfig"  keyProperty="id"  useGeneratedKeys="true">
+    INSERT INTO base_drugs_config
+    	 (code_type, code_value,  name, initials, unit, instructions, remark,acronym)
+    VALUES
+    	 (#{codeType}, #{codeValue},#{name}, #{initials}, #{unit}, #{instructions}, #{remark},#{acronym})
+  </insert>
+  
+  <update id="update" parameterType="org.web.module.height.obesity.entity.DrugsConfig">
+    UPDATE base_drugs_config SET id=#{id}
+	    <if test="codeType!=null and codeType!=''">
+	      ,code_type = #{codeType}
+	    </if>
+	    <if test="codeValue!=null and codeValue!=''">
+	      ,code_value = #{codeValue}
+	    </if>
+	    <if test="name!=null and name!=''">
+	    , name = #{name}
+	    </if>
+	     <if test="initials!=null and initials!=''">
+	        ,initials = #{initials}
+	     </if>
+	      <if test="unit!=null and unit!=''">
+	       , unit = #{unit}
+	      </if>
+	       <if test="acronym!=null and acronym!=''">
+	       , acronym = #{acronym}
+	      </if>
+	      <if test="instructions!=null and instructions!=''">
+	        , instructions = #{instructions}
+	      </if>
+	      <if test="remark!=null ">
+	       ,remark = #{remark}
+	      </if>
+    WHERE
+   		 id = #{id}
+  </update>
+  
+  <select id="getOne" parameterType="org.web.module.height.obesity.entity.DrugsConfig"  resultType="map">
+	SELECT
+		id,
+		code_type codeType,
+		code_value codeValue,
+		`name`,
+		initials,
+		unit,
+		acronym,
+		instructions,
+		remark
+	FROM
+		base_drugs_config
+	WHERE
+		id = #{id}   
+  </select>
+  
+  <select id="getList" parameterType="org.web.module.height.obesity.entity.DrugsConfig"  resultType="map">
+ 	SELECT
+		id,
+		code_type codeType,
+		code_value codeValue,
+		`name`,
+		initials,
+		unit,
+		acronym,
+		instructions,
+		remark
+	FROM
+		base_drugs_config
+		<where>
+			        <if test="codeValue!=null and codeValue!=''">
+		    		  code_value = #{codeValue}  
+			       </if>
+				    <if test="name!=null and name!=''">
+				    and ( `name`  like CONCAT(CONCAT('%', #{name}), '%')  or  initials   like CONCAT(CONCAT('%', #{name}), '%') ) 
+				    </if>
+		</where>
+		ORDER BY id 
+  </select>
+</mapper>

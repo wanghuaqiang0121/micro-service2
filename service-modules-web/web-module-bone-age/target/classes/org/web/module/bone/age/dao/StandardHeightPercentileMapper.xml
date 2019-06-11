@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.web.module.bone.age.dao.StandardHeightPercentileMapper">
+
+	<delete id="delete" parameterType="org.web.module.bone.age.domain.StandardHeightPercentile">
+		DELETE
+		FROM
+		standard_height_percentile
+		WHERE
+		id = #{id}
+	</delete>
+
+	<insert id="insert" parameterType="org.web.module.bone.age.domain.StandardHeightPercentile" keyProperty="id" useGeneratedKeys="true">
+		INSERT INTO
+		standard_height_percentile
+		(month_age, sex, percentile, standard_value)
+		VALUES
+		( #{monthAge}, #{sex}, #{percentile}, #{standardValue})	
+	</insert>
+
+	<update id="update" parameterType="org.web.module.bone.age.domain.StandardHeightPercentile">
+		UPDATE standard_height_percentile SET id=#{id}
+		<if test="monthAge!=null">
+			,month_age = #{monthAge}
+		</if>
+		<if test="sex!=null">
+			,sex = #{sex}
+		</if>
+		<if test="percentile!=null">
+			,percentile = #{percentile}
+		</if>
+		<if test="standardValue!=null">
+			,standard_value = #{standardValue}
+		</if>
+		WHERE
+		id = #{id}	
+	</update>
+
+	<select id="getOne" parameterType="org.web.module.bone.age.domain.StandardHeightPercentile" resultType="map">
+		SELECT
+		id,
+		month_age monthAge,
+		sex,
+		percentile,
+		standard_value standardValue
+		FROM
+		standard_height_percentile
+		<where>
+			<if test="id!=null">id=#{id}</if>
+			<if test="sex!=null">AND sex=#{sex}</if>
+			<if test="monthAge">AND month_age=#{monthAge}</if>
+			<if test="percentile!=null">AND percentile=#{percentile}</if>
+		</where>
+	</select>
+
+
+	<select id="getPercentile" parameterType="org.web.module.bone.age.domain.StandardHeightPercentile" resultType="map">
+		SELECT
+		id,
+		month_age monthAge,
+		sex,
+		percentile,
+		standard_value standardValue
+		FROM
+		standard_height_percentile
+		<where>
+			<if test="id!=null">id=#{id}</if>
+			<if test="sex!=null"> AND sex=#{sex}</if>
+			<if test="monthAge">AND month_age=#{monthAge}</if>
+		</where>
+		ORDER BY ABS(standard_value-#{standardValue})
+		limit 1
+	</select>
+
+	<select id="getList" parameterType="org.web.module.bone.age.domain.StandardHeightPercentile" resultType="map">
+		SELECT
+		id,
+		month_age monthAge,
+		sex,
+		percentile,
+		standard_value standardValue FROM standard_height_percentile 
+		where sex=#{sex}
+			AND month_age &gt;=#{startMonthAge}
+			AND month_age &lt;=#{endMonthAge}
+			AND percentile=#{percentile}		
+	</select>
+</mapper>

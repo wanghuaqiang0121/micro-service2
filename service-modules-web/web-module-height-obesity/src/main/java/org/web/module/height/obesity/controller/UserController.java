@@ -1,0 +1,73 @@
+package org.web.module.height.obesity.controller;
+
+import java.util.List;
+import java.util.Map;
+
+import javax.annotation.Resource;
+
+import org.service.core.api.ApiCodeEnum;
+import org.service.core.api.JsonApi;
+import org.service.core.api.MultiLine;
+import org.service.core.auth.control.RequiresAuthentication;
+import org.service.core.auth.level.Level;
+import org.service.core.entity.BaseEntity.SelectAll;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RestController;
+import org.web.module.height.obesity.entity.User;
+import org.web.module.height.obesity.global.BaseGlobal;
+import org.web.module.height.obesity.service.UserService;
+
+import com.github.pagehelper.Page;
+import com.github.pagehelper.PageHelper;
+
+/**
+ * Copyright © 2018 四川易迅通健康医疗技术发展有限公司. All rights reserved.
+ *
+ * @author: WangHuaQiang
+ * @date: 2018年12月17日
+ * @description: 用户
+ */
+@RestController
+public class UserController {
+	
+	@Resource
+	private UserService userService;
+	
+	/** 
+	 * @author: WangHuaQiang
+	 * @date: 2018年12月17日
+	 * @param user
+	 * @param result
+	 * @param organizationTeamId
+	 * @return
+	 * @description: 某团队下的用户列表
+	 */
+	@SuppressWarnings("unchecked")
+	@RequiresAuthentication(ignore = false, value = { "web-module-height-obesity:user:get-list" },level=Level.OPERATION)
+	@GetMapping("/users")
+	public JsonApi getList(@Validated({ SelectAll.class }) User user, BindingResult result,
+			@RequestHeader(required = true, value = BaseGlobal.ORGANIZATION_TEAM_ID) Integer organizationTeamId, 
+			@RequestHeader(required = true, value = BaseGlobal.ORGANIZATION_ID) Integer organizationId, 
+			@RequestHeader(required = true, value = BaseGlobal.TOKEN_FLAG) String token) {
+		user.setOrganizationTeamId(organizationTeamId);
+		user.setOrganizationId(organizationId);
+		Page<?> page = PageHelper.startPage(user.getPage(), user.getPageSize(),true);
+		List<Map<String, Object>> userList = userService.getList(user);
+		for (Map<String, Object> map : userList) {
+			if (map.get("times") != null) {
+				List<Map<String, Object>> mapTimes =  (List<Map<String, Object>>) map.get("times");
+				map.put("times", mapTimes.get(0));
+			}else{
+				map.put("times", null);
+			}
+		}
+		if (userList != null && !userList.isEmpty()) {
+			return new JsonApi(ApiCodeEnum.OK, new MultiLine(page.getTotal(), userList));
+		}
+		return new JsonApi(ApiCodeEnum.NOT_FOUND);
+	}	
+
+}

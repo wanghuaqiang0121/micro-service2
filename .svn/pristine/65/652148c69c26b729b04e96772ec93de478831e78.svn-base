@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.web.module.height.obesity.dao.NutritionConfigMapper">
+
+  <delete id="delete" parameterType="org.web.module.height.obesity.entity.NutritionConfig">
+	DELETE
+	FROM
+		base_nutrition_config
+	WHERE
+		id = #{id}
+  </delete>
+  
+  <insert id="insert" parameterType="org.web.module.height.obesity.entity.NutritionConfig" keyProperty="id"  useGeneratedKeys="true">
+ 	 INSERT INTO base_nutrition_config
+    	 ( sex, month_age_start,  month_age_end, code_type, code_name,   type, value, unit)
+    VALUES 
+     	( #{sex}, #{monthAgeStart},  #{monthAgeEnd}, #{codeType}, #{codeName}, #{type}, #{value}, #{unit})
+  </insert>
+  
+  <update id="update" parameterType="org.web.module.height.obesity.entity.NutritionConfig">
+    UPDATE base_nutrition_config SET id=#{id}
+	     <if test="sex!=null">
+	        , sex = #{sex}
+	     </if>
+	     <if test="monthAgeStart!=null ">
+	     , month_age_start = #{monthAgeStart}
+	       </if>
+	       <if test="monthAgeEnd!=null">
+	      ,month_age_end = #{monthAgeEnd}
+	       </if>
+	       <if test="codeType!=null and codeType!=''">
+	      ,code_type = #{codeType}
+	       </if>
+	       <if test="codeName!=null and codeName!=''">
+	      ,code_name = #{codeName}
+	       </if>
+	       <if test="type!=null">
+	          ,type = #{type}
+	       </if>
+	       <if test="value!=null">
+	         ,value = #{value}
+	       </if>
+	       <if test="unit!=null and unit!=''">
+	       ,unit = #{unit}
+	       </if>
+     WHERE
+    	 id = #{id}
+  </update>
+  
+  <select id="getOne" parameterType="org.web.module.height.obesity.entity.NutritionConfig"  resultType="map">
+	SELECT
+		id,
+		sex,
+		month_age_start monthAgeStart,
+		month_age_end monthAgeEnd,
+		code_type codeType,
+		code_name codeName,
+		type,
+		`value`,
+		unit
+	FROM
+		base_nutrition_config
+	WHERE
+		id = #{id}  
+  </select>
+  
+  <select id="getList" parameterType="org.web.module.height.obesity.entity.NutritionConfig" resultType="map">
+	SELECT
+		id,
+		sex,
+		month_age_start monthAgeStart,
+		month_age_end monthAgeEnd,
+		code_type codeType,
+		code_name codeName,
+		type,
+		`value`,
+		unit
+	FROM
+		base_nutrition_config
+		<where>
+		     <if test="codeName!=null and codeName!=''">
+	        code_name  like CONCAT(CONCAT('%', #{codeName}), '%')
+	       </if>
+		</where>
+	</select>	
+ <select id="getADList" parameterType="org.web.module.height.obesity.entity.NutritionConfig" resultType="map">
+ 	SELECT
+		id,
+		sex,
+		month_age_start monthAgeStart,
+		month_age_end monthAgeEnd,
+		code_type codeType,
+		code_name codeName,
+		type,
+		`value`,
+		unit
+	FROM
+		base_nutrition_config
+WHERE
+	code_type IN (1, 2)
+	<if test="sex!=null">
+		AND sex = #{sex}
+	</if>
+	<if test="monthAge!=null">
+		AND  #{monthAge}  BETWEEN month_age_start AND month_age_end
+	</if>
+ </select>
+</mapper>

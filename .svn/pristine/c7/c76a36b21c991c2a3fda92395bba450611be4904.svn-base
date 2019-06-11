@@ -1,0 +1,345 @@
+package org.web.module.bone.age.controller;
+
+import java.util.List;
+import java.util.Map;
+
+import javax.annotation.Resource;
+
+import org.service.core.api.ApiCodeEnum;
+import org.service.core.api.JsonApi;
+import org.service.core.api.MultiLine;
+import org.service.core.auth.control.RequiresAuthentication;
+import org.service.core.auth.level.Level;
+import org.service.core.entity.BaseEntity;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RestController;
+import org.web.module.bone.age.domain.ReadFilmDoctorPrice;
+import org.web.module.bone.age.domain.ReadFilmRechargeRecord;
+import org.web.module.bone.age.domain.RemoteBoneAgeOrder;
+import org.web.module.bone.age.global.BaseGlobal;
+import org.web.module.bone.age.global.GlobalEnum;
+import org.web.module.bone.age.message.Prompt;
+import org.web.module.bone.age.service.ReadFilmDoctorPriceService;
+import org.web.module.bone.age.service.ReadFilmRechargeRecordService;
+import org.web.module.bone.age.service.RemoteBoneAgeOrderService;
+
+import com.github.pagehelper.Page;
+import com.github.pagehelper.PageHelper;
+
+/**
+ * Copyright © 2019 四川易迅通健康医疗技术发展有限公司. All rights reserved.
+ *
+ * @author: ChenYan
+ * @date: 2019年3月5日
+ * @description: 远程阅片骨龄工单
+ */
+@RestController
+public class RemoteBoneAgeOrderController {
+	
+	@Resource
+	private RemoteBoneAgeOrderService remoteBoneAgeOrderService;
+
+	@Resource
+	private ReadFilmDoctorPriceService readFilmDoctorPriceService;
+	@Resource
+	private ReadFilmRechargeRecordService readFilmRechargeRecordService;
+	
+	/**
+	 * @author: ChenYan
+	 * @date: 2019年3月5日
+	 * @param remoteBoneAgeOrder
+	 * @param result
+	 * @return
+	 * @description: 远程阅片列表
+	 */
+	@RequiresAuthentication(ignore=true,level = Level.OPERATION, value = { "web-module-bone-age:remote-bone-age-order:get-list" })
+	@GetMapping(value = { "/remote/bone/age/orders" })
+	public JsonApi getList(@Validated({ BaseEntity.SelectAll.class })  RemoteBoneAgeOrder remoteBoneAgeOrder, BindingResult result) {
+		Page<?> page = PageHelper.startPage(remoteBoneAgeOrder.getPage(), remoteBoneAgeOrder.getPageSize());
+		List<Map<String, Object>> remoteBoneAgeOrderList = remoteBoneAgeOrderService.getList(remoteBoneAgeOrder);
+		if (remoteBoneAgeOrderList != null && !remoteBoneAgeOrderList.isEmpty()) {
+			return new JsonApi(ApiCodeEnum.OK, new MultiLine(page.getTotal(), remoteBoneAgeOrderList));
+		}
+		return new JsonApi(ApiCodeEnum.NOT_FOUND);
+	}
+	
+	/**
+	 * @author: ChenYan
+	 * @date: 2019年3月5日
+	 * @param remoteBoneAgeOrder
+	 * @param result
+	 * @return
+	 * @description: 接收人的远程阅片列表状态为未完成的
+	 */
+	@RequiresAuthentication(ignore=true,level = Level.OPERATION, value = { "web-module-bone-age:remote-bone-age-order:get-incomplete-list" })
+	@GetMapping(value = { "/remote/bone/age/order/incomplete" })
+	public JsonApi getIncompleteRemoteBoneAgeOrder(@Validated({ BaseEntity.SelectAll.class })  RemoteBoneAgeOrder remoteBoneAgeOrder, BindingResult result) {
+		Page<?> page = PageHelper.startPage(remoteBoneAgeOrder.getPage(), remoteBoneAgeOrder.getPageSize());
+		List<Map<String, Object>> remoteBoneAgeOrderList = remoteBoneAgeOrderService.getIncompleteRemoteBoneAgeOrder(remoteBoneAgeOrder);
+		if (remoteBoneAgeOrderList != null && !remoteBoneAgeOrderList.isEmpty()) {
+			return new JsonApi(ApiCodeEnum.OK, new MultiLine(page.getTotal(), remoteBoneAgeOrderList));
+		}
+		return new JsonApi(ApiCodeEnum.NOT_FOUND);
+	}
+	
+	/**
+	 * @author: ChenYan
+	 * @date: 2019年3月5日
+	 * @param id
+	 * @param remoteBoneAgeOrder
+	 * @param result
+	 * @return
+	 * @description: 重新发送
+	 */
+	@RequiresAuthentication(ignore=true,level = Level.OPERATION, value = { "web-module-bone-age:remote-bone-age-order:update" })
+	@PutMapping(value = { "/remote/bone/age/order/{id}" })
+	public JsonApi update(@PathVariable("id") Integer id, @Validated({ BaseEntity.Update.class }) @RequestBody RemoteBoneAgeOrder remoteBoneAgeOrder, BindingResult result) {
+		remoteBoneAgeOrder.setId(id);
+		/* 检查数据是否存在 */
+		Map<String, Object> remoteBoneAgeOrderMap = remoteBoneAgeOrderService.getOne(remoteBoneAgeOrder);
+		if (remoteBoneAgeOrderMap == null) {
+			return new JsonApi(ApiCodeEnum.NOT_FOUND);
+		}
+		else {
+			/*修改 远程阅片充值 余额减去接收医生的价格,锁定金额加上医生的价格*/
+			Integer receiveOrganizationUserId=(Integer) remoteBoneAgeOrderMap.get("receiveOrganizationUserId");
+			Integer receiveOrganizationId=(Integer) remoteBoneAgeOrderMap.get("receiveOrganizationId");
+			/*医生价格*/
+			ReadFilmDoctorPrice readFilmDoctorPrice=new ReadFilmDoctorPrice();
+			readFilmDoctorPrice.setDoctorId(receiveOrganizationUserId);
+			readFilmDoctorPrice.setOrganizationId(receiveOrganizationId);
+			Map<String, Object> readFilmDoctorPriceMap=readFilmDoctorPriceService.getOne(readFilmDoctorPrice);
+			if (readFilmDoctorPriceMap==null) {
+				return new JsonApi(ApiCodeEnum.NOT_FOUND);
+			}
+			/*获取医生价格*/
+			Double doctorPrice=(Double) readFilmDoctorPriceMap.get("price");
+			/*机构余额*/
+		 
+			ReadFilmRechargeRecord readFilmRechargeRecord=new ReadFilmRechargeRecord();
+			Integer readFilmRechargeRecordId=null;
+			Double remainingSum=null;
+			/*设置接受机构id*/
+			readFilmRechargeRecord.setOrganizationId(receiveOrganizationId);
+			List<Map<String, Object>> readFilmRechargeRecordList = readFilmRechargeRecordService.getList(readFilmRechargeRecord);
+			if (readFilmRechargeRecordList!=null && !readFilmRechargeRecordList.isEmpty()) {
+				readFilmRechargeRecordId=(Integer) readFilmRechargeRecordList.get(0).get("id");
+				if (readFilmRechargeRecordList.get(0).get("remainingSum")!=null) {
+					 remainingSum=(Double) readFilmRechargeRecordList.get(0).get("remainingSum");
+					if (remainingSum<doctorPrice) {
+						/* 提示 余额不足*/
+						return new JsonApi(ApiCodeEnum.FAIL).setMsg(Prompt.bundle("remaining.sum.is.not.enough"));
+					}
+				}else {
+					/* 提示 余额不足*/
+					return new JsonApi(ApiCodeEnum.FAIL).setMsg(Prompt.bundle("remaining.sum.is.not.enough"));
+				}
+			}else {
+				 return new JsonApi(ApiCodeEnum.NOT_FOUND);
+			}
+			
+			/*余额充足，机构余额减去医生价格，锁定价格为医生价格+原来锁定的价格*/
+			if (readFilmRechargeRecordList.get(0).get("lockMoney")!=null) {
+				Double lockMoney=(Double) readFilmRechargeRecordList.get(0).get("lockMoney");
+				readFilmRechargeRecord.setLockMoney(doctorPrice+lockMoney);
+			}else {
+				readFilmRechargeRecord.setLockMoney(doctorPrice);
+			}
+			readFilmRechargeRecord.setRemainingSum(remainingSum-doctorPrice);
+			readFilmRechargeRecord.setId(readFilmRechargeRecordId);
+			/*修改远程阅片充值*/
+			if (readFilmRechargeRecordService.update(readFilmRechargeRecord)<0) {
+				return new JsonApi(ApiCodeEnum.FAIL);
+			}
+			
+			/*禁用状态修改为禁用修改为   待接诊*/
+			int status=Integer.parseInt(remoteBoneAgeOrderMap.get("status").toString());
+			if (GlobalEnum.RemoteBoneAgeOrder.DISABLE.getValue()!=status) {
+				return new JsonApi(ApiCodeEnum.FAIL).setMsg(Prompt.bundle("remote.bone.age.order.status.error"));
+			}
+			/*设置状态*/
+			remoteBoneAgeOrder.setStatus(GlobalEnum.RemoteBoneAgeOrder.WAITINGFORORDER.getValue());
+			if (remoteBoneAgeOrderService.update(remoteBoneAgeOrder) > 0) {
+				return new JsonApi(ApiCodeEnum.OK);
+			}
+			return new JsonApi(ApiCodeEnum.FAIL);
+		}
+	}
+	
+	/**
+	 * @author: ChenYan
+	 * @date: 2019年3月5日
+	 * @param id
+	 * @param remoteBoneAgeOrder
+	 * @param result
+	 * @return
+	 * @description: 催单
+	 */
+	@RequiresAuthentication(ignore=true,level = Level.OPERATION, value = { "web-module-bone-age:remote-bone-age-order:update-reminder" })
+	@PutMapping(value = { "/remote/bone/age/order/reminder/{id}" })
+	public JsonApi updateReminder(@PathVariable("id") Integer id, @Validated({ BaseEntity.Update.class }) @RequestBody RemoteBoneAgeOrder remoteBoneAgeOrder, BindingResult result) {
+		remoteBoneAgeOrder.setId(id);
+		/* 检查数据是否存在 */
+		Map<String, Object> remoteBoneAgeOrderMap = remoteBoneAgeOrderService.getOne(remoteBoneAgeOrder);
+		if (remoteBoneAgeOrderMap == null) {
+			return new JsonApi(ApiCodeEnum.NOT_FOUND);
+		}
+		else {
+			/*设置催单状态*/
+			remoteBoneAgeOrder.setReminder(true);
+			if (remoteBoneAgeOrderService.update(remoteBoneAgeOrder) > 0) {
+				return new JsonApi(ApiCodeEnum.OK);
+			}
+		}
+		return new JsonApi(ApiCodeEnum.FAIL);
+	}
+	
+	
+	/**
+	 * @author: ChenYan
+	 * @date: 2019年3月5日
+	 * @param id
+	 * @param remoteBoneAgeOrder
+	 * @param result
+	 * @return
+	 * @description: 禁用/撤回
+	 */
+	@RequiresAuthentication(ignore=true,level = Level.OPERATION, value = { "web-module-bone-age:remote-bone-age-order:update-disable" })
+	@PutMapping(value = { "/remote/bone/age/order/disable/{id}" })
+	public JsonApi updateDisable(@PathVariable("id") Integer id, @Validated({ BaseEntity.Update.class }) @RequestBody RemoteBoneAgeOrder remoteBoneAgeOrder, BindingResult result) {
+		remoteBoneAgeOrder.setId(id);
+		/* 检查数据是否存在 */
+		Map<String, Object> remoteBoneAgeOrderMap = remoteBoneAgeOrderService.getOne(remoteBoneAgeOrder);
+		if (remoteBoneAgeOrderMap == null) {
+			return new JsonApi(ApiCodeEnum.NOT_FOUND);
+		}
+		else {
+			/*修改 远程阅片充值 余额加上接收医生的价格,锁定金额减去医生的价格*/
+			Integer receiveOrganizationUserId=(Integer) remoteBoneAgeOrderMap.get("receiveOrganizationUserId");
+			Integer receiveId=(Integer) remoteBoneAgeOrderMap.get("receiveOrganizationId");
+			/*医生价格*/
+			ReadFilmDoctorPrice readFilmDoctorPrice=new ReadFilmDoctorPrice();
+			readFilmDoctorPrice.setDoctorId(receiveOrganizationUserId);
+			readFilmDoctorPrice.setOrganizationId(receiveId);
+			Map<String, Object> readFilmDoctorPriceMap=readFilmDoctorPriceService.getOne(readFilmDoctorPrice);
+			if (readFilmDoctorPriceMap==null) {
+				return new JsonApi(ApiCodeEnum.NOT_FOUND);
+			}
+			/*获取医生价格*/
+			Double doctorPrice=(Double) readFilmDoctorPriceMap.get("price");
+			/*机构余额*/
+		   Integer receiveOrganizationId=(Integer) readFilmDoctorPriceMap.get("receiveOrganizationId");
+			ReadFilmRechargeRecord readFilmRechargeRecord=new ReadFilmRechargeRecord();
+			/*设置接受机构id*/
+			readFilmRechargeRecord.setOrganizationId(receiveOrganizationId);
+			List<Map<String, Object>> readFilmRechargeRecordList = readFilmRechargeRecordService.getList(readFilmRechargeRecord);
+			if (readFilmRechargeRecordList==null || readFilmRechargeRecordList.isEmpty()) {
+				return new JsonApi(ApiCodeEnum.NOT_FOUND);
+			}
+			if (readFilmRechargeRecordList.get(0).get("remainingSum")!=null) {
+				Double remainingSum=(Double) readFilmRechargeRecordList.get(0).get("remainingSum");
+				Double lockMoney=(Double) readFilmRechargeRecordList.get(0).get("lockMoney");
+				// 余额=余额+医生价格
+				readFilmRechargeRecord.setRemainingSum(remainingSum+doctorPrice);
+				// 锁定金额=锁定-医生价格
+				readFilmRechargeRecord.setLockMoney(lockMoney-doctorPrice);
+			}else {
+				// 余额=余额+医生价格
+				readFilmRechargeRecord.setRemainingSum(doctorPrice);
+			}
+			readFilmRechargeRecord.setId(Integer.parseInt(readFilmRechargeRecordList.get(0).get("id").toString()));
+			// 修改机构价格
+			if (readFilmRechargeRecordService.update(readFilmRechargeRecord)<0) {
+				return new JsonApi(ApiCodeEnum.FAIL);
+			}
+			/*设置禁用状态*/
+			remoteBoneAgeOrder.setStatus(GlobalEnum.RemoteBoneAgeOrder.DISABLE.getValue());
+			if (remoteBoneAgeOrderService.update(remoteBoneAgeOrder) < 0) {
+				throw new RuntimeException();
+			}
+			return new JsonApi(ApiCodeEnum.OK);
+		}
+	}
+	
+	/**
+	 * @author: ChenYan
+	 * @date: 2019年3月6日
+	 * @param id
+	 * @param remoteBoneAgeOrder
+	 * @param result
+	 * @return
+	 * @description: 接单
+	 */
+	@RequiresAuthentication(ignore=true,level = Level.OPERATION, value = { "web-module-bone-age:remote-bone-age-order:update-receipt" })
+	@PutMapping(value = { "/remote/bone/age/order/receipt/{id}" })
+	public JsonApi updateReceipt(@PathVariable("id") Integer id, @Validated({ BaseEntity.Update.class }) @RequestBody RemoteBoneAgeOrder remoteBoneAgeOrder, BindingResult result) {
+		remoteBoneAgeOrder.setId(id);
+		/* 检查数据是否存在 */
+		Map<String, Object> remoteBoneAgeOrderMap = remoteBoneAgeOrderService.getOne(remoteBoneAgeOrder);
+		if (remoteBoneAgeOrderMap == null) {
+			return new JsonApi(ApiCodeEnum.NOT_FOUND);
+		}
+		else {
+			/*设置禁用状态*/
+			remoteBoneAgeOrder.setStatus(GlobalEnum.RemoteBoneAgeOrder.INEXECUTION.getValue());
+			if (remoteBoneAgeOrderService.update(remoteBoneAgeOrder) > 0) {
+				return new JsonApi(ApiCodeEnum.OK);
+			}
+		}
+		return new JsonApi(ApiCodeEnum.FAIL);
+	}
+	
+	
+	
+	/**
+	 * @author: ChenYan
+	 * @date: 2019年3月6日
+	 * @param remoteBoneAgeOrder
+	 * @param result
+	 * @param organizationId
+	 * @return
+	 * @description: 指定医生阅片列表（统计）
+	 */
+	@RequiresAuthentication(ignore=true,level = Level.OPERATION, value = { "web-module-bone-age:remote-bone-age-order:get-statistics-times-list" })
+	@GetMapping(value = { "/remote/bone/age/order/statistics/times" })
+	public JsonApi getRemoteBoneAgeOrderList(@Validated({ BaseEntity.SelectAll.class })  RemoteBoneAgeOrder remoteBoneAgeOrder, BindingResult result
+			,@RequestHeader(required = true, value = BaseGlobal.ORGANIZATION_ID) Integer organizationId) {
+		remoteBoneAgeOrder.setStatus(GlobalEnum.RemoteBoneAgeOrder.COMPLETED.getValue());
+		remoteBoneAgeOrder.setLaunchOrganizationId(organizationId);
+		Page<?> page = PageHelper.startPage(remoteBoneAgeOrder.getPage(), remoteBoneAgeOrder.getPageSize());
+		List<Map<String, Object>> remoteBoneAgeOrderList = remoteBoneAgeOrderService.getRemoteBoneAgeOrderList(remoteBoneAgeOrder);
+		if (remoteBoneAgeOrderList != null && !remoteBoneAgeOrderList.isEmpty()) {
+			return new JsonApi(ApiCodeEnum.OK, new MultiLine(page.getTotal(), remoteBoneAgeOrderList));
+		}
+		return new JsonApi(ApiCodeEnum.NOT_FOUND);
+	}
+	/**
+	 * @author: ChenYan
+	 * @date: 2019年3月5日
+	 * @param remoteBoneAgeOrder
+	 * @param result
+	 * @return
+	 * @description: 新增远程阅片骨龄工单
+	 */
+	/*@RequiresAuthentication(level = Level.OPERATION, value = { "web-module-bone-age:remote-bone-age-order:insert" })
+	@PostMapping(value = { "/remote/bone/age/order" })
+	public JsonApi insert(@Validated({ BaseEntity.Insert.class }) @RequestBody RemoteBoneAgeOrder remoteBoneAgeOrder, BindingResult result,
+			@RequestHeader(required = true, value = BaseGlobal.ORGANIZATION_ID) Integer organizationId
+			,@RequestHeader(required = true, value = BaseGlobal.ORGANIZATION_TEAM_ID) Integer organizationTeamId) {
+		设置默认值
+		remoteBoneAgeOrder.setCreateTime(new Date());
+		remoteBoneAgeOrder.setStatus(GlobalEnum.RemoteBoneAgeOrder.WAITINGFORORDER.getValue());
+		remoteBoneAgeOrder.setReminder(false);
+		remoteBoneAgeOrder.setLaunchOrganizationTeamId(organizationTeamId);
+		if (remoteBoneAgeOrderService.insert(remoteBoneAgeOrder) > 0) {
+			return new JsonApi(ApiCodeEnum.OK);
+		}
+		return new JsonApi(ApiCodeEnum.FAIL);
+	}*/
+}

@@ -1,0 +1,159 @@
+package org.web.module.bone.age.controller;
+
+import java.util.Calendar;
+import java.util.Map;
+
+import javax.annotation.Resource;
+
+import org.service.core.api.ApiCodeEnum;
+import org.service.core.api.JsonApi;
+import org.service.core.auth.control.RequiresAuthentication;
+import org.service.core.auth.level.Level;
+import org.service.core.entity.BaseEntity;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RestController;
+import org.web.module.bone.age.domain.BaseAgeOrder;
+import org.web.module.bone.age.domain.BaseMedicalImagingData;
+import org.web.module.bone.age.domain.MedicalImagingData;
+import org.web.module.bone.age.global.BaseGlobal;
+import org.web.module.bone.age.global.GlobalEnum.ScoreTableType;
+import org.web.module.bone.age.service.AgeOrderService;
+import org.web.module.bone.age.service.BaseMedicalImagingDataService;
+import org.web.module.bone.age.service.MedicalImagingDataService;
+@RestController
+public class AgeOrderController {
+	
+	@Resource
+	private AgeOrderService  ageOrderService;
+	@Resource
+	private MedicalImagingDataService medicalImagingDataService;
+	@Resource
+	private BaseMedicalImagingDataService baseMedicalImagingDataService;
+
+
+	/**
+	 * @author: ChenYan
+	 * @date: 2019年5月5日
+	 * @param id
+	 * @param boneAgeOrder
+	 * @param result
+	 * @param token
+	 * @return
+	 * @description: 修改骨龄评分
+	 */
+	@RequiresAuthentication(value = { "web-module-bone-age:age-order:update" }, level = Level.OPERATION,ignore=true)
+	@PutMapping(value = { "/age/order/{id}" })
+	public JsonApi updateBone(@PathVariable("id") Integer id,
+			@RequestBody @Validated({ BaseEntity.Update.class }) BaseAgeOrder ageOrder, BindingResult result, 
+			@RequestHeader(required = true, value = BaseGlobal.TOKEN_FLAG) String token,
+			@RequestHeader(required = true, value = BaseGlobal.ORGANIZATION_ID) Integer organizationId
+			,@RequestHeader(required = true, value = BaseGlobal.ORGANIZATION_TEAM_ID) Integer organizationTeamId) {
+		/*判断数据是否存在*/
+		ageOrder.setBaseMedicalImagingDataId(id);
+		Map<String, Object> map=ageOrderService.getOne(ageOrder);
+		if (map==null) {
+			return new JsonApi(ApiCodeEnum.NOT_FOUND);
+		}
+		/*修改年龄工单*/
+		// 计算分值
+		BaseMedicalImagingData baseMedicalImagingData = new BaseMedicalImagingData();
+		baseMedicalImagingData.setId(id);
+		Map<String,Object> baseMedicalImagingDataMap = baseMedicalImagingDataService.getOne(baseMedicalImagingData);
+		if (baseMedicalImagingDataMap == null || baseMedicalImagingDataMap.get("sex") == null) {
+			return new JsonApi(ApiCodeEnum.NOT_FOUND);
+		}
+		// 修改
+		if(ageOrderService.update(ageOrder) > 0){
+			ageOrder.setSex((Integer)baseMedicalImagingDataMap.get("sex"));
+			ageOrder.setScoreTableType(ScoreTableType.T.getValue());
+			Map<String, Object> scoresMap = ageOrderService.getTW2BoneScores(ageOrder);
+			if (scoresMap != null) {
+				ageOrder.setBoneScore(Float.parseFloat(scoresMap.get("totalPoints").toString()));
+			}
+	    	// 修改分值
+			ageOrderService.update(ageOrder);
+			return new JsonApi(ApiCodeEnum.OK,ageOrder);
+		}
+		return new JsonApi(ApiCodeEnum.FAIL);
+	}
+	
+	
+	/**
+	 * @author: ChenYan
+	 * @date: 2019年5月5日
+	 * @param id
+	 * @param baseAgeOrder
+	 * @param result
+	 * @param token
+	 * @param organizationId
+	 * @param organizationTeamId
+	 * @return
+	 * @description: 生成报告
+	 */
+	@RequiresAuthentication(value = { "web-module-bone-age:age-order:update-generate-report" }, level = Level.OPERATION ,ignore=true)
+	@PutMapping(value = { "/age/order/bone/generate/report/{id}" })
+	@Transactional
+	public JsonApi updateGenerateReport(@PathVariable("id") Integer id,
+			@RequestBody @Validated({ BaseEntity.Update.class }) BaseAgeOrder ageOrder, BindingResult result, 
+			@RequestHeader(required = true, value = BaseGlobal.TOKEN_FLAG) String token,
+			@RequestHeader(required = true, value = BaseGlobal.ORGANIZATION_ID) Integer organizationId
+			,@RequestHeader(required = true, value = BaseGlobal.ORGANIZATION_TEAM_ID) Integer organizationTeamId) {
+		/*判断数据是否存在*/
+		ageOrder.setBaseMedicalImagingDataId(id);
+		Map<String, Object> map=ageOrderService.getOne(ageOrder);
+		if (map==null) {
+			return new JsonApi(ApiCodeEnum.NOT_FOUND);
+		}
+		/*修改年龄工单*/
+		if (ageOrderService.update(ageOrder)>0) {
+			/*修改影像资料 骨龄报告(送检)状态\n2.已完成*/
+			MedicalImagingData medicalImagingData =new MedicalImagingData();
+			medicalImagingData.setId(id);
+			medicalImagingData.setBoneAgeStatus(2);
+			if (medicalImagingDataService.update(medicalImagingData)>0) {
+				return new JsonApi(ApiCodeEnum.OK);
+			}
+			throw new RuntimeException();
+		}
+		return new JsonApi(ApiCodeEnum.FAIL);
+	}
+	
+	
+	/**
+	 * @author: ChenYan
+	 * @date: 2019年5月5日
+	 * @param id
+	 * @param ageOrder
+	 * @param result
+	 * @param token
+	 * @param organizationId
+	 * @param organizationTeamId
+	 * @return
+	 * @description: 年龄工单详情
+	 */
+	@RequiresAuthentication(value = { "web-module-bone-age:age-order:get-one" }, level = Level.OPERATION,ignore=true)
+	@GetMapping(value = { "/age/order/{id}" })
+	public JsonApi getOne(@PathVariable("id") Integer id,@Validated({BaseEntity.SelectOne.class })BaseAgeOrder ageOrder,
+			BindingResult result, @RequestHeader(required = true, value = BaseGlobal.TOKEN_FLAG) String token,
+			@RequestHeader(required = true, value = BaseGlobal.ORGANIZATION_ID) Integer organizationId,
+			@RequestHeader(required = true, value = BaseGlobal.ORGANIZATION_TEAM_ID) Integer organizationTeamId
+			) {
+		ageOrder.setBaseMedicalImagingDataId(id);
+		Map<String, Object> ageOrderMap =ageOrderService.getOne(ageOrder);
+		if (ageOrderMap != null) {
+			Calendar now = Calendar.getInstance();
+			ageOrderMap.put("reportDate", now.get(Calendar.YEAR)+"-"+(now.get(Calendar.MONTH) + 1)+"-"+now.get(Calendar.DAY_OF_MONTH));
+			return new JsonApi(ApiCodeEnum.OK, ageOrderMap);
+		}
+		return new JsonApi(ApiCodeEnum.NOT_FOUND);
+	}
+	
+
+}

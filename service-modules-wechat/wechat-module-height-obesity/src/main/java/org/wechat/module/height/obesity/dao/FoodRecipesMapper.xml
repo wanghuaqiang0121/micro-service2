@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.wechat.module.height.obesity.dao.FoodRecipesMapper">
+
+  <delete id="delete" parameterType="org.wechat.module.height.obesity.entity.FoodRecipes">
+	DELETE
+	FROM
+		base_food_recipes
+	WHERE
+		id = #{id}  
+  </delete>
+  
+  <insert id="insert" parameterType="org.wechat.module.height.obesity.entity.FoodRecipes" keyProperty="id"  useGeneratedKeys="true">
+	 INSERT INTO base_food_recipes (`name`)
+	VALUES
+		(
+			#{name})
+  </insert>
+  
+  <update id="update" parameterType="org.wechat.module.height.obesity.entity.FoodRecipes">
+   UPDATE base_food_recipes SET id=#{id}
+	    <if test="name!=null and name!=''">
+	     ,`name` =#{name}
+	    </if>
+    WHERE
+		id = #{id}
+  </update>
+  
+  <select id="getOne" parameterType="org.wechat.module.height.obesity.entity.FoodRecipes" resultType="map">
+	SELECT
+		id,
+		`name`
+	FROM
+		base_food_recipes
+	WHERE
+		id = #{id}
+  </select>
+  
+  <select id="getList" parameterType="org.wechat.module.height.obesity.entity.FoodRecipes" resultType="map">
+  SELECT
+		id,
+		`name`
+	FROM
+		base_food_recipes
+  </select>
+</mapper>

@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.web.module.height.obesity.dao.UserMapper">
+
+  <delete id="delete" parameterType="org.web.module.height.obesity.entity.User">
+    delete from base_user
+    where id = #{id}
+  </delete>
+  
+  <insert id="insert" parameterType="org.web.module.height.obesity.entity.User"  keyProperty="id"  useGeneratedKeys="true">
+    insert into base_user (id, name, sex, 
+      id_card, birthday, phone, 
+      phone_status, photo, province, 
+      city, area, street, 
+      lng, lat, address, status, 
+      is_bind_wechat, source, terminal_source, 
+      create_date, update_date, remark
+      )
+    values (#{id}, #{name}, #{sex}, 
+      #{idCard}, #{birthday}, #{phone}, 
+      #{phoneStatus}, #{photo}, #{province}, 
+      #{city}, #{area}, #{street}, 
+      #{lng}, #{lat}, #{address}, #{status}, 
+      #{isBindWechat,jdbcType=BIT}, #{source}, #{terminalSource}, 
+      #{createDate}, #{updateDate}, #{remark}
+      )
+  </insert>
+  <update id="update" parameterType="org.web.module.height.obesity.entity.User">
+    update base_user
+    set name = #{name},
+      sex = #{sex},
+      id_card = #{idCard},
+      birthday = #{birthday},
+      phone = #{phone},
+      phone_status = #{phoneStatus},
+      photo = #{photo},
+      province = #{province},
+      city = #{city},
+      area = #{area},
+      street = #{street},
+      lng = #{lng},
+      lat = #{lat},
+      address = #{address},
+      status = #{status},
+      is_bind_wechat = #{isBindWechat},
+      source = #{source},
+      terminal_source = #{terminalSource},
+      create_date = #{createDate},
+      update_date = #{updateDate},
+      remark = #{remark}
+    where id = #{id}
+  </update>
+  
+  <select id="getOne" parameterType="org.web.module.height.obesity.entity.User"  resultType="map">
+    SELECT id, name, sex, id_card, birthday, phone, phone_status phoneStatus, photo, province, city, 
+    area, street, lng, lat, address, status, is_bind_wechat, source, terminal_source, 
+    create_date, update_date, remark,TIMESTAMPDIFF(MONTH,birthday,NOW()) monthAge
+    FROM base_user
+    WHERE id = #{id}
+  </select>
+  
+  <resultMap type="map" id="umap">
+  	<result column="id" property="id"/>
+  	<collection property="times" column="{id=id}" javaType="list" select="getTimes"></collection>
+  </resultMap>
+  <!-- 某团队的用户列表 -->
+  <select id="getList" parameterType="org.web.module.height.obesity.entity.User"  resultType="umap">
+    SELECT 
+    	bu.id, 
+    	bu.`name`,
+    	bu.sex,
+    	bu.phone,
+    	bu.source,
+    	TIMESTAMPDIFF(YEAR,bu.birthday,NOW()) AS ageYear, 
+    	TIMESTAMPDIFF(MONTH,bu.birthday,NOW()) % 12 AS ageMonth,
+    	bu.create_date createDate,
+    	bcm.birth_gestational birthGestational,
+    	bcm.birth_height birthHeight,
+    	bcm.birth_weight birthWeight,
+    	<!-- 查询有没有买SGFPGL包 -->
+    	(	IF (
+				(
+					SELECT
+						COUNT(bst.id) id
+					FROM
+						base_user_service bus
+					INNER JOIN base_service_type bst ON bst.id = bus.service_type_id
+					AND bst. CODE = 'SGFPGL'
+					WHERE
+						bus.user_id = bu.id
+				) &lt; 1,
+				FALSE,
+				TRUE
+			)
+    	)isBuySgfpgl,
+    	MAX(bcm.create_date_time) lastManagementTime,
+		MIN(bcm.create_date_time) firstManagementTime
+    FROM base_user_organization_team buot 
+    INNER JOIN base_user bu ON bu.id = buot.user_id
+    LEFT JOIN base_children_maternity bcm ON bcm.user_id = bu.id
+    WHERE 
+    	buot.is_height_obesity = 1
+    	AND buot.organization_team_id = #{organizationTeamId}
+	    <if test="filed!=null and filed!=''">
+					and (
+					bu.`name` like CONCAT(CONCAT('%', #{filed}), '%')
+					or bu.phone like CONCAT(CONCAT('%', #{filed}), '%')
+					or bu.id_card like CONCAT(CONCAT('%', #{filed}), '%')
+					)
+		</if>
+		GROUP BY bu.id
+		ORDER BY bu.create_date DESC
+  </select>
+  <select id="getTimes" parameterType="java.util.Map" resultType="int">
+    SELECT
+		sum(bus.times - bus.lock_times - bus.use_times) times
+	FROM
+		base_user_service bus
+	INNER JOIN base_service_type bst ON bst.id = bus.service_type_id
+	AND bst.`CODE` = 'SGFPGL'
+	WHERE
+		bus.user_id = bu.id
+  </select>
+</mapper>

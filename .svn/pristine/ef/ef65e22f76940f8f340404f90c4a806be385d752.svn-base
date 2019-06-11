@@ -1,0 +1,175 @@
+server:
+  port: 4200
+spring:
+  servlet:
+    multipart:
+      max-file-size: 100Mb
+      max-request-size: 150Mb
+  application:
+    name: zuul-server
+  zipkin:
+    base-url: http://localhost:2100
+  sleuth:
+    sampler:
+      percentage: 1.0
+eureka:
+  client:
+    healthcheck:
+      enabled: true
+    service-url:
+      defaultZone: http://192.168.1.200:1100/eureka/
+    register-with-eureka: true
+    fetch-registry: true
+  instance:
+    prefer-ip-address: true
+    instance-id: ${spring.cloud.client.ip-address}:${server.port}:${spring.application.name}
+    metadata-map:
+      cluster: zuul
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+      cors:
+        allowed-origins: '*'
+        allowed-methods: '*'
+hystrix:
+  command:
+    default:
+      execution:
+        timeout:
+          enabled: true
+        isolation:
+          thread:
+            timeoutInMilliseconds: 30000
+ribbon:
+  ReadTimeout: 10000
+  ConnectTimeout: 5000
+  MaxAutoRetries: 0
+  MaxAutoRetriesNextServer: 1
+zuul:
+  host:
+    socket-timeout-millis: 10000
+    connect-timeout-millis: 5000
+  ignored-services: '*'
+  routes:
+    api-organization-permission:
+      path: /api/orgpermission/**
+      serviceId: module-organization-permission
+    api-user:
+      path: /api/user/**
+      serviceId: module-user
+    api-web-module-height-obesity:
+      path: /api/web/height/obesity/**
+      serviceId: web-module-height-obesity
+    api-wechat-module-height-obesity:
+      path: /api/wechat/height/obesity/**
+      serviceId: wechat-module-height-obesity
+    api-common:
+      path: /api/common/**
+      serviceId: module-common
+    api-sign:
+      path: /api/sign/**
+      serviceId: module-sign
+    api-organization:
+      path: /api/organization/**
+      serviceId: module-organization-user
+    api-bone-age:
+      path: /api/bone/age/**
+      serviceId: web-module-bone-age
+    api-team-permission:
+      path: /api/teampermission/**
+      serviceId: module-team-permission
+    api-organization-configure:
+      path: /api/organizationconfigure/**
+      serviceId: module-organization-configure
+    api-platform-configure:
+      path: /api/platformconfigure/**
+      serviceId: module-platform-configuration
+    api-organization-team:
+      path: /api/team/**
+      serviceId: module-organization-team
+    api-work-order:
+      path: /api/work/order/**
+      serviceId: module-work-order
+    api-appointment:
+      path: /api/appointment/**
+      serviceId: module-bespeak
+    api-inquiry:
+      path: /api/inquiry/**
+      serviceId: module-inquiry
+    api-module-medical:
+      path: /api/medical/**
+      serviceId: module-medical
+    api-service_order:
+      path: /api/serviceorder/**
+      serviceId: Module-ServiceOrder
+    api-businessmonitoring:
+      path: /api/businessmonitoring/**
+      serviceId: Module-BusinessMonitoring
+    api-hiscenter:
+      path: /api/hiscenter/**
+      serviceId: Module-HisCenter
+    api-HEIGHTMANAGEMENTUSER:
+      path: /api/height/**
+      serviceId: HEIGHTMANAGEMENTUSER
+web-module-height-obesity:
+  ribbon:
+    NFLoadBalancerRuleClassName: com.netflix.loadbalancer.WeightedResponseTimeRule
+wechat-module-height-obesity:
+  ribbon:
+    NFLoadBalancerRuleClassName: com.netflix.loadbalancer.WeightedResponseTimeRule
+module-organization-permission:
+  ribbon:
+    NFLoadBalancerRuleClassName: com.netflix.loadbalancer.WeightedResponseTimeRule
+module-bespeak:
+  ribbon:
+    NFLoadBalancerRuleClassName: com.netflix.loadbalancer.WeightedResponseTimeRule
+module-inquiry:
+  ribbon:
+    NFLoadBalancerRuleClassName: com.netflix.loadbalancer.WeightedResponseTimeRule
+module-user:
+  ribbon:
+    NFLoadBalancerRuleClassName: com.netflix.loadbalancer.WeightedResponseTimeRule
+module-common:
+  ribbon:
+    NFLoadBalancerRuleClassName: com.netflix.loadbalancer.WeightedResponseTimeRule
+module-sign:
+  ribbon:
+    NFLoadBalancerRuleClassName: com.netflix.loadbalancer.WeightedResponseTimeRule
+module-organization-user:
+  ribbon:
+    NFLoadBalancerRuleClassName: com.netflix.loadbalancer.WeightedResponseTimeRule
+web-module-bone-age:
+  ribbon:
+    NFLoadBalancerRuleClassName: com.netflix.loadbalancer.WeightedResponseTimeRule
+module-team-permission:
+  ribbon:
+    NFLoadBalancerRuleClassName: com.netflix.loadbalancer.WeightedResponseTimeRule
+module-organization-configure:
+  ribbon:
+    NFLoadBalancerRuleClassName: com.netflix.loadbalancer.WeightedResponseTimeRule
+module-platform-configuration:
+  ribbon:
+    NFLoadBalancerRuleClassName: com.netflix.loadbalancer.WeightedResponseTimeRule
+module-organization-team:
+  ribbon:
+    NFLoadBalancerRuleClassName: com.netflix.loadbalancer.WeightedResponseTimeRule
+module-work-order:
+  ribbon:
+    NFLoadBalancerRuleClassName: com.netflix.loadbalancer.WeightedResponseTimeRule
+module-medical:
+  ribbon:
+    NFLoadBalancerRuleClassName: com.netflix.loadbalancer.WeightedResponseTimeRule
+Module-ServiceOrder:
+  ribbon:
+    NFLoadBalancerRuleClassName: com.netflix.loadbalancer.WeightedResponseTimeRule
+Module-BusinessMonitoring:
+  ribbon:
+    NFLoadBalancerRuleClassName: com.netflix.loadbalancer.WeightedResponseTimeRule
+Module-HisCenter:
+  ribbon:
+    NFLoadBalancerRuleClassName: com.netflix.loadbalancer.WeightedResponseTimeRule
+HEIGHTMANAGEMENTUSER:
+  ribbon:
+    NFLoadBalancerRuleClassName: com.netflix.loadbalancer.WeightedResponseTimeRule

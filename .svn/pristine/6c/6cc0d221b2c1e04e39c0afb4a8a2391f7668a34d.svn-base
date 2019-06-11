@@ -1,0 +1,53 @@
+package org.web.module.height.obesity.entity;
+
+import org.service.core.entity.BaseEntity;
+
+public class StandardSleepConfig extends BaseEntity {
+    /**
+     * @type: {@link long}
+     * @author: ZhangGuangZhi
+     * @date: 2019年1月16日
+     * @description:
+     */
+    private static final long serialVersionUID = 2666564337224062804L;
+
+    private Integer id;
+
+    private Integer startMonthAge;
+
+    private Integer endMonthAge;
+
+    private String content;
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public Integer getStartMonthAge() {
+        return startMonthAge;
+    }
+
+    public void setStartMonthAge(Integer startMonthAge) {
+        this.startMonthAge = startMonthAge;
+    }
+
+    public Integer getEndMonthAge() {
+        return endMonthAge;
+    }
+
+    public void setEndMonthAge(Integer endMonthAge) {
+        this.endMonthAge = endMonthAge;
+    }
+
+    public String getContent() {
+        return content;
+    }
+
+    public void setContent(String content) {
+        this.content = content;
+    }
+}

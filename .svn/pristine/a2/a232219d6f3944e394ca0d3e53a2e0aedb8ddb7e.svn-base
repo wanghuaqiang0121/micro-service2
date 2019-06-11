@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.web.module.bone.age.dao.UserMapper">
+
+  <delete id="delete" parameterType="org.web.module.bone.age.domain.User">
+    delete from base_user
+    where id = #{id}
+  </delete>
+  
+  <insert id="insert" parameterType="org.web.module.bone.age.domain.User"  keyProperty="id"  useGeneratedKeys="true">
+    insert into base_user (id, name, sex, 
+      id_card, birthday, phone, 
+      phone_status, photo, province, 
+      city, area, street, 
+      lng, lat, address, status, 
+      is_bind_wechat, source, terminal_source, 
+      create_date, update_date, remark
+      )
+    values (#{id}, #{name}, #{sex}, 
+      #{idCard}, #{birthday}, #{phone}, 
+      #{phoneStatus}, #{photo}, #{province}, 
+      #{city}, #{area}, #{street}, 
+      #{lng}, #{lat}, #{address}, #{status}, 
+      #{isBindWechat,jdbcType=BIT}, #{source}, #{terminalSource}, 
+      #{createDate}, #{updateDate}, #{remark}
+      )
+  </insert>
+  
+  <!-- 判断数据是否重复 -->
+	<select id="getRepeat" parameterType="org.web.module.bone.age.domain.User" resultType="map">
+		SELECT bu.id, bu.`name`, bu.phone, bu.birthday, bu.sex FROM base_user bu
+		<where>
+			<if test="phone !=null and phone != ''">
+				 bu.phone = #{phone}
+			</if>
+			<if test="idCard != null and idCard != ''">
+				and bu.id_card = #{idCard}
+			</if>
+		</where>
+	</select>
+	<!-- 修改数据 -->
+	<update id="update" parameterType="org.web.module.bone.age.domain.User">
+		UPDATE base_user set id=#{id}                         
+			<if test="userName !=null and userName != ''">                
+				,name=#{userName}                                     
+			</if>                                                 
+			<if test="sex !=null ">                               
+				,sex=#{sex}                                       
+			</if>                                                
+			<if test="idCard !=null and idCard != ''">           
+				,id_card=#{idCard}                               
+			</if>                                                
+			<if test="birthday !=null ">                         
+				,birthday=#{birthday}                            
+			</if>                                                
+			<if test="phone !=null and phone != ''">             
+				,phone=#{phone}                                  
+			</if>                                                
+			<if test="phoneStatus !=null ">                      
+				,phone_status=#{phoneStatus}                     
+			</if>                                                
+			<if test="isBindWechat !=null ">                     
+				,is_bind_wechat=#{isBindWechat}
+			</if>
+			<if test="province !=null and province !=''">
+				,province=#{province}
+			</if>
+			<if test="source !=null">
+				,source=#{source}
+			</if>
+			<if test="terminalSource !=null">
+				,terminal_source=#{terminalSource}
+			</if>
+			<if test="city !=null and city !=''">
+				,city=#{city}
+			</if>
+			<if test="area !=null and area !=''">
+				,area=#{area}
+			</if>
+			<if test="street !=null and street !=''">
+				,street=#{street}
+			</if>
+			<if test="lng !=null">
+				,lng=#{lng}
+			</if>
+			<if test="lat !=null">
+				,lat=#{lat}
+			</if>
+			<if test="address !=null and address !=''">
+				,address=#{address}
+			</if>
+			<if test="status !=null">
+				,status=#{status}
+			</if>
+			<if test="updateDate !=null">
+				,update_date=#{updateDate}
+			</if>
+			<if test="createDate !=null">
+				,create_date=#{createDate}
+			</if>
+			<if test="photo !=null and photo != ''">
+				,photo=#{photo}
+			</if>
+			<if test="remark !=null and remark !=''">
+				,remark=#{remark}
+			</if>
+			<if test="cardNumber!=null and cardNumber!=''">
+				,card_number=#{cardNumber}
+			</if>
+			<if test="signDate!=null">
+				,sign_date=#{signDate}
+			</if>
+		WHERE id=#{id}
+	</update>
+  
+  <select id="getOne" parameterType="org.web.module.bone.age.domain.User"  resultType="map">
+    SELECT id, name, sex, id_card, birthday, phone, phone_status phoneStatus, photo, province, city, 
+    area, street, lng, lat, address, status, is_bind_wechat, source, terminal_source, 
+    create_date, update_date, remark,TIMESTAMPDIFF(MONTH,birthday,NOW()) monthAge,TIMESTAMPDIFF(YEAR,birthday,NOW()) AS age
+    FROM base_user
+    WHERE id = #{id}
+  </select>
+  
+  <!-- 某团队的用户列表 -->
+  <select id="getList" parameterType="org.web.module.bone.age.domain.User"  resultType="map">
+    SELECT 
+    	bu.id, 
+    	bu.`name`,
+    	bu.sex,
+    	bu.phone,
+    	bu.source,
+    	TIMESTAMPDIFF(YEAR,bu.birthday,NOW()) AS ageYear, 
+    	TIMESTAMPDIFF(MONTH,bu.birthday,NOW()) % 12 AS ageMonth,
+    	bu.create_date createDate,
+    	bcm.birth_gestational birthGestational,
+    	bcm.birth_height birthHeight,
+    	bcm.birth_weight birthWeight,
+    	MAX(bcm.create_date_time) lastManagementTime,
+		MIN(bcm.create_date_time) firstManagementTime
+    FROM base_user_organization_team buot 
+    INNER JOIN base_user bu ON bu.id = buot.user_id
+    LEFT JOIN base_children_maternity bcm ON bcm.user_id = bu.id
+    WHERE 
+    	buot.is_height_obesity = 1
+    	AND buot.organization_team_id = #{organizationTeamId}
+	    <if test="filed!=null and filed!=''">
+					and (
+					bu.`name` like CONCAT(CONCAT('%', #{filed}), '%')
+					or bu.phone like CONCAT(CONCAT('%', #{filed}), '%')
+					or bu.id_card like CONCAT(CONCAT('%', #{filed}), '%')
+					)
+		</if>
+		GROUP BY bu.id
+		ORDER BY bu.create_date DESC
+  </select>
+  
+  
+  <select id="getUserGroupPhone"  parameterType="org.web.module.bone.age.domain.User"  resultType="map">
+  SELECT
+	bug.id,
+	bug.user_id
+FROM
+	base_user_group bug
+WHERE
+	bug.phone = #{phone}
+  
+  </select>
+  
+</mapper>

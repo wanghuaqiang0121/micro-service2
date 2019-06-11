@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.wechat.module.height.obesity.dao.UserTriageRecordMapper">
+
+  <delete id="delete" parameterType="org.wechat.module.height.obesity.entity.UserTriageRecord">
+    delete from base_user_triage_record
+    where id = #{id}
+  </delete>
+  <insert id="insert" parameterType="org.wechat.module.height.obesity.entity.UserTriageRecord">
+    insert into base_user_triage_record (id, user_id, organization_id, 
+      organization_team_id, organization_user_id, 
+      organization_consulting_room_id, status, get_triage_time, 
+      create_date_time)
+    values (#{id}, #{userId}, #{organizationId}, 
+      #{organizationTeamId}, #{organizationUserId}, 
+      #{organizationConsultingRoomId}, #{status}, #{getTriageTime}, 
+      #{createDateTime})
+  </insert>
+  <update id="update" parameterType="org.wechat.module.height.obesity.entity.UserTriageRecord">
+    update base_user_triage_record
+    set user_id = #{userId},
+      organization_id = #{organizationId},
+      organization_team_id = #{organizationTeamId},
+      organization_user_id = #{organizationUserId},
+      organization_consulting_room_id = #{organizationConsultingRoomId},
+      status = #{status},
+      get_triage_time = #{getTriageTime},
+      create_date_time = #{createDateTime}
+    where id = #{id}
+  </update>
+  <select id="getOne" parameterType="org.wechat.module.height.obesity.entity.UserTriageRecord" resultType="map">
+    select id, user_id, organization_id, organization_team_id, organization_user_id, 
+    organization_consulting_room_id, status, get_triage_time, create_date_time
+    from base_user_triage_record
+    where id = #{id}
+  </select>
+  <select id="getList" parameterType="org.wechat.module.height.obesity.entity.UserTriageRecord" resultType="map">
+    select id, user_id, organization_id, organization_team_id, organization_user_id, 
+    organization_consulting_room_id, status, get_triage_time, create_date_time
+    from base_user_triage_record
+  </select>
+  
+  
+</mapper>

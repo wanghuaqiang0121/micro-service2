@@ -1,0 +1,28 @@
+package org.web.module.bone.age.service;
+
+import java.util.Map;
+
+import javax.annotation.Resource;
+
+import org.springframework.stereotype.Service;
+import org.web.module.bone.age.dao.AiReadFilmMapper;
+import org.web.module.bone.age.domain.AiReadFilm;
+
+@Service
+public class AiReadFilmService {
+	@Resource
+	private AiReadFilmMapper aiReadFilmMapper;
+	
+	public int insert(AiReadFilm aiReadFilm) {
+		return aiReadFilmMapper.insert(aiReadFilm);
+	}
+	
+	public int delete(AiReadFilm aiReadFilm) {
+		return aiReadFilmMapper.delete(aiReadFilm);
+	}
+	
+	public Map<String, Object> getOne(AiReadFilm aiReadFilm) {
+		return aiReadFilmMapper.getOne(aiReadFilm);
+	}
+
+}

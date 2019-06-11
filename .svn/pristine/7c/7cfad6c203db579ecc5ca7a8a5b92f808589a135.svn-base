@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.web.module.height.obesity.dao.WhoStandardHeightWeightSdMapper">
+	<delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+		delete from who_standard_height_weight_sd
+		where id =
+		#{id}
+	</delete>
+	<insert id="insert" parameterType="org.web.module.height.obesity.entity.WhoStandardHeightWeightSd">
+		insert into who_standard_height_weight_sd (id,
+		month_age_start,
+		month_age_end,
+		sex, height, sd, standard_value
+		)
+		values
+		(#{id}, #{monthAgeStart}, #{monthAgeEnd},
+		#{sex}, #{height}, #{sd},
+		#{standardValue}
+		)
+	</insert>
+	<update id="updateByPrimaryKey" parameterType="org.web.module.height.obesity.entity.WhoStandardHeightWeightSd">
+		update who_standard_height_weight_sd
+		set month_age_start = #{monthAgeStart},
+		month_age_end = #{monthAgeEnd},
+		sex = #{sex}, height = #{height},
+		sd = #{sd},
+		standard_value = #{standardValue}
+		where id =
+		#{id}
+	</update>
+	<select id="getOne" parameterType="org.web.module.height.obesity.entity.WhoStandardHeightWeightSd" resultType="map">
+		select id, month_age_start, month_age_end, sex, height, sd,
+		standard_value
+		from who_standard_height_weight_sd
+		where id = #{id}
+	</select>
+
+	<select id="getStandValue" parameterType="org.web.module.height.obesity.entity.WhoStandardHeightWeightSd" resultType="map">
+		select
+		id,
+		month_age_start monthAgeStart ,
+		month_age_end monthAgeEnd,
+		sex,
+		height,
+		sd,
+		standard_value standardValue
+		from who_standard_height_weight_sd
+		where sex=#{sex} AND month_age_start=#{monthAgeStart} AND month_age_end=#{monthAgeEnd} AND sd&gt;=#{sd}
+		order by ABS(#{height}-height)
+		limit 1
+	</select>
+
+	<select id="getHeightWeightSd" parameterType="org.web.module.height.obesity.entity.WhoStandardHeightWeightSd" resultType="map">
+		select
+		id,
+		month_age_start monthAgeStart,
+		month_age_end monthAgeEnd,
+		sex,
+		height,
+		sd,
+		standard_value standardValue
+		from who_standard_height_weight_sd
+		<where>
+			<if test="monthAgeStart!=null">month_age_start &gt;=#{monthAgeStart}</if>
+			<if test="monthAgeEnd!=null">AND month_age_end &lt;=#{monthAgeEnd}</if>
+			<if test="sex!=null">AND sex=#{sex}</if>
+			<if test="sd!=null">AND sd=#{sd}</if>
+		</where>
+		ORDER BY ABS(#{height}-height))
+		limit 1
+	</select>
+	<select id="getList" parameterType="org.web.module.height.obesity.entity.WhoStandardHeightWeightSd" resultType="map">
+		select id, month_age_start, month_age_end, sex, height, sd,
+		standard_value
+		from who_standard_height_weight_sd
+	</select>
+</mapper>
